@@ -10,4 +10,12 @@
     <color name="under_line">#BDBFBF</color>
     <color name="main_blue">#2196F3</color>
     <color name="main_white">#FFFFFF</color>
+
+    <color name="main_money">#ff4757</color>
+    <color name="text_main">#49496a</color>
+    <color name="text_main1">#838895</color>
+    <color name="color_link">#f0f0f0</color>
+    <color name="main_bac">#f8f8f8</color>
+    <color name="main_yellow">#FEC62E</color>
+    <color name="main_red">#E53935</color>
 </resources>
