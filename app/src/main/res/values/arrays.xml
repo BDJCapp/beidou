@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="ProjectName">
+        <item>实验室测试工程</item>
+        <item>默认工程</item>
+        <item>南京牛首山工程</item>
+        <item>北京和平里工程</item>
+    </string-array>
+</resources>

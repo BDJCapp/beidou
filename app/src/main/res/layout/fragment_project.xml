@@ -13,7 +13,7 @@
         android:clickable="true"
         />
 
-    <RelativeLayout
+  <!--  <RelativeLayout
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
         app:behavior_peekHeight="160dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
         <include layout="@layout/layout_bottom_sheet" />
-    </RelativeLayout>
+    </RelativeLayout>-->
 
 
 

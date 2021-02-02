@@ -45,18 +45,18 @@ public class ProjectFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_project,container,false);
+        View view = inflater.inflate(R.layout.fragment_project, container, false);
         mMapView = view.findViewById(R.id.map_project);
         //设置沉浸式状态栏
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getActivity().getWindow();
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
-        }
+        }*/
 
-        bottomSheet = view.findViewById(R.id.bottom_sheet);
+        /*bottomSheet = view.findViewById(R.id.bottom_sheet);
         BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -85,9 +85,11 @@ public class ProjectFragment extends Fragment {
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
 //                Log.d("BottomSheetDemo", "slideOffset:" + slideOffset);
             }
-        });
+        });*/
         return view;
     }
+
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {

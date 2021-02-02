@@ -4,6 +4,10 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
+import com.xuexiang.xui.XUI;
+import com.xuexiang.xui.utils.StatusBarUtils;
 
 /**
  * @author: 李垚
@@ -22,5 +26,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        XUI.initTheme(this);//初始化XUI
+        //设置沉浸式状态栏
+        //StatusBarUtils.initStatusBarStyle(this,false, ActivityCompat.getColor(this,R.color.main_blue));
+        StatusBarUtils.translucent(this, ActivityCompat.getColor(this,R.color.main_blue));
     }
 }

@@ -1,16 +1,16 @@
 package com.beyond.beidou;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.beyond.beidou.data.DataFragment;
+import com.beyond.beidou.data.DataHomeFragment;
 import com.beyond.beidou.my.MyFragment;
 import com.beyond.beidou.project.ProjectFragment;
+import com.beyond.beidou.utils.LogUtil;
 import com.beyond.beidou.warning.WarningFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -21,6 +21,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Fragment warningFragment;
     private Fragment myFragment;
     private Fragment nowFragment = null;
+    private Fragment chartFragment = null;
     private BottomNavigationView navigationView;
 
     @Override
@@ -80,8 +81,13 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                 switchFragment(nowFragment, projectFragment);
                 break;
             case R.id.nav_data:
-                if (dataFragment == null) {
-                    dataFragment = new DataFragment();
+                if (chartFragment != null)
+                {
+                    switchFragment(nowFragment,chartFragment);
+                    break;
+                }
+                else if (dataFragment == null) {
+                    dataFragment = new DataHomeFragment();
                 }
                 switchFragment(nowFragment, dataFragment);
                 break;
@@ -102,7 +108,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public void switchFragment(Fragment from, Fragment to) {
         if (to == null)
             return;
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+       FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         if (!to.isAdded()) {
             if (from == null) {
                 transaction.add(R.id.layout_home, to).show(to).commit();
@@ -117,4 +123,29 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         nowFragment = to;
     }
 
+
+
+    public Fragment getChartFragment() {
+        return chartFragment;
+    }
+
+    public void setChartFragment(Fragment chartFragment) {
+        this.chartFragment = chartFragment;
+    }
+
+    public Fragment getNowFragment() {
+        return nowFragment;
+    }
+
+    public void setNowFragment(Fragment nowFragment) {
+        this.nowFragment = nowFragment;
+    }
+
+    public Fragment getDataFragment() {
+        return dataFragment;
+    }
+
+    public void setDataFragment(Fragment dataFragment) {
+        this.dataFragment = dataFragment;
+    }
 }
