@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import com.beyond.beidou.data.DataHomeFragment;
 import com.beyond.beidou.my.MyFragment;
 import com.beyond.beidou.project.ProjectFragment;
-import com.beyond.beidou.utils.LogUtil;
 import com.beyond.beidou.warning.WarningFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -64,7 +63,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     /**
      * 当点击导航栏时改变fragment
      *
-     * @param id
+     * @param id 选择的ItemId
      */
     public void changePageFragment(int id) {
         switch (id) {
@@ -81,6 +80,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                 switchFragment(nowFragment, projectFragment);
                 break;
             case R.id.nav_data:
+                if (nowFragment == chartFragment)
+                    break;
                 if (chartFragment != null)
                 {
                     switchFragment(nowFragment,chartFragment);
@@ -125,6 +126,22 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
 
 
+    /**
+     * 监听物理返回键，判断当前是否是chartfragment，解决返回重影问题
+     */
+    @Override
+    public void onBackPressed() {
+        if (nowFragment == chartFragment)
+        {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.remove(chartFragment).show(dataFragment);
+            nowFragment = dataFragment;
+            chartFragment = null;
+        }
+        super.onBackPressed();
+
+    }
+
     public Fragment getChartFragment() {
         return chartFragment;
     }
@@ -147,5 +164,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     public void setDataFragment(Fragment dataFragment) {
         this.dataFragment = dataFragment;
+    }
+
+
+    public BottomNavigationView getNavigationView() {
+        return navigationView;
     }
 }

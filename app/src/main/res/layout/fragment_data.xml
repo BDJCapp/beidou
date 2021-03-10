@@ -13,6 +13,7 @@
         android:layout_gravity="center"
         android:dropDownVerticalOffset="50dp"
         android:dropDownWidth="200dp"
+        android:theme="@style/spinner_style"
         />
     <View
         android:id="@+id/line1"

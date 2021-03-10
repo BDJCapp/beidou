@@ -6,4 +6,6 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="loadExcel">导出报表</string>
+    <string name="deviceNum">监测点数:</string>
+    <string name="update">更新于:</string>
 </resources>

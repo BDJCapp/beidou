@@ -9,4 +9,10 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+
+    <style name="spinner_style" parent="Theme.Design.Light.NoActionBar">
+        <!-- AppCompatEditText默认状态状态设置底线颜色 -->
+        <item name="colorControlNormal">#0099E1</item>
+    </style>
+
 </resources>

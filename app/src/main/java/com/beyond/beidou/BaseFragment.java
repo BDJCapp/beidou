@@ -3,10 +3,17 @@ package com.beyond.beidou;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Looper;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * @author: 李垚
@@ -15,33 +22,49 @@ import androidx.fragment.app.Fragment;
 public abstract class BaseFragment extends Fragment {
 
 
-
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    public static void initAfterSetContentView(Activity activity, View titleViewGroup) {
-        if (activity == null)
-            return;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-//            Window window = activity.getWindow();
-//            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            if (titleViewGroup == null)
-                return;
-            // 设置头部控件ViewGroup的PaddingTop,防止界面与状态栏重叠
-            int statusBarHeight = getStatusBarHeight(activity);
-            titleViewGroup.setPadding(0, statusBarHeight, 0, 0);
-        }
+    public void showToast(String msg){
+        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
     }
-    /**
-     * 获取状态栏高度
-     * @param context
-     * @return
-     */
-    private static int getStatusBarHeight(Context context) {
-        int result = 0;
-        int resourceId = context.getResources().getIdentifier(
-                "status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = context.getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
+
+    public void showToastSync(String msg){
+        Looper.prepare();
+        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+        Looper.loop();
+    }
+
+    public void navigateTo(Class cls){
+        Intent intent = new Intent(getActivity(), cls);
+        startActivity(intent);
+    }
+
+    public void navigateToWithBundle(Class cls, Bundle bundle){
+        Intent intent = new Intent(getActivity(), cls);
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
+
+    public void navigateToWithFlag(Class cls, int flags){
+        Intent intent = new Intent(getActivity(), cls);
+        intent.setFlags(flags);
+        startActivity(intent);
+    }
+
+    protected void saveStringToSP(String key, String value){
+        SharedPreferences sp = getActivity().getSharedPreferences("sp_user", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(key, value);
+        editor.commit();
+    }
+
+    protected String getStringFromSP(String key){
+        SharedPreferences sp = getActivity().getSharedPreferences("sp_user", MODE_PRIVATE);
+        return  sp.getString(key, "");
+    }
+
+    protected void removeByKey(String key){
+        SharedPreferences sp = getActivity().getSharedPreferences("sp_user", MODE_PRIVATE);
+        SharedPreferences.Editor edit = sp.edit();
+        edit.remove(key);
+        edit.commit();
     }
 }

@@ -1,30 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
+    >
 
     <com.baidu.mapapi.map.MapView
+        android:id="@+id/bdmapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/map_project"
         android:clickable="true"
         />
 
-  <!--  <RelativeLayout
-        android:id="@+id/bottom_sheet"
+    <com.yinglan.scrolllayout.ScrollLayout
+        android:id="@+id/scrollLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@color/main_white"
-        app:behavior_hideable="false"
-        app:behavior_peekHeight="160dp"
-        app:layout_behavior="@string/bottom_sheet_behavior">
-        <include layout="@layout/layout_bottom_sheet" />
-    </RelativeLayout>-->
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#ffffff">
+
+            <com.yinglan.scrolllayout.content.ContentScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/iv_minus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_minus" />
+
+                    <Spinner
+                        android:id="@+id/spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:theme="@style/spinner_style"
+                        />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:orientation="horizontal"
+                        >
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="监测点总数:"
+                            android:textSize="16sp"
+                            android:layout_weight="4.5"
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_amount"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="4"
+                            android:textSize="16sp"
+                            android:maxLines="1"
+                            android:layout_weight="2"
+                            />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:text="更新于:"
+                            android:maxLines="1"
+                            android:layout_marginLeft="10dp"
+                            android:layout_weight="3"
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_time"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:maxLines="1"
+                            android:text="2021-02-06-00:00:00"
+                            android:layout_weight="8.5"
+                            />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:orientation="horizontal"
+                        android:padding="5dp"
+                        >
+
+                        <Button
+                            android:id="@+id/btn_amount"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:gravity="center"
+                            android:background="@drawable/btn_amount_bg"
+                            android:text="总数：\n4"
+                            android:layout_marginStart="5dp"
+                            android:layout_weight="1"
+                            />
+                        <Button
+                            android:id="@+id/btn_online"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:gravity="center"
+                            android:background="@drawable/btn_online_bg"
+                            android:text="在线：\n1"
+                            android:layout_marginStart="5dp"
+                            android:layout_weight="1"
+                            />
+                        <Button
+                            android:id="@+id/btn_warning"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:gravity="center"
+                            android:background="@drawable/btn_warning_bg"
+                            android:text="警告：\n1"
+                            android:layout_marginStart="5dp"
+                            android:layout_weight="1"
+                            />
+                        <Button
+                            android:id="@+id/btn_error"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:gravity="center"
+                            android:background="@drawable/btn_error_bg"
+                            android:text="故障：\n1"
+                            android:layout_marginStart="5dp"
+                            android:layout_weight="1"
+                            />
+                        <Button
+                            android:id="@+id/btn_offline"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:gravity="center"
+                            android:background="@drawable/btn_offline_bg"
+                            android:text="离线：\n1"
+                            android:layout_marginStart="5dp"
+                            android:layout_weight="1"
+                            />
+
+                    </LinearLayout>
+
+                    <com.beyond.beidou.MyRecycleView
+                        android:id="@+id/recycle_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="54dp"
+                        />
+
+                </LinearLayout>
 
 
+            </com.yinglan.scrolllayout.content.ContentScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        </RelativeLayout>
+
+    </com.yinglan.scrolllayout.ScrollLayout>
+
+</RelativeLayout>

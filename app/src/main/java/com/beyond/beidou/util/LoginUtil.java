@@ -1,7 +1,12 @@
 package com.beyond.beidou.util;
 
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.beyond.beidou.api.Api;
+import com.beyond.beidou.api.ApiConfig;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -80,12 +85,14 @@ public class LoginUtil {
      */
     public String getSessionId()
     {
-            Log.e("App中的SessionUUID", APIUtil.getSessionUUID());
+            Log.e("App中的SessionUUID", ApiConfig.getSessionUUID());
+            Log.e("App中的Token", ApiConfig.getAccessToken());
             FormBody body = new FormBody.Builder()
-                    .add("sessionUUID", APIUtil.getSessionUUID())
+                    .add("AccessToken", ApiConfig.getAccessToken())
+                    .add("SessionUUID", ApiConfig.getSessionUUID())
                     .build();
 
-            HttpUtil.sendOkHttpRequestFormBody(APIUtil.getDoSessionUrl(), body, new Callback() {
+            Api.config(ApiConfig.GET_SESSION_UUID).postRequestFormBody(body, new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
                     Log.e("请求session失败","错误原因" + e.getMessage());
@@ -105,52 +112,69 @@ public class LoginUtil {
 
                             Log.e("解析的SessionUUID",object.getString("SessionUUID"));
 
-                            APIUtil.setSessionUUID(object.getString("SessionUUID"));
+                            ApiConfig.setSessionUUID(object.getString("SessionUUID"));
+                            Log.e("11111111111111111", "Session:" + object.getString("SessionUUID"));
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Log.e("JsonException","错误信息为" + e.getMessage());
                         }
                     }
-                    Log.e("请求成功，SessionUUID为", APIUtil.getSessionUUID());
+                    Log.e("请求成功，SessionUUID为", ApiConfig.getSessionUUID());
                 }
             });
 
-        return APIUtil.getSessionUUID();
+        return ApiConfig.getSessionUUID();
     }
 
-
-    public void loginByPwd(String userName, String password, String imageCode, Callback callback)
-    {
+    public String getAccessToken() {
         FormBody body = new FormBody.Builder()
-                .add("sessionUUID", APIUtil.getSessionUUID())
-                .add("userName",userName)
-                .add("password",password)
-                .add("imageCode",imageCode)
+                .add("GrantType", ApiConfig.GrantType)
+                .add("AuthorizationLable", ApiConfig.AuthorizationLable)
+                .add("AuthorizationSecret", ApiConfig.AuthorizationSecret)
                 .build();
-        HttpUtil.sendOkHttpRequestFormBody(APIUtil.getDoLoginUrl(),body,callback);
-    }
 
 
-
-   /* public void test(String imageCode)
-        {
-            Log.e("test中的SessionUUID",App.getSessionUUID());
-        FormBody body = new FormBody.Builder()
-                .add("sessionUUID", App.getSessionUUID())
-                .add("userName","qwerASD5")
-                .add("password","qwertyuiiopASDFG5*")
-                .add("imageCode",imageCode)
-                .build();
-        HttpUtil.sendOkHttpRequest(App.getDoLoginUrl(), body, new Callback() {
+        Api.config(ApiConfig.GET_ACCESS_TOKEN).postRequestFormBody(body, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                Log.e("请求失败","错误原因是"+ e.getMessage());
+                Log.e("请求AccessToken失败", "错误原因" + e.getMessage());
             }
+
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                Log.e("请求成功，返回数据为",response.body().string());
+                String responseText = response.body().string();
+                Log.e("response的内容", "111111111111111111111111111111111111" +responseText);
+                if (!TextUtils.isEmpty(responseText)) {
+                    try {
+                        JSONObject object = new JSONObject(responseText);
+
+                        //Log.e("解析的AccessTokenID",object.getString("AccessToken"));
+
+                        ApiConfig.setAccessToken(object.getString("AccessToken"));
+                        Log.e("11111111111111111", "access:" + object.getString("AccessToken"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        //Log.e("JsonException","错误信息为" + e.getMessage());
+                    }
+                }
+                //Log.e("请求成功,AccessTokenID为", APIUtil.getAccessTokenID());
             }
         });
-    }*/
+        return ApiConfig.getAccessToken();
+    }
+
+
+    public void loginByPwd(String Username, String Password, String SessionUUID,String AccessToken, Callback callback)
+    {
+        FormBody body = new FormBody.Builder()
+                .add("Username",Username)
+                .add("Password",Password)
+                .add("SessionUUID",SessionUUID)
+                .add("AccessToken",AccessToken)
+                .build();
+        Api.config(ApiConfig.LOGIN).postRequestFormBody(body,callback);
+    }
+
+
 
 }
