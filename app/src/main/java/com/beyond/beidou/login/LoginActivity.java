@@ -65,7 +65,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private final int IMAGECODESUCCESS = 1;            //设置msg.what
     private final int LOGINDEFAULTFAILED = 2;
     private final int CODE_ERROR = 421;
-    private final int ACCOUNT_OR_PWD_ERROR = 422;
+    private final int ACCOUNT_OR_PWD_ERROR = 400120;
+    private final int IIILEGAL_USER_SESSION = 400110;
+    private final int SESSION_EXPIRATION_LOGOUT = 204;
     private final int CODE_NULL = 423;
 
     private Intent intent;
@@ -99,14 +101,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 //                    etPictureCode.setText("");
 ////                    getImageCode();
 //                    break;
-//                case ACCOUNT_OR_PWD_ERROR:
-//                    Toast.makeText(LoginActivity.this, String.valueOf(msg.obj),Toast.LENGTH_LONG).show();
-//                    etLoginAccount.setText("");
-//                    etLoginCheck.setText("");
-//                    etPictureCode.setText("");
-////                    getImageCode();
-//                    break;
-//                case CODE_NULL:
+                case ACCOUNT_OR_PWD_ERROR:
+                    Toast.makeText(LoginActivity.this, String.valueOf(msg.obj),Toast.LENGTH_LONG).show();
+                    break;
+                case IIILEGAL_USER_SESSION:
+                case SESSION_EXPIRATION_LOGOUT:
+                    loginUtil.getAccessToken();
+                    break;
+                //                case CODE_NULL:
 //                    Toast.makeText(LoginActivity.this, String.valueOf(msg.obj),Toast.LENGTH_LONG).show();
 ////                    getImageCode();
 //                    break;
@@ -123,7 +125,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         init();
         initView();
         initEvent();
-        loginUtil.getSessionId();  //获取SessionUUID
+        loginUtil.getAccessToken();
+//        loginUtil.getSessionId();  //获取SessionUUID
+        etLoginAccount.setText("qazXSW0");
+        etLoginCheck.setText("qazxswEDCVFR0*");
         //Log.e("启动页获取的SessionUUID为", APIUtil.getSessionUUID());
     }
 
@@ -183,10 +188,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 //                loginType = LoginUtil.LOGINBYPHONE;
 //                setPhoneUI();
 //                break;
-            case R.id.tv_loginByPwd:
-                loginType = LoginUtil.LOGINBYPWD;
-                setPwdUI();
-                break;
+//            case R.id.tv_loginByPwd:
+//                loginType = LoginUtil.LOGINBYPWD;
+//                setPwdUI();
+//                break;
 //            case R.id.tv_loginByEmail:
 //                loginType = LoginUtil.LOGINBYEMAIL;
 //                setEmailUI();
@@ -203,9 +208,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 //                    sendCode();
 //                    break;
             case R.id.btn_login:
-
-                Log.e("denglu的SessionUUID为", "2222222222222222" + ApiConfig.getSessionUUID());
-                Log.e("denglu的token为", "2222222222222222222" + ApiConfig.getAccessToken());
+                Log.e("denglu的token为", ApiConfig.getAccessToken());
+                Log.e("denglu的SessionUUID为",  ApiConfig.getSessionUUID());
                 login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
                 //loginUtil.test(etPictureCode.getText().toString());
 //                intent.setClass(LoginActivity.this, MainActivity.class);
@@ -237,7 +241,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             {
                 //如果手机号格式不正确
                 etLoginAccount.setText("");
-                //XToast.warning(this,"手机号格式错误，请重新输入").show();
+                XToast.warning(this,"手机号格式错误，请重新输入").show();
             }
         }
         else if (loginType == LoginUtil.LOGINBYEMAIL)
@@ -248,27 +252,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             {
                 //如果手机号格式不正确
                 etLoginAccount.setText("");
-                //XToast.warning(this,"邮箱格式错误，请重新输入").show();
+                XToast.warning(this,"邮箱格式错误，请重新输入").show();
             }
         }
     }
 
 
-    private void setPwdUI() {
-        tvLoginByEmail.setTextColor(getResources().getColor(R.color.text_black));
-        tvLoginByPhone.setTextColor(getResources().getColor(R.color.text_black));
-        tvLoginByPwd.setTextColor(getResources().getColor(R.color.main_blue));
-        etLoginAccount.setHint("请输入手机号码/账号/邮箱");
-        btnSendCode.setVisibility(View.INVISIBLE);
-        tvAccount.setText("账号 :   ");
-        tvCheckCode.setText("密码：");
-        etLoginCheck.setHint("请输入密码");
-        etLoginAccount.setText("");
-        etLoginCheck.setText("");
-        etLoginCheck.setTransformationMethod(PasswordTransformationMethod.getInstance());
-        imgVisible.setVisibility(View.VISIBLE);
-        tvForgetPwd.setVisibility(View.VISIBLE);
-    }
+
 
 
     private void setPwdVisible() {
@@ -295,21 +285,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
     public void login(String Username,String Password,String SessionUUID,String AccessToken)
     {
-        if (loginType == LoginUtil.LOGINBYPWD) {
+
             loginUtil.loginByPwd("qazXSW0", "qazxswEDCVFR0*", SessionUUID, AccessToken, new Callback() {
 
                 /*loginUtil.loginByPwd(userName, password, imageCode, new Callback() {*/
-
-
-
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
                     //网络请求失败
-                    //Toast.makeText(LoginActivity.this, "网络请求失败，请检查网络连接，稍后再试", Toast.LENGTH_SHORT).show();
-                    etLoginAccount.setText("");
-                    etLoginCheck.setText("");
-                    etPictureCode.setText("");
-//                    getImageCode();
+                    Toast.makeText(LoginActivity.this, "网络请求失败，请检查网络连接，稍后再试", Toast.LENGTH_SHORT).show();
                 }
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
@@ -326,6 +309,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                             //获取json中的code。json是包含很多数据，这里只是单拿出其中的code吗
                             switch (errCode){
                                 case "200": //登录成功
+                                    Log.e("200",responseText);
                                     intent.setClass(LoginActivity.this, MainActivity.class);
                                     startActivity(intent);
                                     finish();
@@ -335,16 +319,27 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 //                                    message.what = CODE_ERROR;
 //                                    handler.sendMessage(message);
 //                                    break;
-//                                case "422": //用户名和密码错误
-//                                    message.obj = errMsg;
-//                                    message.what = ACCOUNT_OR_PWD_ERROR;
-//                                    handler.sendMessage(message);
-//                                    break;
+                                case "400120": //用户名和密码错误
+                                    message.obj = errMsg;
+                                    message.what = ACCOUNT_OR_PWD_ERROR;
+                                    handler.sendMessage(message);
+                                    break;
 //                                case "423": //验证码为空
 //                                    message.obj = errMsg;
 //                                    message.what = CODE_NULL;
 //                                    handler.sendMessage(message);
 //                                    break;
+                                case "400110"://用户会话非法
+                                    message.obj = errMsg;
+                                    message.what = IIILEGAL_USER_SESSION;
+                                    handler.sendMessage(message);
+                                    break;
+                                case "204"://用户会话非法
+                                    message.obj = errMsg;
+                                    message.what = SESSION_EXPIRATION_LOGOUT;
+                                    handler.sendMessage(message);
+                                    break;
+
                                 default:
                                     message.what= LOGINDEFAULTFAILED;
                                     handler.sendMessage(message);
@@ -355,7 +350,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     }
                 }
             });
-        }
+
     }
 
 
@@ -384,13 +379,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 if(grantResults.length > 0){
                     for(int result : grantResults){
                         if(result != PackageManager.PERMISSION_GRANTED){
-                            //Toast.makeText(this, "Need to grant all permissions!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Need to grant all permissions!", Toast.LENGTH_SHORT).show();
                             finish();
                             return;
                         }
                     }
                 } else {
-                    //Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show();
                     finish();
                 }
         }

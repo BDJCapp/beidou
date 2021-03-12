@@ -64,7 +64,7 @@ public class StartActivity extends BaseActivity {
         init();
 //        loginUtil.getSessionId();  //获取SessionUUID
 //        Log.e("启动页获取的SessionUUID为", APIUtil.getSessionUUID());
-        loginUtil.getAccessToken();  //获取SessionUUID
+//        loginUtil.getAccessToken();  //获取SessionUUID
 //        Log.e("请求成功,启动页AccessTokenID为", APIUtil.getAccessTokenID());
         handler.sendEmptyMessageDelayed(1001, 3000);
     }

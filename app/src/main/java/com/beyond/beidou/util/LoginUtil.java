@@ -85,8 +85,8 @@ public class LoginUtil {
      */
     public String getSessionId()
     {
-            Log.e("App中的SessionUUID", ApiConfig.getSessionUUID());
-            Log.e("App中的Token", ApiConfig.getAccessToken());
+            Log.e("SessionUUI中的SessionUUID", ApiConfig.getSessionUUID());
+            Log.e("SessionUUID中的Token", ApiConfig.getAccessToken());
             FormBody body = new FormBody.Builder()
                     .add("AccessToken", ApiConfig.getAccessToken())
                     .add("SessionUUID", ApiConfig.getSessionUUID())
@@ -105,18 +105,16 @@ public class LoginUtil {
                         否则会出现EAndroidRuntime FATAL EXCEPTION OkHttp Dispatcher错误
                      */
                     String responseText = response.body().string();
-                    Log.e("response的内容",responseText);
+                    Log.e("SessionUUIDresponse的内容",responseText);
                     if (!TextUtils.isEmpty(responseText)) {
                         try {
                             JSONObject object = new JSONObject(responseText);
 
-                            Log.e("解析的SessionUUID",object.getString("SessionUUID"));
-
                             ApiConfig.setSessionUUID(object.getString("SessionUUID"));
-                            Log.e("11111111111111111", "Session:" + object.getString("SessionUUID"));
+                            Log.e("请求SessionUUID", "Session:" + object.getString("SessionUUID"));
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Log.e("JsonException","错误信息为" + e.getMessage());
+                            Log.e("JsonException","SessionUUID错误信息为" + e.getMessage());
                         }
                     }
                     Log.e("请求成功，SessionUUID为", ApiConfig.getSessionUUID());
@@ -143,18 +141,17 @@ public class LoginUtil {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String responseText = response.body().string();
-                Log.e("response的内容", "111111111111111111111111111111111111" +responseText);
+                Log.e("AccessTokenresponse的内容",  responseText);
                 if (!TextUtils.isEmpty(responseText)) {
                     try {
                         JSONObject object = new JSONObject(responseText);
-
                         //Log.e("解析的AccessTokenID",object.getString("AccessToken"));
-
                         ApiConfig.setAccessToken(object.getString("AccessToken"));
-                        Log.e("11111111111111111", "access:" + object.getString("AccessToken"));
+                        Log.e("AccessToken", "access:" + object.getString("AccessToken"));
+                        getSessionId();
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        //Log.e("JsonException","错误信息为" + e.getMessage());
+                        Log.e("JsonException","AccessToken错误信息为" + e.getMessage());
                     }
                 }
                 //Log.e("请求成功,AccessTokenID为", APIUtil.getAccessTokenID());
@@ -175,6 +172,13 @@ public class LoginUtil {
         Api.config(ApiConfig.LOGIN).postRequestFormBody(body,callback);
     }
 
-
-
+    public void logout(String Username, String SessionUUID,String AccessToken, Callback callback)
+    {
+        FormBody body = new FormBody.Builder()
+                .add("Username",Username)
+                .add("SessionUUID",SessionUUID)
+                .add("AccessToken",AccessToken)
+                .build();
+        Api.config(ApiConfig.LOGOUT).postRequestFormBody(body,callback);
+    }
 }

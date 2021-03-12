@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.data.DataHomeFragment;
 import com.beyond.beidou.my.MyFragment;
 import com.beyond.beidou.project.ProjectFragment;
@@ -21,7 +22,15 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Fragment myFragment;
     private Fragment nowFragment = null;
     private Fragment chartFragment = null;
+    private Fragment helpFragment = null;
+    private Fragment aboutFragment = null;
     private BottomNavigationView navigationView;
+
+    @Override
+    protected void onDestroy() {
+        ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
+        super.onDestroy();
+    }
 
     @Override
     public void init() {
@@ -140,6 +149,24 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         }
         super.onBackPressed();
 
+        if (nowFragment == helpFragment)
+        {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.remove(helpFragment).show(myFragment);
+            nowFragment = myFragment;
+            helpFragment = null;
+        }
+        super.onBackPressed();
+
+        if (nowFragment == aboutFragment)
+        {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.remove(aboutFragment).show(myFragment);
+            nowFragment = myFragment;
+            aboutFragment = null;
+        }
+        super.onBackPressed();
+
     }
 
     public Fragment getChartFragment() {
@@ -149,6 +176,12 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public void setChartFragment(Fragment chartFragment) {
         this.chartFragment = chartFragment;
     }
+
+    public void setHelpFragment(Fragment helpFragment) {
+        this.helpFragment = helpFragment;
+    }
+
+    public void setAboutFragment(Fragment aboutFragment) { this.aboutFragment = aboutFragment; }
 
     public Fragment getNowFragment() {
         return nowFragment;
@@ -160,6 +193,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     public Fragment getDataFragment() {
         return dataFragment;
+    }
+
+    public Fragment getMyFragment() {
+        return myFragment;
     }
 
     public void setDataFragment(Fragment dataFragment) {
