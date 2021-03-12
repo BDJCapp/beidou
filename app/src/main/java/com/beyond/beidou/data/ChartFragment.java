@@ -75,6 +75,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private LinearLayout layoutChartX, layoutChartY, layoutChartH;
     private ScrollView svCharts;
     private ImageView imgBack;
+    private String aa;
 
     public static ChartFragment newInstance(String projectName,ArrayList<String> stationNameList,int position)
     {
