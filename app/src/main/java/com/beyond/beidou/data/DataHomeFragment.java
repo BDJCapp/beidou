@@ -20,10 +20,18 @@ import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
 import com.beyond.beidou.adapter.DeviceListAdapter;
+import com.beyond.beidou.api.Api;
+import com.beyond.beidou.api.ApiCallback;
+import com.beyond.beidou.api.ApiConfig;
+import com.beyond.beidou.entites.ProjectResponse;
 import com.beyond.beidou.util.LogUtil;
+import com.google.gson.Gson;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -33,6 +41,7 @@ public class DataHomeFragment extends BaseFragment {
 
     private Spinner spProjectName;
     private RecyclerView deviceList;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,80 +53,141 @@ public class DataHomeFragment extends BaseFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_data, container, false);
         initView(view);
-/*        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                LoginUtil.getToken();
-            }
-        }).start();*/
         return view;
     }
 
     public void initView(View view) {
         spProjectName = view.findViewById(R.id.spinner_projectName);
         deviceList = view.findViewById(R.id.rv_device);
-
-        /*设置下拉框*/
-        final String[] arrayStrings = new String[]{"实验室测试工程", "默认工程", "南京牛首山工程", "北京和平里工程"};
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, arrayStrings);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-        spProjectName.setAdapter(adapter);
-        spProjectName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        /*设置列表*/
-        DeviceListAdapter rvAdapter = getRvAdapter();
-        deviceList.setAdapter(rvAdapter);
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-        manager.setOrientation(RecyclerView.VERTICAL);
-        deviceList.setLayoutManager(manager);
+        setViews();
     }
 
-    /**
-     * 模拟列表数据并设置adapter
-     * @return 设备列表适配器
-     */
-    public DeviceListAdapter getRvAdapter() {
-        final List<String> deviceNames = new ArrayList<>();
-        List<String> deviceTypes = new ArrayList<>();
-        List<String> lastTimes = new ArrayList<>();
-        List<String> deviceStatus = new ArrayList<>();
-        //模拟数据
-        for (int i = 1; i < 5; i++) {
-            deviceNames.add("监测点" + i);
-            lastTimes.add("2020-02-0" + i + "16:20:00");
+
+    public void setViews()
+    {
+        //设置Spinner
+        final HashMap<String,Object> requestParams = new HashMap<>();
+        requestParams.put("AccessToken", ApiConfig.getAccessToken());
+        requestParams.put("SessionUUID",ApiConfig.getSessionUUID());
+        Api.config(ApiConfig.GET_PROJECTS,requestParams).postRequest(getActivity(), new ApiCallback() {
+            @Override
+            public void onSuccess(String res) {
+                Gson gson = new Gson();
+                ProjectResponse projectResponse = gson.fromJson(res, ProjectResponse.class);
+                final List<String> projectNameList = new ArrayList<>();
+                for (int i = 0; i < projectResponse.getProjectList().size(); i++) {
+                    projectNameList.add(projectResponse.getProjectList().get(i).getProjectName());
+                }
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, projectNameList);
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+                        spProjectName.setAdapter(adapter);
+
+                        //读取SP上次退出时选中的工程名，若没有。默认展示第一个工程
+                        //spProjectName.setSelection(0,true);
+
+
+                        spProjectName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                SimpleDateFormat sdfTwo =new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
+                                LogUtil.e("Spinner切换工程的时间",sdfTwo.format(System.currentTimeMillis()));
+                                setDeviceList(spProjectName.getSelectedItem().toString());  //设置设备列表
+                            }
+                            @Override
+                            public void onNothingSelected(AdapterView<?> parent) {
+
+                            }
+                        });
+                    }
+                });
+            }
+            @Override
+            public void onFailure(Exception e) {
+                LogUtil.e("获取工程网络请求失败",e.getMessage());
+            }
+        });
+    }
+
+    public void setDeviceList(String selectedProject)
+    {
+        HashMap<String,Object> requestParams = new HashMap<>();
+        List<String> requestProjectList = new ArrayList<>();
+        requestProjectList.add(selectedProject);
+        requestParams.put("AccessToken", ApiConfig.getAccessToken());
+        requestParams.put("SessionUUID",ApiConfig.getSessionUUID());
+        requestParams.put("ProjectName",requestProjectList);
+
+        SimpleDateFormat sdfTwo =new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
+        LogUtil.e("请求工程数据开始时间",sdfTwo.format(System.currentTimeMillis()));
+
+        Api.config(ApiConfig.GET_PROJECTS,requestParams)
+                .postRequest(getActivity(), new ApiCallback() {
+                    @Override
+                    public void onSuccess(String res) {
+
+                        SimpleDateFormat sdfTwo =new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
+                        LogUtil.e("请求工程数据结束时间",sdfTwo.format(System.currentTimeMillis()));
+
+                        Gson gson = new Gson();
+                        ProjectResponse projectResponse = gson.fromJson(res, ProjectResponse.class);
+                        final ArrayList<String> deviceNames = new ArrayList<>();
+                        final List<String> deviceTypes = new ArrayList<>();
+                        final List<String> lastTimes = new ArrayList<>();
+                        final List<String> deviceStatus = new ArrayList<>();
+                        List<ProjectResponse.ProjectListBean.StationListBean> stationList = projectResponse.getProjectList().get(0).getStationList();
+                        for (int i = 0; i < stationList.size(); i++) {
+                            deviceNames.add(stationList.get(i).getStationName());
+                            deviceTypes.add(getStationType(stationList.get(i).getStationType()));
+                            lastTimes.add(stationList.get(i).getStationLastTime());
+                            deviceStatus.add(stationList.get(i).getStationStatus());
+                        }
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                DeviceListAdapter adapter = new DeviceListAdapter(deviceNames, deviceTypes, lastTimes, deviceStatus);
+                                adapter.setLookDataListener(new DeviceListAdapter.onItemLookdataClockListener() {
+                                    @Override
+                                    public void onItemClick(View view, int position) {
+                                        // LogUtil.e("查看的监测点", deviceNames.get(position));
+                                        switchFragment(spProjectName.getSelectedItem().toString(), deviceNames,position);
+                                    }
+                                });
+                                deviceList.setAdapter(adapter);
+                                LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+                                manager.setOrientation(RecyclerView.VERTICAL);
+                                deviceList.setLayoutManager(manager);
+                            }
+                        });
+                    }
+                    @Override
+                    public void onFailure(Exception e) {
+
+                    }
+                });
+    }
+
+    public String getStationType(String stationType)
+    {
+        switch (stationType)
+        {
+            case "0":
+                return "未知";
+            case "1":
+                return "基准站";
+            case "2":
+                return "移动站";
+            default:
+                return "错误";
         }
-        deviceStatus.add("在线");
-        deviceStatus.add("警告");
-        deviceStatus.add("故障");
-        deviceStatus.add("离线");
-
-        deviceTypes.add("移动站");
-        deviceTypes.add("基准站");
-        deviceTypes.add("移动站");
-        deviceTypes.add("基准站");
-
-        DeviceListAdapter adapter = new DeviceListAdapter(deviceNames, deviceTypes, lastTimes, deviceStatus);
-        adapter.setLookDataListener(new DeviceListAdapter.onItemLookdataClockListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                LogUtil.e("查看的监测点", deviceNames.get(position));
-                switchFragment();
-            }
-        });
-        return adapter;
     }
 
-    public void switchFragment() {
-        Fragment chartFragment = new ChartFragment();
+    public void switchFragment(String projectName,ArrayList<String> stationNameList,int position) {
+        //Fragment chartFragment = new ChartFragment();
+        ChartFragment chartFragment = ChartFragment.newInstance(projectName,stationNameList,position);
         MainActivity activity = (MainActivity) getActivity();
         activity.setChartFragment(chartFragment);
         activity.setNowFragment(chartFragment);
@@ -127,27 +197,4 @@ public class DataHomeFragment extends BaseFragment {
         ft.addToBackStack(null);   //加入到返回栈中
         ft.commit();
     }
-
-    /*public void getProjects()
-    {
-        FormBody getProjectsBody = new FormBody.Builder()
-                .add("AccessToken", "64eb860b-2af4-451b-07a4-1976cc98f555")
-                .add("SessionUUID","b8ee3e95-658f-cae3-4792-f1c251446229")
-                .build();
-        HttpUtil.postRequestFormBody(APIUtil.getGetProjectsUrl(), getProjectsBody, new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                LogUtil.e("获取工程列表错误",e.getMessage());
-            }
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                String responseText = response.body().string();
-                Gson gson = new Gson();
-                ProjectResponse returnProjects = gson.fromJson(responseText, ProjectResponse.class);
-                LogUtil.e("获取数据成功，返回信息为", returnProjects.getResponseMsg());
-                LogUtil.e("获取的工程名称",returnProjects.getProjectList().get(0).getProjectName());
-            }
-        });
-
-    }*/
 }

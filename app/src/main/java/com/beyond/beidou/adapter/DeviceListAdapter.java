@@ -49,7 +49,35 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.Vi
         String tTime = lastTimes.get(position);
         holder.lastTime.setText(tTime);
         String tStatus = deviceStatus.get(position);
-        switch (tStatus){
+        Integer stationStatus = Integer.valueOf(tStatus);
+        if (stationStatus == 0)
+        {
+            // "未知";
+            holder.status.setImageResource(R.drawable.ic_svg_offline_point);
+        }
+        else if (stationStatus == 4)
+        {
+           // "移除";
+            holder.status.setImageResource(R.drawable.ic_svg_offline_point);
+        }
+        else if (stationStatus >= 10 && stationStatus <= 19) {
+            // "在线";
+            holder.status.setImageResource(R.drawable.ic_svg_online_point);
+        } else if (stationStatus >= 20 && stationStatus <= 29) {
+            //"离线";
+            holder.status.setImageResource(R.drawable.ic_svg_offline_point);
+        } else if (stationStatus >= 30 && stationStatus <= 39) {
+            // "警告";
+            holder.status.setImageResource(R.drawable.ic_svg_warning_point);
+        } else if (stationStatus >= 40 && stationStatus <= 49) {
+            // "故障";
+            holder.status.setImageResource(R.drawable.ic_svg_error_point);
+        } else {
+            // "错误";
+            holder.status.setImageResource(R.drawable.ic_svg_offline_point);
+        }
+
+        /*switch (tStatus){
             case "在线":
                 holder.status.setImageResource(R.drawable.ic_svg_online_point);
                 break;
@@ -62,7 +90,8 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.Vi
             case "离线":
                 holder.status.setImageResource(R.drawable.ic_svg_offline_point);
                 break;
-        }
+        }*/
+
         holder.lookData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

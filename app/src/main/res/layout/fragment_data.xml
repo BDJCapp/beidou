@@ -9,7 +9,6 @@
         android:layout_width="200dp"
         android:layout_height="50dp"
         android:id="@+id/spinner_projectName"
-        android:entries="@array/ProjectName"
         android:layout_gravity="center"
         android:dropDownVerticalOffset="50dp"
         android:dropDownWidth="200dp"

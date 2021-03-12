@@ -18,8 +18,7 @@ public class ScreenUtil {
     }
 
     /**
-     * 获取屏幕高
-     *
+     * 获取屏幕
      * @param activity
      * @return
      */

@@ -21,14 +21,24 @@ import android.widget.Toast;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
+import com.beyond.beidou.api.Api;
+import com.beyond.beidou.api.ApiConfig;
+import com.beyond.beidou.entites.GetGraphicDataResponse;
 import com.beyond.beidou.util.LogUtil;
+import com.beyond.beidou.util.LoginUtil;
 import com.beyond.beidou.util.MyPointValue;
 import com.beyond.beidou.util.ScreenUtil;
-import com.yinglan.scrolllayout.ScrollLayout;
+import com.google.gson.Gson;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import lecho.lib.hellocharts.gesture.ContainerScrollType;
@@ -41,6 +51,10 @@ import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.LineChartView;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.Response;
 
 
 public class ChartFragment extends BaseFragment implements View.OnClickListener {
@@ -55,11 +69,23 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private TextView xChartName, yChartName, hChartName;
     private TextView xChartCoo, yChartCoo, hChartCoo;
     private TextView xChartTime, yChartTime, hChartTime;
+    private TextView mTitle;
     private float valueYMax, valueYMin, yMax, yMin;
     private String cutNum;
     private LinearLayout layoutChartX, layoutChartY, layoutChartH;
     private ScrollView svCharts;
     private ImageView imgBack;
+
+    public static ChartFragment newInstance(String projectName,ArrayList<String> stationNameList,int position)
+    {
+        ChartFragment chartFragment = new ChartFragment();
+        Bundle args = new Bundle();
+        args.putString("projectName",projectName);
+        args.putStringArrayList("stationNameList", stationNameList);
+        args.putInt("position", position);
+        chartFragment.setArguments(args);
+        return chartFragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,25 +98,39 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         View view = inflater.inflate(R.layout.fragment_chart, container, false);
         initView(view);
         drawXYHChart("最近1小时");  //默认展示XYH一小时的图表
+/*      getChartData("N");
+        getChartData("E");
+        getChartData("H");*/
         return view;
     }
 
     public void initView(View view) {
+        mTitle = view.findViewById(R.id.tv_title);
         spChart = view.findViewById(R.id.sp_chart_type);
         spDevice = view.findViewById(R.id.sp_device);
         spTime = view.findViewById(R.id.sp_chart_time);
 
-        String[] devices = new String[]{"监测点1", "监测点2", "监测点3"};
-        final String[] charts = new String[]{"XYH", "位移图", "心型图"};
-        String[] times = new String[]{"最近1小时", "最近6小时", "最近12小时", "本日", "本周", "本月", "本年"};
+        if (getArguments() != null)
+        {
+            mTitle.setText(getArguments().getString("projectName"));
+            ArrayAdapter<String> deviceAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, getArguments().getStringArrayList("stationNameList"));
+            deviceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+            spDevice.setAdapter(deviceAdapter);
+            spDevice.setSelection(getArguments().getInt("position"),true);
+        }
+
+        /*String[] devices = new String[]{"监测点1", "监测点2", "监测点3"};
         ArrayAdapter<String> deviceAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, devices);
         deviceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+        spDevice.setAdapter(deviceAdapter);
+        */
+        final String[] charts = new String[]{"XYH", "位移图", "心型图"};
+        String[] times = new String[]{"最近1小时", "最近6小时", "最近12小时", "本日", "本周", "本月", "本年"};
         ArrayAdapter<String> chartAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, charts);
         chartAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
         ArrayAdapter<String> timeAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, times);
         timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
         spTime.setAdapter(timeAdapter);
-        spDevice.setAdapter(deviceAdapter);
         spChart.setAdapter(chartAdapter);
 
         chartX = view.findViewById(R.id.chart_X);
@@ -120,9 +160,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         spChart.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                LogUtil.e("监测点当前选择为", spDevice.getSelectedItem().toString());
+                /*LogUtil.e("监测点当前选择为", spDevice.getSelectedItem().toString());
                 LogUtil.e("图表当前选择为", spChart.getSelectedItem().toString());
-                LogUtil.e("时间当前选择为", spTime.getSelectedItem().toString());
+                LogUtil.e("时间当前选择为", spTime.getSelected Item().toString());*/
                 switchChart();
             }
 
@@ -167,21 +207,20 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      */
     View.OnTouchListener touchListener = new View.OnTouchListener() {
 
-        float y0 = 0f;
-        float y1 = 0f;
+        float yStart = 0f;
+        float yEnd = 0f;
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    y0 = event.getY();
+                    yStart = event.getY();
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    y1 = event.getY();
-                    if (Math.abs(y1 - y0) > 200f) {
+                    yEnd = event.getY();
+                    if (Math.abs(yEnd - yStart) > 200f) {
                         svCharts.requestDisallowInterceptTouchEvent(false);
                     }
-                    LogUtil.e("y0  y1", y0 + "  " + y1);
                     break;
             }
             return false;
@@ -750,5 +789,52 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 drawHeartChart();
                 break;
         }
+    }
+
+    public void getChartData(final String graphicType)
+    {
+        FormBody getChartDataBody = new FormBody.Builder()
+                .add("AccessToken", ApiConfig.getAccessToken())
+                .add("SessionUUID",ApiConfig.getSessionUUID())
+                .add("StationUUID","6159529a-6bc3-4c73-84d1-e59f6f60ece6")
+                .add("GraphicType",graphicType)
+                .add("StartTime","2021-03-09 00:00:00")
+                .add("EndTime","2021-03-09 23:59:59")
+                .build();
+
+        Api.config(ApiConfig.GET_GRAPHIC_DATA).postRequestFormBody(getChartDataBody, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String responseText = response.body().string();
+                Gson gson = new Gson();
+                GetGraphicDataResponse dataResponse = gson.fromJson(responseText, GetGraphicDataResponse.class);
+                LogUtil.e(graphicType + "获取数据个数", String.valueOf(dataResponse.getContent().size()));
+                for (int i = 0; i < 10; i++) {
+                    String time = dataResponse.getContent().get(i).get(0);
+                    LogUtil.e("时间",time);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date date = null;
+                    try {
+                        date = simpleDateFormat.parse(time);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    long ts = date.getTime();
+                    String res = String.valueOf(ts);
+                    res = "31535999";
+                    LogUtil.e("时间戳",res);
+                    float convertTime = Float.parseFloat(res);
+                    LogUtil.e("float时间戳", String.valueOf(convertTime));
+                    //时间戳太大解决思路，结束时间的时间戳减去开始时间的时间戳。但是一年的时间戳还是大，精度会丢一位
+                }
+
+            }
+        });
+
     }
 }

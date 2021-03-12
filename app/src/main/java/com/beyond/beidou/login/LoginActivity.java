@@ -237,7 +237,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             {
                 //如果手机号格式不正确
                 etLoginAccount.setText("");
-                XToast.warning(this,"手机号格式错误，请重新输入").show();
+                //XToast.warning(this,"手机号格式错误，请重新输入").show();
             }
         }
         else if (loginType == LoginUtil.LOGINBYEMAIL)
@@ -248,7 +248,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             {
                 //如果手机号格式不正确
                 etLoginAccount.setText("");
-                XToast.warning(this,"邮箱格式错误，请重新输入").show();
+                //XToast.warning(this,"邮箱格式错误，请重新输入").show();
             }
         }
     }
@@ -305,7 +305,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
                     //网络请求失败
-                    Toast.makeText(LoginActivity.this, "网络请求失败，请检查网络连接，稍后再试", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(LoginActivity.this, "网络请求失败，请检查网络连接，稍后再试", Toast.LENGTH_SHORT).show();
                     etLoginAccount.setText("");
                     etLoginCheck.setText("");
                     etPictureCode.setText("");
@@ -384,13 +384,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 if(grantResults.length > 0){
                     for(int result : grantResults){
                         if(result != PackageManager.PERMISSION_GRANTED){
-                            Toast.makeText(this, "Need to grant all permissions!", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(this, "Need to grant all permissions!", Toast.LENGTH_SHORT).show();
                             finish();
                             return;
                         }
                     }
                 } else {
-                    Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show();
                     finish();
                 }
         }
