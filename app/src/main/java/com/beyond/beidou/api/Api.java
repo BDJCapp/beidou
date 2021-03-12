@@ -22,9 +22,7 @@ public class Api {
     private static OkHttpClient client;
     private static String requestUrl;
     private static Map<String, Object> mParams;
-
     public static Api api = new Api();
-
     public Api(){
 
     }
@@ -48,8 +46,7 @@ public class Api {
         JSONObject jsonObject = new JSONObject(mParams);
         String jsonStr = jsonObject.toString();
         RequestBody requestBodyJson =
-                RequestBody.create(jsonStr, MediaType.parse("application/json;charset=utf-8")
-                        );
+                RequestBody.create(jsonStr, MediaType.parse("application/json;charset=utf-8"));
         Request request = new Request.Builder()
                 .url(requestUrl)
                 .post(requestBodyJson)
@@ -58,7 +55,6 @@ public class Api {
         call.enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e("onFailure", e.getMessage());
                 callback.onFailure(e);
             }
 
