@@ -1,6 +1,5 @@
 package com.beyond.beidou.project;
 
-import android.app.Activity;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -16,7 +16,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
@@ -24,35 +23,72 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.Marker;
+import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
 
+import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MyRecycleView;
 import com.beyond.beidou.R;
 import com.beyond.beidou.adapter.MonitoringPointsAdapter;
+import com.beyond.beidou.api.Api;
+import com.beyond.beidou.api.ApiCallback;
+import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.MonitoringPoint;
+import com.beyond.beidou.entites.ProjectResponse;
 import com.beyond.beidou.util.ScreenUtil;
+import com.google.gson.Gson;
 import com.yinglan.scrolllayout.ScrollLayout;
 
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class ProjectFragment extends BaseFragment {
 
     private LocationClient mLocationClient;
     private boolean isFirstLocate = true;
-    private BaiduMap mBaiduMap = null;
+    private BaiduMap mBaiduMap;
     private MapView mMapView;
     private ScrollLayout mScrollLayout;
     private RelativeLayout mRelativeLayout;
     private Spinner mSpinner;
     private List<MonitoringPoint> mPointList = new ArrayList<>();
     private MyRecycleView mRecyclerView;
+    private HashMap<String, Object> mParams = new HashMap<String, Object>();
+    private TextView mTvAmount;
+    private Button mBtnAmount;
+    private Button mBtnOnline;
+    private Button mBtnWarning;
+    private Button mBtnError;
+    private Button mBtnOffline;
+    private TextView mTvTime;
 
+    private List<ProjectResponse.ProjectListBean> projectList = new ArrayList<>();
+    private ProjectResponse.ProjectListBean.ProjectStationStatusBean projectStationStatus;
+    private ArrayList<String> projectNameList = new ArrayList<>();
+    private String netTime;
+    private List<ProjectResponse.ProjectListBean.StationListBean> projectStationList = new ArrayList<>();
+    private MonitoringPointsAdapter mPointsAdapter;
+    private  LinearLayoutManager layoutManager;
+
+    public static String presentProject = "";
 
     @Nullable
     @Override
@@ -94,6 +130,13 @@ public class ProjectFragment extends BaseFragment {
         mRelativeLayout = view.findViewById(R.id.relativeLayout);
         mSpinner = view.findViewById(R.id.spinner);
         mRecyclerView = view.findViewById(R.id.recycle_view);
+        mTvAmount = view.findViewById(R.id.tv_amount);
+        mBtnAmount = view.findViewById(R.id.btn_amount);
+        mBtnOnline = view.findViewById(R.id.btn_online);
+        mBtnWarning = view.findViewById(R.id.btn_warning);
+        mBtnError = view.findViewById(R.id.btn_error);
+        mBtnOffline = view.findViewById(R.id.btn_offline);
+        mTvTime = view.findViewById(R.id.tv_time);
 
 //        设置 setting
         mScrollLayout.setMinOffset(200);
@@ -109,6 +152,79 @@ public class ProjectFragment extends BaseFragment {
                 mScrollLayout.scrollToExit();
             }
         });
+
+        mBtnAmount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPointList.clear();
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                }
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
+            }
+        });
+        mBtnOnline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPointList.clear();
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if(statusCode >= 10 && statusCode <= 19){
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
+                }
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
+            }
+        });
+        mBtnWarning.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPointList.clear();
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if(statusCode >= 30 && statusCode <= 39){
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
+                }
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
+            }
+        });
+        mBtnError.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPointList.clear();
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if(statusCode >= 40 && statusCode <= 49){
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
+                }
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
+            }
+        });
+        mBtnOffline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPointList.clear();
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if(statusCode >= 20 && statusCode <= 29){
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
+                }
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     protected void initData() {
@@ -119,44 +235,175 @@ public class ProjectFragment extends BaseFragment {
         mBaiduMap.setOnMapLoadedCallback(new BaiduMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
+                //待改动调整
                 mMapView.setZoomControlsPosition(new Point((int) (width * 0.88 + 0.5f), (int) (height * 0.73 + 0.5f)));
             }
         });
         mBaiduMap.setMyLocationEnabled(true);
 
-        mLocationClient = new LocationClient(getContext().getApplicationContext());
-        mLocationClient.registerLocationListener(new MyLocationListener());
+        mParams.put("AccessToken", ApiConfig.getAccessToken());
+        mParams.put("SessionUUID", ApiConfig.getSessionUUID());
+        Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(getContext(), new ApiCallback() {
+            @Override
+            public void onSuccess(final String res) {
+                Gson gson = new Gson();
+                ProjectResponse response = gson.fromJson(res, ProjectResponse.class);
+                if (Integer.parseInt(response.getResponseCode()) == 200) {
+                    projectList = response.getProjectList();
+                    for (ProjectResponse.ProjectListBean project : projectList) {
+                        projectNameList.add(project.getProjectName());
+                    }
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), R.layout.item_select, projectNameList);
+                            arrayAdapter.setDropDownViewResource(R.layout.item_drop);
+                            mSpinner.setAdapter(arrayAdapter);
+                            presentProject = mSpinner.getSelectedItem().toString();
+                            Log.e("project", "present project is " + presentProject);
 
-        requestLocation();    //请求百度地图位置
+                            for (ProjectResponse.ProjectListBean project : projectList) {
+                                if (project.getProjectName().equals(presentProject)) {
+                                    projectStationStatus = project.getProjectStationStatus();
+                                    projectStationList = project.getStationList();
+                                }
+                            }
+                            mTvAmount.setText(String.valueOf(projectStationStatus.getTotal()));
+                            mBtnAmount.setText("总数\n" + projectStationStatus.getTotal());
+                            mBtnOnline.setText("在线\n" + projectStationStatus.getOnline());
+                            mBtnWarning.setText("警告\n" + projectStationStatus.getWarning());
+                            mBtnError.setText("故障\n" + projectStationStatus.getError());
+                            mBtnOffline.setText("离线\n" + projectStationStatus.getOffline());
 
-        final String[] arr = {"实验室测试工程", "北京和平里工程"};
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), R.layout.item_select, arr);
-        arrayAdapter.setDropDownViewResource(R.layout.item_drop);
-        mSpinner.setAdapter(arrayAdapter);
+                            mLocationClient = new LocationClient(getContext().getApplicationContext());
+                            mLocationClient.registerLocationListener(new MyLocationListener());
+                            requestLocation();    //请求百度地图位置
+                            initStationList();    //初始化监测点数据
+                            layoutManager = new LinearLayoutManager(getContext());
+                            mRecyclerView.setLayoutManager(layoutManager);
+                            mPointsAdapter = new MonitoringPointsAdapter(mPointList);
+                            mRecyclerView.setAdapter(mPointsAdapter);
 
-        initPointList();
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        mRecyclerView.setLayoutManager(layoutManager);
-        MonitoringPointsAdapter pointsAdapter = new MonitoringPointsAdapter(mPointList);
-        mRecyclerView.setAdapter(pointsAdapter);
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());
+                            Date date = new Date(System.currentTimeMillis());
+                            mTvTime.setText(simpleDateFormat.format(date));
+                            mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+                                @Override
+                                public boolean onMarkerClick(Marker marker) {
+                                    View window = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_showinfo, null, false);
+                                    TextView tv_name, tv_type;
+                                    LinearLayout window_layout;
+                                    window_layout = window.findViewById(R.id.window_layout);
+                                    tv_name = window.findViewById(R.id.tv_name);
+                                    tv_type = window.findViewById(R.id.tv_type);
+                                    tv_name.setText( "监测点名称：" + marker.getExtraInfo().get("stationName"));
+                                    tv_type.setText( "监测点类型：" + marker.getExtraInfo().get("stationType"));
+                                    InfoWindow mInfoWindow = new InfoWindow(window, marker.getPosition(), -100);
 
+                                    mBaiduMap.showInfoWindow(mInfoWindow);
+                                    window_layout.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            mBaiduMap.hideInfoWindow();
+                                        }
+                                    });
+                                    return false;
+                                }
+                            });
+                        }
+                    });
+                }
+                Log.e("project", response.getResponseMsg());
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+
+            }
+        });
     }
 
-    private void initPointList() {
-        MonitoringPoint point1 = new MonitoringPoint("监测点1", "基准站", "2020-04-01");
-        MonitoringPoint point2 = new MonitoringPoint("监测点2", "移动站", "2020-04-01");
-        MonitoringPoint point3 = new MonitoringPoint("监测点3", "移动站", "2020-04-01");
-        MonitoringPoint point4 = new MonitoringPoint("监测点4", "移动站", "2020-04-01");
-        mPointList.add(point1);
-        mPointList.add(point2);
-        mPointList.add(point3);
-        mPointList.add(point4);
-        mPointList.add(point4);
-        mPointList.add(point4);
-        mPointList.add(point4);
-        mPointList.add(point4);
-        mPointList.add(point4);
-        mPointList.add(point4);
+    //获取网络时间
+    private void getNetTime() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //百度时间
+                    //url = new URL("http://www.baidu.com");
+//                    中国科学院国家授时中心
+                    URL url = new URL("http://www.ntsc.ac.cn");
+                    URLConnection uc = url.openConnection();//生成连接对象
+                    uc.connect(); //发出连接
+                    long ld = uc.getDate(); //取得网站日期时间
+                    Log.e("project", "time ld: " + uc.getDate());
+                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTimeInMillis(ld);
+                    netTime = formatter.format(calendar.getTime());
+                    Log.e("project", "time ld " + netTime);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mTvTime.setText(netTime);
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e("project", "net time error :" + e.toString());
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private void initStationList() {
+        Log.e("project", "stationList size: " + projectStationList.size());
+        for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                projectStationList) {
+            mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+            LatLng sourcePoint = new LatLng(Double.parseDouble(projectStation.getStationLatitude()), Double.parseDouble(projectStation.getStationLongitude()));
+            CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
+            LatLng targetPoint = converter.convert();
+            Log.e("project", "point: " + targetPoint.toString());
+            BitmapDescriptor markerBitmap = null;
+            int statusCode = Integer.parseInt(projectStation.getStationStatus());
+            if(statusCode >= 10 && statusCode <= 19){
+                markerBitmap = BitmapDescriptorFactory
+                        .fromResource(R.drawable.ic_mk_online);
+            }else if(statusCode >= 20 && statusCode <= 29){
+                markerBitmap = BitmapDescriptorFactory
+                        .fromResource(R.drawable.ic_mk_offline);
+            }else if(statusCode >= 30 && statusCode <= 39){
+                markerBitmap = BitmapDescriptorFactory
+                        .fromResource(R.drawable.ic_mk_warning);
+            }else if(statusCode >= 40 && statusCode <= 49){
+                markerBitmap = BitmapDescriptorFactory
+                        .fromResource(R.drawable.ic_mk_error);
+            }
+            Bundle mBundle = new Bundle();
+            mBundle.putString("stationName", projectStation.getStationName());
+            switch (projectStation.getStationType()){
+                case "0":
+                    mBundle.putString("stationType", "未知");
+                    break;
+                case "1":
+                    mBundle.putString("stationType", "基准站");
+                    break;
+                case "2":
+                    mBundle.putString("stationType", "移动站");
+                    break;
+            }
+            OverlayOptions option = new MarkerOptions()
+                    .position(targetPoint)
+                    .icon(markerBitmap)
+                    .extraInfo(mBundle);
+            mBaiduMap.addOverlay(option);
+        }
+    }
+
+    //此函数用于简化按钮分类的监听事件
+    private void setPointList(int type){
+
     }
 
     private void requestLocation() {
@@ -167,9 +414,15 @@ public class ProjectFragment extends BaseFragment {
     private void navigateTo(BDLocation location) {
         if (isFirstLocate) {
             LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
+            if(projectStationStatus.getTotal() != 0){
+                ProjectResponse.ProjectListBean.StationListBean projectStation = projectStationList.get(0);
+                LatLng sourcePoint = new LatLng(Double.parseDouble(projectStation.getStationLatitude()), Double.parseDouble(projectStation.getStationLongitude()));
+                CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
+                ll = converter.convert();
+            }
             MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
             mBaiduMap.animateMapStatus(update);
-            update = MapStatusUpdateFactory.zoomTo(18f);
+            update = MapStatusUpdateFactory.zoomTo(14f);
             mBaiduMap.animateMapStatus(update);
             isFirstLocate = false;
         } else {

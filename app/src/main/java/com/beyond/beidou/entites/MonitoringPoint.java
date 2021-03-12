@@ -4,11 +4,21 @@ public class MonitoringPoint {
     private String name;
     private String type;
     private String activeTime;
+    private String status;
 
-    public MonitoringPoint(String name, String type, String activeTime) {
+    public MonitoringPoint(String name, String type, String activeTime, String status) {
         this.name = name;
         this.type = type;
         this.activeTime = activeTime;
+        this.status = status;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getName() {

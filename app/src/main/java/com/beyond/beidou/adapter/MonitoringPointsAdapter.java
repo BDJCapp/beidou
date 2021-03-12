@@ -44,6 +44,10 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
         this.mPointsList = mPointsList;
     }
 
+    public void setData(List<MonitoringPoint> mPointsList) {
+        this.mPointsList = mPointsList;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -56,8 +60,27 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MonitoringPoint point = mPointsList.get(position);
         holder.mTv_name.setText(point.getName());
-        holder.mIv_status.setImageResource(R.drawable.ic_status);
-        holder.mTv_type.setText(point.getType());
+        int statusCode = Integer.parseInt(point.getStatus());
+        if(statusCode >= 10 && statusCode <= 19){
+            holder.mIv_status.setImageResource(R.drawable.ic_svg_online_point);
+        }else if(statusCode >= 20 && statusCode <= 29){
+            holder.mIv_status.setImageResource(R.drawable.ic_svg_offline_point);
+        }else if(statusCode >= 30 && statusCode <= 39){
+            holder.mIv_status.setImageResource(R.drawable.ic_svg_warning_point);
+        }else if(statusCode >= 40 && statusCode <= 49){
+            holder.mIv_status.setImageResource(R.drawable.ic_svg_error_point);
+        }
+        switch (point.getType()){
+            case "0":
+                holder.mTv_type.setText("未知");
+                break;
+            case "1":
+                holder.mTv_type.setText("基准站");
+                break;
+            case "2":
+                holder.mTv_type.setText("移动站");
+                break;
+        }
         holder.mTv_activeTime.setText(point.getActiveTime());
     }
 
