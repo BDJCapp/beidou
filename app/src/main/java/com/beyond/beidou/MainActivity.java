@@ -25,6 +25,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Fragment helpFragment = null;
     private Fragment aboutFragment = null;
     private BottomNavigationView navigationView;
+    private String presentProject = null;
 
     @Override
     protected void onDestroy() {
@@ -203,8 +204,14 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         this.dataFragment = dataFragment;
     }
 
-
     public BottomNavigationView getNavigationView() {
         return navigationView;
+    }
+    public String getPresentProject() {
+        return presentProject;
+    }
+
+    public void setPresentProject(String presentProject) {
+        this.presentProject = presentProject;
     }
 }

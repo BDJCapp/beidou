@@ -1,12 +1,15 @@
 package com.beyond.beidou.data;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +35,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -87,8 +92,18 @@ public class DataHomeFragment extends BaseFragment {
                         spProjectName.setAdapter(adapter);
 
                         //读取SP上次退出时选中的工程名，若没有。默认展示第一个工程
-                        //spProjectName.setSelection(0,true);
-
+                        final MainActivity activity = (MainActivity) getActivity();
+                        String presentProject = activity.getPresentProject();
+                        if (!TextUtils.isEmpty(presentProject))
+                        {
+                            for (int i = 0; i < projectNameList.size(); i++) {
+                                if (presentProject.equals(projectNameList.get(i)))
+                                {
+                                    spProjectName.setSelection(i,true);
+                                    setDeviceList(presentProject);
+                                }
+                            }
+                        }
 
                         spProjectName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
@@ -96,6 +111,7 @@ public class DataHomeFragment extends BaseFragment {
                                 SimpleDateFormat sdfTwo =new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
                                 LogUtil.e("Spinner切换工程的时间",sdfTwo.format(System.currentTimeMillis()));
                                 setDeviceList(spProjectName.getSelectedItem().toString());  //设置设备列表
+                                activity.setPresentProject(spProjectName.getSelectedItem().toString());
                             }
                             @Override
                             public void onNothingSelected(AdapterView<?> parent) {
