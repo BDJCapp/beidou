@@ -2,15 +2,18 @@ package com.beyond.beidou;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.data.DataHomeFragment;
 import com.beyond.beidou.my.MyFragment;
 import com.beyond.beidou.project.ProjectFragment;
+import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.warning.WarningFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -26,6 +29,14 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Fragment aboutFragment = null;
     private BottomNavigationView navigationView;
     private String presentProject = null;
+
+    public String getPresentProject() {
+        return presentProject;
+    }
+
+    public void setPresentProject(String presentProject) {
+        this.presentProject = presentProject;
+    }
 
     @Override
     protected void onDestroy() {
@@ -129,6 +140,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             }
         } else {
             // 隐藏当前的fragment，显示下一个
+            Log.e("from", from.toString());
             transaction.hide(from).show(to).commit();
         }
         nowFragment = to;
@@ -141,14 +153,44 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
      */
     @Override
     public void onBackPressed() {
+
         if (nowFragment == chartFragment)
         {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(chartFragment).show(dataFragment);
-            nowFragment = dataFragment;
-            chartFragment = null;
+//            if(projectFragment != null && dataFragment == null){
+//                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//                transaction.remove(chartFragment).show(projectFragment);
+//                nowFragment = projectFragment;
+//                getNavigationView().setSelectedItemId(getNavigationView().getMenu().getItem(0).getItemId());
+//                chartFragment = null;
+//                Log.e("onBackPressed", "projectFragment != null && dataFragment == null" );
+//            }else{
+//                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//                transaction.remove(chartFragment).show(dataFragment);
+//                nowFragment = dataFragment;
+//                chartFragment = null;
+//                transaction.commitAllowingStateLoss();
+//                Log.e("onBackPressed", "else" );
+//
+//            }
+            FragmentManager fm = getProjectFragment().getFragmentManager();
+//            fm.popBackStack();
+            fm.beginTransaction().remove(nowFragment);
+            this.setChartFragment(null);
+            LogUtil.e("nowFragment",nowFragment.toString());
+
+//            Log.e("BackStack11:", "" + fm.getBackStackEntryCount());
+//            Log.e("BackStack11:", fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName());
+            if(fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName().equals("projectFragment")){
+                this.setNowFragment(this.getProjectFragment());
+                this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(0).getItemId());
+            }else{
+                this.setNowFragment(this.getDataFragment());
+                Log.e("fragment now1111", nowFragment.toString());
+                this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(1).getItemId());
+            }
+
         }
-        super.onBackPressed();
+
 
         if (nowFragment == helpFragment)
         {
@@ -157,7 +199,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             nowFragment = myFragment;
             helpFragment = null;
         }
-        super.onBackPressed();
+
 
         if (nowFragment == aboutFragment)
         {
@@ -167,7 +209,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             aboutFragment = null;
         }
         super.onBackPressed();
-
     }
 
     public Fragment getChartFragment() {
@@ -204,14 +245,12 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         this.dataFragment = dataFragment;
     }
 
+
     public BottomNavigationView getNavigationView() {
         return navigationView;
     }
-    public String getPresentProject() {
-        return presentProject;
-    }
 
-    public void setPresentProject(String presentProject) {
-        this.presentProject = presentProject;
+    public Fragment getProjectFragment() {
+        return projectFragment;
     }
 }

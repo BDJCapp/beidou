@@ -67,6 +67,12 @@ public class DataHomeFragment extends BaseFragment {
         setViews();
     }
 
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        LogUtil.e("hiden change","sdasdasd");
+        setViews();
+    }
 
     public void setViews()
     {
@@ -212,7 +218,7 @@ public class DataHomeFragment extends BaseFragment {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.add(R.id.layout_home, chartFragment).hide(this);
-        ft.addToBackStack(null);   //加入到返回栈中
+        ft.addToBackStack("DataHomeFragment");   //加入到返回栈中
         ft.commit();
     }
 }

@@ -1,8 +1,10 @@
 package com.beyond.beidou.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,9 +18,11 @@ import com.beyond.beidou.entites.MonitoringPoint;
 import java.util.List;
 
 public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPointsAdapter.ViewHolder>{
-    private List<MonitoringPoint> mPointsList;
 
-    static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    private List<MonitoringPoint> mPointsList;
+    private static OnItemClickListener mOnItemClickListener;
+
+    static class ViewHolder extends RecyclerView.ViewHolder{
         ImageView mIv_status;
         TextView mTv_name;
         TextView mTv_type;
@@ -34,10 +38,6 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
             mTv_data = view.findViewById(R.id.tv_data);
         }
 
-        @Override
-        public void onClick(View v) {
-
-        }
     }
 
     public MonitoringPointsAdapter(List<MonitoringPoint> mPointsList){
@@ -57,7 +57,7 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         MonitoringPoint point = mPointsList.get(position);
         holder.mTv_name.setText(point.getName());
         int statusCode = Integer.parseInt(point.getStatus());
@@ -82,6 +82,19 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
                 break;
         }
         holder.mTv_activeTime.setText(point.getActiveTime());
+        if(mOnItemClickListener == null){
+            Log.e("123", "mOnItemClickListener is null");
+        }
+        holder.mTv_data.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mOnItemClickListener == null) {
+                    Log.e("onBindViewHolder", "mOnItemClickListener is null");
+                } else {
+                    mOnItemClickListener.onItemClick(v, position);
+                }
+            }
+        });
     }
 
     @Override
@@ -89,5 +102,14 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
         return mPointsList.size();
     }
 
+    public interface OnItemClickListener{
+        void onItemClick(View view, int position);
+    }
 
+    public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
+        if(mOnItemClickListener == null){
+            Log.e("setOnItemClickListener", "mOnItemClickListener is null");
+        }
+        this.mOnItemClickListener = mOnItemClickListener;
+    }
 }

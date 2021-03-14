@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.FragmentManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -757,7 +758,20 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 fm.popBackStack();
                 MainActivity activity = (MainActivity) getActivity();
                 activity.setChartFragment(null);
-                activity.setNowFragment(activity.getDataFragment());
+                Log.e("BackStack11:", "" + fm.getBackStackEntryCount());
+                Log.e("BackStack11:", fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName());
+                if(fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName().equals("projectFragment")){
+                    activity.setNowFragment(activity.getProjectFragment());
+                    activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(0).getItemId());
+                }else{
+                    activity.setNowFragment(activity.getDataFragment());
+                    activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(1).getItemId());
+                }
+//                activity.setNowFragment(activity.getDataFragment());
+//                activity.setNowFragment(activity.getNewDataFragment());
+
+                Log.e("BackStack:", fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName());
+//                Log.e("BackStack:", "" + fm.getBackStackEntryCount());
                 break;
         }
     }
