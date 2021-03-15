@@ -21,7 +21,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 
+import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
+import com.beyond.beidou.project.ProjectFragment;
 import com.beyond.beidou.project.ProjectInfo;
 import com.beyond.beidou.R;
 import com.beyond.beidou.api.Api;
@@ -46,7 +48,7 @@ import okhttp3.Response;
  * @author: 李垚
  * @date: 2020/12/21
  */
-public class MyFragment extends Fragment implements View.OnClickListener{
+public class MyFragment extends BaseFragment implements View.OnClickListener{
     private TextView textView;
     private View view;
     private Button btnQuit;
@@ -107,17 +109,17 @@ public class MyFragment extends Fragment implements View.OnClickListener{
 
     @Override
     public void onClick(View view) {
+        MainActivity activity = (MainActivity) getActivity();
         switch (view.getId())
         {
             case R.id.btn_quit:
+                saveStringToSP("lastProjectName", activity.getPresentProject());
+                ProjectFragment.isReLogin = true;
                 logout("qazXSW0",ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
-//                projectName = arrayStrings[position];
-//                boolean flag = SPDatautils.saveprojectName(getContext(),projectName);
                 break;
 
             case R.id.img_help:
                 Fragment helpFragment = new HelpFragment();
-                MainActivity activity = (MainActivity) getActivity();
                 activity.setHelpFragment(helpFragment);
                 activity.setNowFragment(helpFragment);
                 FragmentManager fragmentManager = getFragmentManager();

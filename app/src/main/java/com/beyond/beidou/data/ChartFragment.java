@@ -200,11 +200,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
             }
         });
-
     }
 
     /**
-     * 解决图表于ScrollView滑动冲突
+     * 解决图表与ScrollView滑动冲突
      * 图表可左右滑动，ScrollView可上下滑动
      */
     View.OnTouchListener touchListener = new View.OnTouchListener() {

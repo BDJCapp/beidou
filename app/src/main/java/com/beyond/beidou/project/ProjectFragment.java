@@ -66,7 +66,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-public class ProjectFragment extends BaseFragment {
+public class ProjectFragment extends BaseFragment implements View.OnClickListener {
 
     private LocationClient mLocationClient;
     private boolean isFirstLocate = true;
@@ -93,9 +93,11 @@ public class ProjectFragment extends BaseFragment {
     private List<ProjectResponse.ProjectListBean.StationListBean> projectStationList = new ArrayList<>();
     private MonitoringPointsAdapter mPointsAdapter;
     private LinearLayoutManager layoutManager;
+    private ArrayList<String> stationNameList = new ArrayList<>();
 
     private static boolean isFirstLogin = true;
     private static String presentProject;
+    public static boolean isReLogin = false;
 
     @Nullable
     @Override
@@ -116,7 +118,16 @@ public class ProjectFragment extends BaseFragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        refreshData();
+        //显示才刷新
+        if (!hidden) {
+            MainActivity mMainActivity = (MainActivity) getActivity();
+            if (!presentProject.equals(mMainActivity.getPresentProject())) {
+                isFirstLocate = true;
+            }
+            presentProject = mMainActivity.getPresentProject();
+            Log.e("refreshData", "onHiddenChanged");
+            refreshData();
+        }
     }
 
     @Override
@@ -124,6 +135,7 @@ public class ProjectFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         initData();
     }
+
 
     public static ProjectFragment newInstance() {
         ProjectFragment fragment = new ProjectFragment();
@@ -159,43 +171,48 @@ public class ProjectFragment extends BaseFragment {
         mScrollLayout.setAllowHorizontalScroll(true);
         mScrollLayout.setToOpen();
 
-        mRelativeLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mScrollLayout.scrollToExit();
-            }
-        });
-
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 presentProject = (String) mSpinner.getItemAtPosition(position);
                 isFirstLocate = true;
-                MainActivity mMainActivity = (MainActivity)getActivity();
+                MainActivity mMainActivity = (MainActivity) getActivity();
                 mMainActivity.setPresentProject(presentProject);
+                Log.e("refreshData", "mSpinner");
                 refreshData();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+                showToast("没有选中任何工程");
             }
         });
+//        mSpinner.setSelection(0, true);
+
+        mRelativeLayout.setOnClickListener(this);
+        mBtnAmount.setOnClickListener(this);
+        mBtnOnline.setOnClickListener(this);
+        mBtnWarning.setOnClickListener(this);
+        mBtnError.setOnClickListener(this);
+        mBtnOffline.setOnClickListener(this);
+
     }
 
     protected void initData() {
         final int width = ScreenUtil.getScreenXRatio(getActivity());
         final int height = ScreenUtil.getScreenXRatio(getActivity());
 
-        if(isFirstLogin){
+        if (isFirstLogin) {
             String spVal = getStringFromSP("lastProjectName");
             presentProject = spVal;
             isFirstLogin = false;
-        }else{
-//            Log.e("isFirstLogin",  mMainActivity.getPresentProject());
-            MainActivity mMainActivity = (MainActivity)getActivity();
+        } else {
+            MainActivity mMainActivity = (MainActivity) getActivity();
             presentProject = mMainActivity.getPresentProject();
-            Log.e("presentProject", presentProject );
+            if(presentProject == null){
+                presentProject = "";
+            }
+            Log.e("presentProject", presentProject);
         }
 
         mBaiduMap = mMapView.getMap();
@@ -226,22 +243,28 @@ public class ProjectFragment extends BaseFragment {
                             ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), R.layout.item_select, projectNameList);
                             arrayAdapter.setDropDownViewResource(R.layout.item_drop);
                             mSpinner.setAdapter(arrayAdapter);
-                            if(presentProject == ""){
+                            if (presentProject.equals("")) {
                                 presentProject = mSpinner.getSelectedItem().toString();
-                                MainActivity mMainActivity = (MainActivity)getActivity();
+                                MainActivity mMainActivity = (MainActivity) getActivity();
                                 mMainActivity.setPresentProject(presentProject);
                                 for (ProjectResponse.ProjectListBean project : projectList) {
                                     if (project.getProjectName().equals(presentProject)) {
                                         projectStationStatus = project.getProjectStationStatus();
                                         projectStationList = project.getStationList();
+                                        for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
+                                            stationNameList.add(station.getStationName());
+                                        }
                                     }
                                 }
-                            }else{
+                            } else {
                                 for (ProjectResponse.ProjectListBean project : projectList) {
                                     if (project.getProjectName().equals(presentProject)) {
                                         projectStationStatus = project.getProjectStationStatus();
                                         projectStationList = project.getStationList();
                                         mSpinner.setSelection(projectList.indexOf(project));
+                                        for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
+                                            stationNameList.add(station.getStationName());
+                                        }
                                     }
                                 }
                             }
@@ -261,19 +284,9 @@ public class ProjectFragment extends BaseFragment {
                             mRecyclerView.setLayoutManager(layoutManager);
                             mPointsAdapter = new MonitoringPointsAdapter(mPointList);
                             mRecyclerView.setAdapter(mPointsAdapter);
-
-                            //在refresh中加以下和按钮的点击事件？
                             mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(View view, int position) {
-                                    ArrayList<String> stationNameList = new ArrayList<>();
-                                    for (ProjectResponse.ProjectListBean project : projectList) {
-                                        if (presentProject.equals(project.getProjectName())) {
-                                            for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
-                                                stationNameList.add(station.getStationName());
-                                            }
-                                        }
-                                    }
                                     switchFragment(presentProject, stationNameList, position);
                                     MainActivity activity = (MainActivity) getActivity();
                                     activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(1).getItemId());
@@ -284,6 +297,7 @@ public class ProjectFragment extends BaseFragment {
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());
                             Date date = new Date(System.currentTimeMillis());
                             mTvTime.setText(simpleDateFormat.format(date));
+
                             mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
                                 @Override
                                 public boolean onMarkerClick(Marker marker) {
@@ -307,78 +321,6 @@ public class ProjectFragment extends BaseFragment {
                                     return false;
                                 }
                             });
-                            mBtnAmount.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    mPointList.clear();
-                                    for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                                            projectStationList) {
-                                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
-                                    }
-                                    mPointsAdapter.setData(mPointList);
-                                    mPointsAdapter.notifyDataSetChanged();
-                                }
-                            });
-                            mBtnOnline.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    mPointList.clear();
-                                    for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                                            projectStationList) {
-                                        int statusCode = Integer.parseInt(projectStation.getStationStatus());
-                                        if (statusCode >= 10 && statusCode <= 19) {
-                                            mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
-                                        }
-                                    }
-                                    mPointsAdapter.setData(mPointList);
-                                    mPointsAdapter.notifyDataSetChanged();
-                                }
-                            });
-                            mBtnWarning.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    mPointList.clear();
-                                    for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                                            projectStationList) {
-                                        int statusCode = Integer.parseInt(projectStation.getStationStatus());
-                                        if (statusCode >= 30 && statusCode <= 39) {
-                                            mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
-                                        }
-                                    }
-                                    mPointsAdapter.setData(mPointList);
-                                    mPointsAdapter.notifyDataSetChanged();
-                                }
-                            });
-                            mBtnError.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    mPointList.clear();
-                                    for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                                            projectStationList) {
-                                        int statusCode = Integer.parseInt(projectStation.getStationStatus());
-                                        if (statusCode >= 40 && statusCode <= 49) {
-                                            mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
-                                        }
-                                    }
-                                    mPointsAdapter.setData(mPointList);
-                                    mPointsAdapter.notifyDataSetChanged();
-                                }
-                            });
-                            mBtnOffline.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    mPointList.clear();
-                                    for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                                            projectStationList) {
-                                        int statusCode = Integer.parseInt(projectStation.getStationStatus());
-                                        if (statusCode >= 20 && statusCode <= 29) {
-                                            mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
-                                        }
-                                    }
-                                    mPointsAdapter.setData(mPointList);
-                                    mPointsAdapter.notifyDataSetChanged();
-                                }
-                            });
                         }
                     });
                 }
@@ -393,14 +335,10 @@ public class ProjectFragment extends BaseFragment {
     }
 
     private void refreshData() {
-//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), R.layout.item_select, projectNameList);
-//        arrayAdapter.setDropDownViewResource(R.layout.item_drop);
-//        mSpinner.setAdapter(arrayAdapter);
-//        presentProject = mSpinner.getSelectedItem().toString();
-
-
-        MainActivity mMainActivity = (MainActivity)getActivity();
-        presentProject = mMainActivity.getPresentProject();
+        if(isReLogin){
+            isFirstLogin = true;
+        }
+        Log.e("refreshData", "refreshData");
         Log.e("project", "projectList size: " + projectList.size());
         Log.e("project", "projectName: " + presentProject);
         for (ProjectResponse.ProjectListBean project : projectList) {
@@ -540,11 +478,6 @@ public class ProjectFragment extends BaseFragment {
         }
     }
 
-    //此函数用于简化按钮分类的监听事件
-    private void setPointList(int type) {
-
-    }
-
     private void requestLocation() {
         initLocation();
         mLocationClient.start();
@@ -617,6 +550,72 @@ public class ProjectFragment extends BaseFragment {
         option.setIsNeedAddress(true);
 
         mLocationClient.setLocOption(option);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.relativeLayout:
+                mScrollLayout.scrollToExit();
+                break;
+            case R.id.btn_amount:
+                mPointList.clear();
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                }
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
+                break;
+            case R.id.btn_online:
+                mPointList.clear();
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if (statusCode >= 10 && statusCode <= 19) {
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
+                }
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
+                break;
+            case R.id.btn_warning:
+                mPointList.clear();
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if (statusCode >= 30 && statusCode <= 39) {
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
+                }
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
+                break;
+            case R.id.btn_error:
+                mPointList.clear();
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if (statusCode >= 40 && statusCode <= 49) {
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
+                }
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
+                break;
+            case R.id.btn_offline:
+                mPointList.clear();
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if (statusCode >= 20 && statusCode <= 29) {
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
+                }
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
+                break;
+        }
     }
 
     private class MyLocationListener extends BDAbstractLocationListener {
