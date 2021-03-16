@@ -521,7 +521,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         //海外地区定位，无需设置坐标类型，统一返回WGS84类型坐标
         option.setCoorType("BD09LL");
 
-        //可选，设置发起定位请求的问题，int类型，单位ms
+        //可选，设置发起定位请求的问题
+        // ，int类型，单位ms
         //如果设置为0，则代表单次定位，即仅定位一次，默认为0
         //如果设置为非0，需设置1000ms以上才有效
         option.setScanSpan(1000);
@@ -535,7 +536,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
         //可选，定位SDK内部是一个service，并放到了独立进程
         //设置是否在stop的时候杀死这个进程，默认（建议）不杀死，即setIgnorekillProcess(true)
-        option.setIgnoreKillProcess(false);
+        option.setIgnoreKillProcess(true);
 
         //可选，设置是否收集Crash信息，默认收集，即参数为false
         option.SetIgnoreCacheException(false);
