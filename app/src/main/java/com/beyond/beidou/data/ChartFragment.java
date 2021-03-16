@@ -26,7 +26,6 @@ import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.GetGraphicDataResponse;
 import com.beyond.beidou.util.LogUtil;
-import com.beyond.beidou.util.LoginUtil;
 import com.beyond.beidou.util.MyPointValue;
 import com.beyond.beidou.util.ScreenUtil;
 import com.google.gson.Gson;
@@ -100,8 +99,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         View view = inflater.inflate(R.layout.fragment_chart, container, false);
         initView(view);
         drawXYHChart("最近1小时");  //默认展示XYH一小时的图表
-/*      getChartData("N");
-        getChartData("E");
+        getChartData("N");
+ /*       getChartData("E");
         getChartData("H");*/
         return view;
     }
@@ -121,11 +120,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             spDevice.setSelection(getArguments().getInt("position"),true);
         }
 
-        /*String[] devices = new String[]{"监测点1", "监测点2", "监测点3"};
-        ArrayAdapter<String> deviceAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, devices);
-        deviceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-        spDevice.setAdapter(deviceAdapter);
-        */
         final String[] charts = new String[]{"XYH", "位移图", "心型图"};
         String[] times = new String[]{"最近1小时", "最近6小时", "最近12小时", "本日", "本周", "本月", "本年"};
         ArrayAdapter<String> chartAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, charts);
@@ -417,7 +411,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         }
 
         //裁剪
-        String tempstring;
+        /*String tempstring;
         float tempfloat;
         cutNum = String.valueOf(preValues.get(0).getY()).substring(0, 3);
         for (MyPointValue point : preValues) {
@@ -427,6 +421,33 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             xValues.add(new PointValue((float) point.getX(), tempfloat));
             yValues.add(new PointValue((float) point.getX(), tempfloat));
             hValues.add(new PointValue((float) point.getX(), tempfloat));
+        }*/
+
+
+        //将数据转换成与格式化后最小值的差值，可以不再对数据进行裁剪
+        double preYMin = 0;
+        double preYMax = 0;
+        preYMin = preValues.get(0).getY();
+        preYMax = preValues.get(0).getY();
+        for (MyPointValue pointValue: preValues) {
+            if (pointValue.getY() > preYMax)
+            {
+                preYMax = pointValue.getY();
+            }
+            if (pointValue.getY() < preYMin)
+            {
+                preYMin = pointValue.getY();
+            }
+        }
+        DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
+        BigDecimal tempYmin = new BigDecimal(df.format(preYMin));
+        preYMin = Double.parseDouble(String.valueOf(tempYmin));
+        float convertValue;
+        for (MyPointValue pointValue: preValues) {
+            convertValue = (float) (pointValue.getY() - preYMin);
+            xValues.add(new PointValue((float) pointValue.getX(), convertValue));
+            yValues.add(new PointValue((float) pointValue.getX(), convertValue));
+            hValues.add(new PointValue((float) pointValue.getX(), convertValue));
         }
 
     }
@@ -516,12 +537,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      * @param values 图表数据
      * @return Y轴标签列表
      */
-    public List<AxisValue> setAxisYLabel(String cutNum, List<PointValue> values) {
+    /*public List<AxisValue> setAxisYLabel(String cutNum, List<PointValue> values) {
         String tempstring;
         float tempfloat;
         List<AxisValue> axisValues = new ArrayList<>();
         valueYMax = values.get(0).getY();
         valueYMin = values.get(0).getY();
+
         for (lecho.lib.hellocharts.model.PointValue pointValue : values) {
             //确定最大最小值
             if (pointValue.getY() >= valueYMax) {
@@ -536,17 +558,76 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         yMax = valueYMax + 0.1f;
         yMin = valueYMin - 0.1f;
 
-        DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
+        LogUtil.e("YMax before", String.valueOf(yMax));
+        LogUtil.e("YMin before", String.valueOf(yMin));
 
+        DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
         BigDecimal b_ymin = new BigDecimal(df.format(yMin));//解决浮点型数据加减运算精度问题
         BigDecimal b_space = new BigDecimal(space);
         tempfloat = yMin;
 
+        LogUtil.e("tempfloat", String.valueOf(tempfloat));
+        LogUtil.e("yMax after", String.valueOf(df.format(yMax)));
+        LogUtil.e("yMin after", String.valueOf(df.format(yMin)));
+        LogUtil.e("bYMin", String.valueOf(b_ymin));
+
         while (tempfloat <= yMax) {
             b_ymin = b_ymin.add(b_space);
             tempstring = cutNum + String.valueOf(b_ymin);
-
             tempfloat = Float.parseFloat(String.valueOf(b_ymin));
+            LogUtil.e("value lable", String.valueOf(tempfloat) + "  " + tempstring);
+            AxisValue axisValue = new AxisValue(tempfloat);
+            axisValue.setLabel(tempstring);
+            axisValues.add(axisValue);
+        }
+        return axisValues;
+    }*/
+
+    //修改之后
+    public List<AxisValue> setAxisYLabel(String cutNum, List<PointValue> values) {
+        String tempstring;
+        float tempfloat;
+        List<AxisValue> axisValues = new ArrayList<>();
+        valueYMax = values.get(0).getY();
+        valueYMin = values.get(0).getY();
+
+        for (lecho.lib.hellocharts.model.PointValue pointValue : values) {
+            //确定最大最小值
+            if (pointValue.getY() >= valueYMax) {
+                valueYMax = pointValue.getY();
+            }
+            if (pointValue.getY() <= valueYMin) {
+                valueYMin = pointValue.getY();
+            }
+        }
+
+        LogUtil.e("valueYMax", String.valueOf(valueYMax));
+        LogUtil.e("valueYMin", String.valueOf(valueYMin));
+
+        String space = "0.01";     //每格大小为0.01m
+        yMax = valueYMax + 0.1f;
+        yMin = valueYMin - 0.1f;
+
+        LogUtil.e("YMax before", String.valueOf(yMax));
+        LogUtil.e("YMin before", String.valueOf(yMin));
+
+        DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
+        BigDecimal b_ymin = new BigDecimal(df.format(yMin));//b_min表示最小值再减去0.1
+        BigDecimal b_space = new BigDecimal(space);
+        tempfloat = yMin;
+        LogUtil.e("tempfloat", String.valueOf(tempfloat));
+        LogUtil.e("yMax after", String.valueOf(df.format(yMax)));
+        LogUtil.e("yMin after", String.valueOf(df.format(yMin)));
+        LogUtil.e("bymin", String.valueOf(b_ymin));
+
+        BigDecimal s_yMin = new BigDecimal("3550716.34");  //传入格式化后的最小值
+
+        while (tempfloat <= yMax) {
+            b_ymin = b_ymin.add(b_space);
+            s_yMin =s_yMin.add(b_space);
+            tempstring = String.valueOf(s_yMin);
+            tempfloat = Float.parseFloat(String.valueOf(b_ymin));
+            LogUtil.e("value lable", String.valueOf(tempfloat) + "  " + tempstring);
             AxisValue axisValue = new AxisValue(tempfloat);
             axisValue.setLabel(tempstring);
             axisValues.add(axisValue);
@@ -766,11 +847,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     activity.setNowFragment(activity.getDataFragment());
                     activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(1).getItemId());
                 }
-//                activity.setNowFragment(activity.getDataFragment());
-//                activity.setNowFragment(activity.getNewDataFragment());
-
-                Log.e("BackStack:", fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName());
-//                Log.e("BackStack:", "" + fm.getBackStackEntryCount());
                 break;
         }
     }
@@ -828,27 +904,49 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 Gson gson = new Gson();
                 GetGraphicDataResponse dataResponse = gson.fromJson(responseText, GetGraphicDataResponse.class);
                 LogUtil.e(graphicType + "获取数据个数", String.valueOf(dataResponse.getContent().size()));
-                for (int i = 0; i < 10; i++) {
-                    String time = dataResponse.getContent().get(i).get(0);
-                    LogUtil.e("时间",time);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    Date date = null;
-                    try {
-                        date = simpleDateFormat.parse(time);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    long ts = date.getTime();
-                    String res = String.valueOf(ts);
-                    res = "31535999";
-                    LogUtil.e("时间戳",res);
-                    float convertTime = Float.parseFloat(res);
-                    LogUtil.e("float时间戳", String.valueOf(convertTime));
-                    //时间戳太大解决思路，结束时间的时间戳减去开始时间的时间戳。但是一年的时间戳还是大，精度会丢一位
-                }
-
+                convertData(dataResponse.getContent(),dataResponse.getMin(),"2021-03-09 00:00:00");
             }
         });
+    }
 
+    /**
+     * 处理接口返回数据
+     * @param responseData 接口返回的数据列表。内层列表中，索引0存储时间，索引1存储数据.
+     * @param responseMin 接口返回值的最小值.
+     * @return  转换后可用于画图的数据。
+     */
+    public List<PointValue> convertData(List<List<String>> responseData,String responseMin,String startTime)
+    {
+        List<PointValue> convertData = new ArrayList<>();
+        String time;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Long axisXValue = null;
+        Long axisX0 = null;
+        double valueMin = Double.parseDouble(responseMin);
+        float convertValue;
+
+        DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
+        BigDecimal convertMin = new BigDecimal(df.format(valueMin));
+        valueMin = Double.parseDouble(String.valueOf(convertMin));
+
+        try {
+            axisX0 = simpleDateFormat.parse(startTime).getTime() / 1000 / 60; //获取分钟级时间戳
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        for (List<String> data : responseData) {
+            time = data.get(0);   //0是时间，1是数据
+            convertValue = (float) (Double.parseDouble(data.get(1)) - valueMin);
+            try {
+                axisXValue = simpleDateFormat.parse(time).getTime() / 1000 / 60;
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            convertData.add(new PointValue((float) (axisXValue - axisX0),convertValue));
+        }
+        /*for (PointValue pointValue: convertData) {
+            LogUtil.e("转换后的时间数据+点数据", pointValue.getX() + "  " + pointValue.getY());
+        }*/
+        return convertData;
     }
 }

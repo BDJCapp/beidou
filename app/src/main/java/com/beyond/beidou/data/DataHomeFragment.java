@@ -1,6 +1,5 @@
 package com.beyond.beidou.data;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -9,11 +8,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,13 +27,14 @@ import com.beyond.beidou.entites.ProjectResponse;
 import com.beyond.beidou.util.LogUtil;
 import com.google.gson.Gson;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
-import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -58,6 +56,7 @@ public class DataHomeFragment extends BaseFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_data, container, false);
         initView(view);
+        test();
         return view;
     }
 
@@ -220,5 +219,34 @@ public class DataHomeFragment extends BaseFragment {
         ft.add(R.id.layout_home, chartFragment).hide(this);
         ft.addToBackStack("DataHomeFragment");   //加入到返回栈中
         ft.commit();
+    }
+
+    public void test()
+    {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date();
+        String startTime = simpleDateFormat.format(date) + " 00:00:00";
+        String endTime = simpleDateFormat.format(date) + " 23:59:59";
+        LogUtil.e("startTime",startTime);
+        LogUtil.e("endTime",endTime);
+        String startTimeStamp = null;
+        String endTimeStamp = null;
+        String timeStampGap = null;
+        String testTime = null;
+        try {
+             //转换为秒级时间戳
+             testTime = String.valueOf(dateFormat.parse("2021-03-09 00:03:55").getTime()/1000);
+             startTimeStamp = String.valueOf(dateFormat.parse(startTime).getTime()/1000);
+             endTimeStamp = String.valueOf(dateFormat.parse(endTime).getTime()/1000);
+             //timeStampGap = String.valueOf(dateFormat.parse("2021-03-09 00:03:55").getTime()/1000 - dateFormat.parse("2021-03-09 00:00:00").getTime()/1000);
+             timeStampGap = String.valueOf(dateFormat.parse(endTime).getTime()/1000 - dateFormat.parse(startTime).getTime()/1000);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        LogUtil.e("测试时间戳", testTime);
+        LogUtil.e("一天开始时间+时间戳",simpleDateFormat.format(date) + " 00:00:00" + "  " + startTimeStamp);
+        LogUtil.e("一天结束时间+时间戳",simpleDateFormat.format(date) + " 23:59:59" + "  " + endTimeStamp);
+        LogUtil.e("时间差",String.valueOf(Float.parseFloat(timeStampGap)));
     }
 }
