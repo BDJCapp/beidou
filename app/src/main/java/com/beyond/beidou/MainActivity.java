@@ -40,7 +40,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     @Override
     protected void onDestroy() {
-//        ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
         super.onDestroy();
     }
 
