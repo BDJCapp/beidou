@@ -24,6 +24,8 @@ public class ApiConfig {
     public static final String GrantType = "BDJC";
     public static final String AuthorizationLable = "UzHky82L6hOKCAsI5MBQYImw";
     public static final String AuthorizationSecret = "HCarvgfeeCQlFoWfo8lylh7aF61wNNBjv8FriEw";
+//    public static final String AppID = "UzHky82L6hOKCAsI5MBQYImw";
+//    public static final String AppSecret = "HCarvgfeeCQlFoWfo8lylh7aF61wNNBjv8FriEw";
     public static final String GET_ACCESS_TOKEN = "getAccessToken.php";
     public static final String GET_SESSION_UUID = "doSession.php";
     public static final String GET_PROJECTS = "getProjects.php";
