@@ -131,9 +131,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         ArrayAdapter<String> timeAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, times);
         timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
         spTime.setAdapter(timeAdapter);
-        spTime.setSelection(3, true);
+        spTime.setSelection(3);
         spChart.setAdapter(chartAdapter);
-        spChart.setSelection(0, true);
+//        spChart.setSelection(0, true);
 
         chartX = view.findViewById(R.id.chart_X);
         chartY = view.findViewById(R.id.chart_Y);
@@ -162,10 +162,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         spChart.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                if(isFirstTimeSelectChart){
-//                    isFirstTimeSelectChart = false;
-//                    return;
-//                }
+                if(isFirstTimeSelectChart){
+                    isFirstTimeSelectChart = false;
+                    return;
+                }
                 Log.e("spChart", "CNM" );
                 switchChart();
             }
@@ -178,10 +178,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         spTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                if(isFirstTimeSelectTime){
-//                    isFirstTimeSelectTime = false;
-//                    return;
-//                }
+                if(isFirstTimeSelectTime){
+                    isFirstTimeSelectTime = false;
+                    return;
+                }
                 Log.e("spTime", "CNM");
                 switchChart();
             }
@@ -313,16 +313,19 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         if ("本日".equals(selectedTime))
         {
             List<AxisValue> xAxisValues = setXAxisValues("本日", xConvertData);
+            Log.e("drawXYHChart", "xConvertData");
             List<AxisValue> yLabel = setAxisYLabel(minResponse.get(1).toString(), xConvertData);
             convertLines(xConvertData,interval,maxInterval);
             setChart(chartX,xConvertData,xAxisValues,yLabel);
 
             xAxisValues = setXAxisValues("本日", yConvertData);
+            Log.e("drawXYHChart", "yConvertData");
             yLabel = setAxisYLabel(minResponse.get(2).toString(), yConvertData);
             convertLines(yConvertData,interval,maxInterval);
             setChart(chartY,yConvertData,xAxisValues,yLabel);
 
             xAxisValues = setXAxisValues("本日", hConvertData);
+            Log.e("drawXYHChart", "hConvertData");
             yLabel = setAxisYLabel(minResponse.get(3).toString(), hConvertData);
             convertLines(hConvertData,interval,maxInterval);
             setChart(chartH,hConvertData,xAxisValues,yLabel);
@@ -407,9 +410,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             yChartTime.setText(time);
             yChartCoo.setText("WGS84坐标系|");*/
 
-            layoutChartX.setVisibility(View.GONE);
-            layoutChartY.setVisibility(View.GONE);
-            layoutChartH.setVisibility(View.GONE);
+//            layoutChartX.setVisibility(View.GONE);
+//            layoutChartY.setVisibility(View.GONE);
+//            layoutChartH.setVisibility(View.GONE);
 
 /*            List<AxisValue> xAxisValues = setXAxisValues(selectedTime, deltaValues);
             List<AxisValue> yAxisValues = setAxisYLabel("",deltaValues);
@@ -547,196 +550,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             pointValues.add(new PointValue(Float.parseFloat(String.valueOf(tempX)), Float.parseFloat(String.valueOf(tempY))));
         }
     }
-
-    /**
-     * 模拟XYH图表的数据并进行处理，数据的获取解析以及裁剪
-     */
-//    public void initXYHChartValue() {
-//        /*接口完成后，在此获取返回的XYH数据*/
-//        if ("最近1小时".equals(spTime.getSelectedItem().toString())) {
-//            preValues.add(new MyPointValue(1, 3550716.442));
-//            preValues.add(new MyPointValue(2, 3550716.439));
-//            preValues.add(new MyPointValue(3, 3550716.440));
-//            preValues.add(new MyPointValue(4, 3550716.443));
-//            preValues.add(new MyPointValue(5, 3550716.442));
-//            preValues.add(new MyPointValue(6, 3550716.442));
-//            preValues.add(new MyPointValue(7, 3550716.442));
-//            preValues.add(new MyPointValue(8, 3550716.443));
-//            preValues.add(new MyPointValue(9, 3550716.443));
-//            preValues.add(new MyPointValue(10, 3550716.443));
-//            preValues.add(new MyPointValue(11, 3550716.444));
-//            preValues.add(new MyPointValue(12, 3550716.444));
-//            preValues.add(new MyPointValue(13, 3550716.444));
-//        } else if ("本周".equals(spTime.getSelectedItem().toString())) {
-//            preValues.add(new MyPointValue(1, 3550716.442));
-//            preValues.add(new MyPointValue(2, 3550716.439));
-//            preValues.add(new MyPointValue(3, 3550716.444));
-//            preValues.add(new MyPointValue(4, 3550716.440));
-//            preValues.add(new MyPointValue(5, 3550716.441));
-//            preValues.add(new MyPointValue(6, 3550716.443));
-//            preValues.add(new MyPointValue(7, 3550716.442));
-//            preValues.add(new MyPointValue(8, 3550716.443));
-//            preValues.add(new MyPointValue(9, 3550716.441));
-//            preValues.add(new MyPointValue(10, 3550716.443));
-//            preValues.add(new MyPointValue(11, 3550716.444));
-//            preValues.add(new MyPointValue(12, 3550716.444));
-//            preValues.add(new MyPointValue(13, 3550716.440));
-//            preValues.add(new MyPointValue(14, 3550716.442));
-//            preValues.add(new MyPointValue(15, 3550716.443));
-//        } else if ("本月".equals(spTime.getSelectedItem().toString())) {
-//            preValues.add(new MyPointValue(1, 3550716.442));
-//            preValues.add(new MyPointValue(2, 3550716.439));
-//            preValues.add(new MyPointValue(3, 3550716.442));
-//            preValues.add(new MyPointValue(4, 3550716.440));
-//            preValues.add(new MyPointValue(5, 3550716.441));
-//            preValues.add(new MyPointValue(6, 3550716.440));
-//            preValues.add(new MyPointValue(7, 3550716.442));
-//            preValues.add(new MyPointValue(8, 3550716.443));
-//            preValues.add(new MyPointValue(9, 3550716.445));
-//            preValues.add(new MyPointValue(10, 3550716.443));
-//            preValues.add(new MyPointValue(11, 3550716.441));
-//            preValues.add(new MyPointValue(12, 3550716.444));
-//            preValues.add(new MyPointValue(13, 3550716.440));
-//            preValues.add(new MyPointValue(14, 3550716.442));
-//            preValues.add(new MyPointValue(15, 3550716.443));
-//            //preValues.add(new MyPointValue(16, 3550716.445));
-//        } else if ("本年".equals(spTime.getSelectedItem().toString())) {
-//            preValues.add(new MyPointValue(1, 3550716.442));
-//            preValues.add(new MyPointValue(2, 3550716.439));
-//            preValues.add(new MyPointValue(3, 3550716.444));
-//            preValues.add(new MyPointValue(4, 3550716.440));
-//            preValues.add(new MyPointValue(5, 3550716.441));
-//            preValues.add(new MyPointValue(6, 3550716.443));
-//            preValues.add(new MyPointValue(7, 3550716.442));
-//            preValues.add(new MyPointValue(8, 3550716.443));
-//            preValues.add(new MyPointValue(9, 3550716.441));
-//            preValues.add(new MyPointValue(10, 3550716.443));
-//            preValues.add(new MyPointValue(11, 3550716.444));
-//            preValues.add(new MyPointValue(12, 3550716.444));
-//            preValues.add(new MyPointValue(13, 3550716.440));
-//        } else {   //数据变化
-//            preValues.add(new MyPointValue(1, 3550716.444));
-//            preValues.add(new MyPointValue(2, 3550716.443));
-//            preValues.add(new MyPointValue(3, 3550716.443));
-//            preValues.add(new MyPointValue(4, 3550716.443));
-//            preValues.add(new MyPointValue(5, 3550716.444));
-//            preValues.add(new MyPointValue(6, 3550716.440));
-//            preValues.add(new MyPointValue(7, 3550716.444));
-//            preValues.add(new MyPointValue(8, 3550716.442));
-//            preValues.add(new MyPointValue(9, 3550716.439));
-//            preValues.add(new MyPointValue(10, 3550716.440));
-//            preValues.add(new MyPointValue(11, 3550716.443));
-//            preValues.add(new MyPointValue(12, 3550716.442));
-//            preValues.add(new MyPointValue(13, 3550716.442));
-//        }
-//
-//        //将数据转换成与格式化后最小值的差值，可以不再对数据进行裁剪
-//        double preYMin = 0;
-//        double preYMax = 0;
-//        preYMin = preValues.get(0).getY();
-//        preYMax = preValues.get(0).getY();
-//        for (MyPointValue pointValue: preValues) {
-//            if (pointValue.getY() > preYMax)
-//            {
-//                preYMax = pointValue.getY();
-//            }
-//            if (pointValue.getY() < preYMin)
-//            {
-//                preYMin = pointValue.getY();
-//            }
-//        }
-//        DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
-//        BigDecimal tempYmin = new BigDecimal(df.format(preYMin));
-//        preYMin = Double.parseDouble(String.valueOf(tempYmin));
-//        float convertValue;
-//        for (MyPointValue pointValue: preValues) {
-//            convertValue = (float) (pointValue.getY() - preYMin);
-//            xValues.add(new PointValue((float) pointValue.getX(), convertValue));
-//            yValues.add(new PointValue((float) pointValue.getX(), convertValue));
-//            hValues.add(new PointValue((float) pointValue.getX(), convertValue));
-//        }
-//
-//    }
-
-    /**
-     * 模拟位移图的数据
-     */
-//    public void initDeltaChartValue() {
-//        List<MyPointValue> returnValues = new ArrayList<>();  //模拟返回数据
-//        if ("本周".equals(spTime.getSelectedItem().toString())) {
-//            returnValues.add(new MyPointValue(3550716.4521, 404979.4331));
-//            returnValues.add(new MyPointValue(3550716.446, 404979.4331));
-//            returnValues.add(new MyPointValue(3550716.4455, 404979.4332));
-//            returnValues.add(new MyPointValue(3550716.4446, 404979.4335));
-//            returnValues.add(new MyPointValue(3550716.4441, 404979.4342));
-//            returnValues.add(new MyPointValue(3550716.444, 404979.4346));
-//            returnValues.add(new MyPointValue(3550716.4443, 404979.4348));
-//            returnValues.add(new MyPointValue(3550716.4457, 404979.4338));
-//            returnValues.add(new MyPointValue(3550716.446, 404979.434));
-//            returnValues.add(new MyPointValue(3550716.4471, 404979.434));
-//            returnValues.add(new MyPointValue(3550716.4485, 404979.4339));
-//            returnValues.add(new MyPointValue(3550716.4481, 404979.4334));
-//            returnValues.add(new MyPointValue(3550716.4481, 404979.4343));
-//            returnValues.add(new MyPointValue(3550716.4487, 404979.4331));
-//            returnValues.add(new MyPointValue(3550716.4485, 404979.4335));
-//        } else if ("本月".equals(spTime.getSelectedItem().toString())) {
-//            returnValues.add(new MyPointValue(3550716.446, 404979.434));
-//            returnValues.add(new MyPointValue(3550716.4471, 404979.434));
-//            returnValues.add(new MyPointValue(3550716.4485, 404979.4339));
-//            returnValues.add(new MyPointValue(3550716.4481, 404979.4334));
-//            returnValues.add(new MyPointValue(3550716.4481, 404979.4343));
-//            returnValues.add(new MyPointValue(3550716.4487, 404979.4331));
-//            returnValues.add(new MyPointValue(3550716.4485, 404979.4335));
-//            returnValues.add(new MyPointValue(3550716.4485, 404979.4335));
-//            returnValues.add(new MyPointValue(3550716.4521, 404979.4331));
-//            returnValues.add(new MyPointValue(3550716.446, 404979.4331));
-//            returnValues.add(new MyPointValue(3550716.4455, 404979.4332));
-//            returnValues.add(new MyPointValue(3550716.4446, 404979.4335));
-//            returnValues.add(new MyPointValue(3550716.4441, 404979.4342));
-//            returnValues.add(new MyPointValue(3550716.444, 404979.4346));
-//            returnValues.add(new MyPointValue(3550716.4443, 404979.4348));
-//            returnValues.add(new MyPointValue(3550716.4457, 404979.4338));
-//        } else if ("本年".equals(spTime.getSelectedItem().toString())) {
-//            returnValues.add(new MyPointValue(3550716.4521, 404979.4331));
-//            returnValues.add(new MyPointValue(3550716.446, 404979.4331));
-//            returnValues.add(new MyPointValue(3550716.4455, 404979.4332));
-//            returnValues.add(new MyPointValue(3550716.4446, 404979.4335));
-//            returnValues.add(new MyPointValue(3550716.4441, 404979.4342));
-//            returnValues.add(new MyPointValue(3550716.444, 404979.4346));
-//            returnValues.add(new MyPointValue(3550716.4443, 404979.4348));
-//            returnValues.add(new MyPointValue(3550716.4457, 404979.4338));
-//            returnValues.add(new MyPointValue(3550716.446, 404979.434));
-//            returnValues.add(new MyPointValue(3550716.4471, 404979.434));
-//            returnValues.add(new MyPointValue(3550716.4485, 404979.4339));
-//            returnValues.add(new MyPointValue(3550716.4481, 404979.4334));
-//            returnValues.add(new MyPointValue(3550716.4481, 404979.4333));
-//        } else {
-//            returnValues.add(new MyPointValue(3550716.4521, 404979.4331));
-//            returnValues.add(new MyPointValue(3550716.446, 404979.4331));
-//            returnValues.add(new MyPointValue(3550716.4455, 404979.4332));
-//            returnValues.add(new MyPointValue(3550716.4446, 404979.4335));
-//            returnValues.add(new MyPointValue(3550716.4441, 404979.4342));
-//            returnValues.add(new MyPointValue(3550716.444, 404979.4346));
-//            returnValues.add(new MyPointValue(3550716.4443, 404979.4348));
-//            returnValues.add(new MyPointValue(3550716.4457, 404979.4338));
-//            returnValues.add(new MyPointValue(3550716.446, 404979.434));
-//            returnValues.add(new MyPointValue(3550716.4471, 404979.434));
-//            returnValues.add(new MyPointValue(3550716.4485, 404979.4339));
-//            returnValues.add(new MyPointValue(3550716.4481, 404979.4334));
-//            returnValues.add(new MyPointValue(3550716.4481, 404979.4333));
-//        }
-//        /*数据处理，如果接口直接返回处理过的数据最好*/
-//        double x0, y0, result;
-//        float i = 0;
-//        x0 = returnValues.get(0).getX();   //模拟基准点
-//        y0 = returnValues.get(0).getY();
-//        for (MyPointValue point : returnValues) {
-//            i++;
-//            result = Math.sqrt(Math.pow(point.getX() - x0, 2) + Math.pow(point.getY() - y0, 2));
-//            deltaValues.add(new PointValue(i, (float) result));
-//        }
-//    }
-
 
     //修改之后
     public List<AxisValue> setAxisYLabel(String yMin, List<PointValue> values) {
@@ -1041,7 +854,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 drawXYHChart(selectedTime);
                 break;
             case "位移图":
-                //cleanValues();
+//                cleanValues();
                 drawDeltaChart(selectedTime);
                 break;
             case "心型图":
@@ -1205,5 +1018,4 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             e.printStackTrace();
         }
     }
-
 }

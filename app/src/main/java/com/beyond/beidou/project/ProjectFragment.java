@@ -136,18 +136,15 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         initData();
     }
 
-
     public static ProjectFragment newInstance() {
         ProjectFragment fragment = new ProjectFragment();
         return fragment;
     }
 
-
     protected int initLayout() {
         SDKInitializer.initialize(getContext().getApplicationContext());
         return R.layout.fragment_project;
     }
-
 
     protected void initView(View view) {
         mMapView = view.findViewById(R.id.bdmapView);
@@ -187,8 +184,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 showToast("没有选中任何工程");
             }
         });
-//        mSpinner.setSelection(0, true);
-
         mRelativeLayout.setOnClickListener(this);
         mBtnAmount.setOnClickListener(this);
         mBtnOnline.setOnClickListener(this);
@@ -201,7 +196,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     protected void initData() {
         final int width = ScreenUtil.getScreenXRatio(getActivity());
         final int height = ScreenUtil.getScreenXRatio(getActivity());
-
         if (isFirstLogin) {
             String spVal = getStringFromSP("lastProjectName");
             presentProject = spVal;
@@ -214,7 +208,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
             Log.e("presentProject", presentProject);
         }
-
         mBaiduMap = mMapView.getMap();
         mBaiduMap.setOnMapLoadedCallback(new BaiduMap.OnMapLoadedCallback() {
             @Override
@@ -224,7 +217,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
         });
         mBaiduMap.setMyLocationEnabled(true);
-
         mParams.put("AccessToken", ApiConfig.getAccessToken());
         mParams.put("SessionUUID", ApiConfig.getSessionUUID());
         Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(getContext(), new ApiCallback() {
@@ -297,7 +289,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());
                             Date date = new Date(System.currentTimeMillis());
                             mTvTime.setText(simpleDateFormat.format(date));
-
+                            //设置地图marker覆盖物
                             mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
                                 @Override
                                 public boolean onMarkerClick(Marker marker) {
@@ -367,6 +359,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());
         Date date = new Date(System.currentTimeMillis());
         mTvTime.setText(simpleDateFormat.format(date));
+        //设置地图marker覆盖物
         mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
@@ -392,7 +385,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         });
     }
 
-    //获取网络时间
+    //获取网络时间，待定
     private void getNetTime() {
         new Thread(new Runnable() {
             @Override
@@ -507,49 +500,39 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
     private void initLocation() {
         LocationClientOption option = new LocationClientOption();
-
         //设置定位模式，默认高精度
         //LocationMode.Hight_Accuracy：高精度
         //LocationMode.Battery_Saving：低功耗
         //LocationMode.Device_Sensors：仅使用设备
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
-
         //可选，设置返回经纬度坐标类型，默认 GCJ02
         //GCJ02：国测局坐标
         //BD09LL：百度经纬度坐标
         //BD09：百度墨卡托坐标
         //海外地区定位，无需设置坐标类型，统一返回WGS84类型坐标
         option.setCoorType("BD09LL");
-
         //可选，设置发起定位请求的问题
         // ，int类型，单位ms
         //如果设置为0，则代表单次定位，即仅定位一次，默认为0
         //如果设置为非0，需设置1000ms以上才有效
         option.setScanSpan(1000);
-
         //可选，设置是否使用gps，默认false
         //使用高精度和仅使用设备两种定位模式的，参数必须设置为true
         option.setOpenGps(true);
-
         //可选，设置是否当GPS有效时按照1s/1次频率输出GPS结果，默认false
         option.setLocationNotify(true);
-
         //可选，定位SDK内部是一个service，并放到了独立进程
         //设置是否在stop的时候杀死这个进程，默认（建议）不杀死，即setIgnorekillProcess(true)
         option.setIgnoreKillProcess(true);
-
         //可选，设置是否收集Crash信息，默认收集，即参数为false
         option.SetIgnoreCacheException(false);
-
         //可选，V7.2版本新增功能
         //如果设置了该接口，首次启动定位时，会先判断当前Wi-Fi是否超出有效期，若超出有效期，会先重新扫描Wi-Fi，然后定位
         option.setWifiCacheTimeOut(5 * 60 * 1000);
-
         //可选，设置是否需要过滤GPS仿真结果，默认需要，即参数为false
         option.setEnableSimulateGps(false);
-
+        //设置是否需要详细地址信息
         option.setIsNeedAddress(true);
-
         mLocationClient.setLocOption(option);
     }
 
@@ -623,9 +606,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
-
             navigateTo(bdLocation);
-
             StringBuilder currentPosition = new StringBuilder();
             currentPosition.append("纬度：").append(bdLocation.getLatitude()).append("\n");
             currentPosition.append("经度：").append(bdLocation.getLongitude()).append("\n");
