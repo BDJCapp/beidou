@@ -1,5 +1,6 @@
 package com.beyond.beidou.util;
 
+import android.content.Intent;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
@@ -7,11 +8,14 @@ import android.widget.Toast;
 
 import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiConfig;
+import com.beyond.beidou.test.BeanTest;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -109,8 +113,8 @@ public class LoginUtil {
                     if (!TextUtils.isEmpty(responseText)) {
                         try {
                             JSONObject object = new JSONObject(responseText);
-
                             ApiConfig.setSessionUUID(object.getString("SessionUUID"));
+                            //监听SessionUUID值改变
                             Log.e("请求SessionUUID", "Session:" + object.getString("SessionUUID"));
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -127,10 +131,9 @@ public class LoginUtil {
     public String getAccessToken() {
         FormBody body = new FormBody.Builder()
                 .add("GrantType", ApiConfig.GrantType)
-                .add("AuthorizationLable", ApiConfig.AuthorizationLable)
-                .add("AuthorizationSecret", ApiConfig.AuthorizationSecret)
+                .add("AppID", ApiConfig.AppID)
+                .add("AppSecret", ApiConfig.AppSecret )
                 .build();
-
 
         Api.config(ApiConfig.GET_ACCESS_TOKEN).postRequestFormBody(body, new Callback() {
             @Override

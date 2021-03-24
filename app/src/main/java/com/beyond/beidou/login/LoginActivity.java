@@ -1,8 +1,11 @@
 package com.beyond.beidou.login;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -11,6 +14,7 @@ import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,13 +32,18 @@ import com.beyond.beidou.BaseActivity;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
 import com.beyond.beidou.api.ApiConfig;
+import com.beyond.beidou.test.BeanTest;
 import com.beyond.beidou.util.LoginUtil;
 import com.xuexiang.xui.widget.toast.XToast;
+import com.zyao89.view.zloading.ZLoadingDialog;
+import com.zyao89.view.zloading.Z_TYPE;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,13 +71,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private ImageView imgPictureCode;
 
     private static int loginType = LoginUtil.LOGINBYPWD;   //默认为密码登录
-    private final int IMAGECODESUCCESS = 1;            //设置msg.what
+//    private final int IMAGECODESUCCESS = 1;            //设置msg.what
     private final int LOGINDEFAULTFAILED = 2;
     private final int CODE_ERROR = 421;
     private final int ACCOUNT_OR_PWD_ERROR = 400120;
     private final int IIILEGAL_USER_SESSION = 400110;
     private final int SESSION_EXPIRATION_LOGOUT = 204;
     private final int CODE_NULL = 423;
+    private static boolean isExit = false;
+    ZLoadingDialog dialog = new ZLoadingDialog(LoginActivity.this);
 
     private Intent intent;
     private boolean isVisible = false;
@@ -106,8 +117,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     break;
                 case IIILEGAL_USER_SESSION:
                 case SESSION_EXPIRATION_LOGOUT:
+                case 400:
+                case 400010:
                     loginUtil.getAccessToken();
+                    login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
                     break;
+                case 1:
+                    //加载动画之后登录
+                    login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
+                    break;
+                case 0://判断是否连续点击两次
+                        isExit = false;
                 //                case CODE_NULL:
 //                    Toast.makeText(LoginActivity.this, String.valueOf(msg.obj),Toast.LENGTH_LONG).show();
 ////                    getImageCode();
@@ -126,6 +146,21 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         initView();
         initEvent();
         loginUtil.getAccessToken();
+//        !ApiConfig.getSessionUUID().equals("00000000-0000-0000-0000-000000000000")
+//        while(ApiConfig.getSessionUUID() !="00000000-0000-0000-0000-000000000000") {
+//            Log.e("1","对话框消失");
+//            dialog.dismiss();
+//            break;
+//        }
+//        BeanTest b = new BeanTest();
+//        b.addPropertyChangeListener(new PropertyChangeListener() {
+//            @Override
+//            public void propertyChange(PropertyChangeEvent evt) {
+////                dialog.dismiss();
+//                Log.e("1","对话框消失");
+//            }
+//        });
+
 //        loginUtil.getSessionId();  //获取SessionUUID
         etLoginAccount.setText("qazXSW0");
         etLoginCheck.setText("qazxswEDCVFR0*");
@@ -210,7 +245,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             case R.id.btn_login:
                 Log.e("denglu的token为", ApiConfig.getAccessToken());
                 Log.e("denglu的SessionUUID为",  ApiConfig.getSessionUUID());
-                login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
+                dialog.setLoadingBuilder( Z_TYPE.ROTATE_CIRCLE)//设置类型
+                        .setLoadingColor(Color.BLACK)//颜色
+                        .setHintText("Loading...")
+                        .show();
+                handler.sendEmptyMessageDelayed(1,1500);
+//                login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
                 //loginUtil.test(etPictureCode.getText().toString());
 //                intent.setClass(LoginActivity.this, MainActivity.class);
 //                startActivity(intent);
@@ -312,33 +352,34 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                                     Log.e("200",responseText);
                                     intent.setClass(LoginActivity.this, MainActivity.class);
                                     startActivity(intent);
+                                    dialog.dismiss();
                                     finish();
                                     break;
-//                                case "421": //验证码错误
-//                                    message.obj = errMsg;
-//                                    message.what = CODE_ERROR;
-//                                    handler.sendMessage(message);
-//                                    break;
+                                case "400"://操作失败/参数非法
+                                    message.obj = errMsg;
+                                    message.what = 400;
+                                    handler.sendMessage(message);
+                                    break;
+                                case "400010"://访问令牌非法
+                                    message.obj = errMsg;
+                                    message.what = 40010;
+                                    handler.sendMessage(message);
+                                    break;
                                 case "400120": //用户名和密码错误
                                     message.obj = errMsg;
                                     message.what = ACCOUNT_OR_PWD_ERROR;
                                     handler.sendMessage(message);
                                     break;
-//                                case "423": //验证码为空
-//                                    message.obj = errMsg;
-//                                    message.what = CODE_NULL;
-//                                    handler.sendMessage(message);
-//                                    break;
                                 case "400110"://用户会话非法
                                     message.obj = errMsg;
                                     message.what = IIILEGAL_USER_SESSION;
                                     handler.sendMessage(message);
                                     break;
-                                case "204"://用户会话非法
-                                    message.obj = errMsg;
-                                    message.what = SESSION_EXPIRATION_LOGOUT;
-                                    handler.sendMessage(message);
-                                    break;
+//                                case "204"://用户会话非法
+//                                    message.obj = errMsg;
+//                                    message.what = SESSION_EXPIRATION_LOGOUT;
+//                                    handler.sendMessage(message);
+//                                    break;
 
                                 default:
                                     message.what= LOGINDEFAULTFAILED;
@@ -388,6 +429,51 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show();
                     finish();
                 }
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+//        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+//            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//            builder.setTitle("提示");
+//            builder.setMessage("确定要退出应用");
+//            builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface arg0, int arg1) {
+//                    // TODO Auto-generated method stub
+//                    System.exit(0);
+//                    // System.exit(code);
+//                }
+//            });
+//            builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface arg0, int arg1) {
+//                    // TODO Auto-generated method stub
+//
+//                }
+//            });
+//            builder.show();
+//            return true;
+//        }
+//        return super.onKeyDown(keyCode, event);
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            exit();
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+    private void exit() {
+        if (!isExit) {
+            isExit = true;
+            Toast.makeText(getApplicationContext(), "再按一次退出程序",
+                    Toast.LENGTH_SHORT).show();
+            // 利用handler延迟发送更改状态信息
+            handler.sendEmptyMessageDelayed(0, 2000);
+        } else {
+            finish();
+            System.exit(0);
         }
     }
 

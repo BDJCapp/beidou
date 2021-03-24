@@ -44,10 +44,7 @@ import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.Response;
 
-/**
- * @author: 李垚
- * @date: 2020/12/21
- */
+
 public class MyFragment extends BaseFragment implements View.OnClickListener{
     private TextView textView;
     private View view;
@@ -127,12 +124,14 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
                 ft.add(R.id.layout_home, helpFragment).hide(this);
                 ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
+//                Intent intent = new Intent(getActivity(),HelpActivity.class);
+//                startActivity(intent);
                 break;
 
             case R.id.img_about:
                 Fragment aboutFragment = new AboutFragment();
                 MainActivity activity2 = (MainActivity) getActivity();
-                activity2.setHelpFragment(aboutFragment);
+                activity2.setAboutFragment(aboutFragment);
                 activity2.setNowFragment(aboutFragment);
                 FragmentManager fragmentManager2 = getFragmentManager();
                 FragmentTransaction ft2 = fragmentManager2.beginTransaction();
@@ -176,6 +175,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
                                 ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
                                 Intent intent= new Intent(getActivity(),LoginActivity.class);
                                 startActivity(intent);
+                                getActivity().finish();
                                 break;
                         }
                     } catch (JSONException e) {

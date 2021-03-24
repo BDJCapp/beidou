@@ -27,6 +27,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Fragment chartFragment = null;
     private Fragment helpFragment = null;
     private Fragment aboutFragment = null;
+    private Fragment feedbackFragment = null;
+    private Fragment versioninfoFragment = null;
     private BottomNavigationView navigationView;
     private String presentProject = null;
 
@@ -231,6 +233,14 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     public void setAboutFragment(Fragment aboutFragment) { this.aboutFragment = aboutFragment; }
 
+    public void setFeedBackFragment(Fragment feedbackFragment) {
+        this.feedbackFragment = feedbackFragment;
+    }
+
+    public void setVersionInfoFragment(Fragment versioninfoFragment) {
+        this.versioninfoFragment = versioninfoFragment;
+    }
+
     public Fragment getNowFragment() {
         return nowFragment;
     }
@@ -247,10 +257,21 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         return myFragment;
     }
 
+    public Fragment getAboutFragment() {
+        return aboutFragment;
+    }
+
+    public Fragment getHelpFragment() {
+        return helpFragment;
+    }
+
+    public Fragment getFeedbackFragment() {
+        return feedbackFragment;
+    }
+
     public void setDataFragment(Fragment dataFragment) {
         this.dataFragment = dataFragment;
     }
-
 
     public BottomNavigationView getNavigationView() {
         return navigationView;

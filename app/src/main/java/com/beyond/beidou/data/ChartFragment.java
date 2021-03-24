@@ -1037,7 +1037,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         String selectedTime = spTime.getSelectedItem().toString();
         switch (spChart.getSelectedItem().toString()) {
             case "XYH":
-                cleanValues();
+//                cleanValues();
                 drawXYHChart(selectedTime);
                 break;
             case "位移图":
@@ -1045,7 +1045,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 drawDeltaChart(selectedTime);
                 break;
             case "心型图":
-                cleanValues();
+//                cleanValues();
                 drawHeartChart(selectedTime);
                 break;
         }
