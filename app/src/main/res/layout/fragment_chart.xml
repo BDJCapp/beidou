@@ -55,47 +55,48 @@
         android:layout_below="@+id/toolbar"
         />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/line_title"
         android:layout_marginTop="5dp"
         android:id="@+id/layout_spinner"
+        android:orientation="horizontal"
         >
         <Spinner
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:id="@+id/sp_device"
             android:entries="@array/ProjectName"
             android:spinnerMode="dropdown"
             android:overlapAnchor="false"
             android:dropDownWidth="100dp"
-            android:layout_alignParentLeft="true"
             android:theme="@style/spinner_style"
             />
         <Spinner
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:id="@+id/sp_chart_type"
             android:entries="@array/ProjectName"
             android:spinnerMode="dropdown"
             android:overlapAnchor="false"
             android:dropDownWidth="90dp"
-            android:layout_centerInParent="true"
             android:theme="@style/spinner_style"
             />
         <Spinner
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:id="@+id/sp_chart_time"
             android:entries="@array/ProjectName"
             android:spinnerMode="dropdown"
             android:overlapAnchor="false"
             android:dropDownWidth="120dp"
             android:theme="@style/spinner_style"
-            android:layout_alignParentRight="true"
             />
-    </RelativeLayout>
+    </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -113,7 +114,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="600dp"
-        android:layout_below="@+id/layout_spinner"
         android:padding="5dp"
         android:orientation="vertical"
         android:id="@+id/layout_chartX"
@@ -172,7 +172,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="500dp"
+        android:layout_height="600dp"
         android:layout_below="@+id/layout_chartX"
         android:padding="5dp"
         android:orientation="vertical"
@@ -234,7 +234,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="500dp"
+        android:layout_height="600dp"
         android:layout_below="@+id/layout_chartY"
         android:padding="5dp"
         android:orientation="vertical"

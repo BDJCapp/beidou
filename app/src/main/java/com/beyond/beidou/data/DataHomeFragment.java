@@ -24,14 +24,12 @@ import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.ProjectResponse;
+import com.beyond.beidou.util.DateUtil;
 import com.beyond.beidou.util.LogUtil;
 import com.google.gson.Gson;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -56,7 +54,6 @@ public class DataHomeFragment extends BaseFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_data, container, false);
         initView(view);
-        test();
         return view;
     }
 
@@ -69,7 +66,6 @@ public class DataHomeFragment extends BaseFragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        LogUtil.e("hiden change","sdasdasd");
         setViews();
     }
 
@@ -221,32 +217,34 @@ public class DataHomeFragment extends BaseFragment {
         ft.commit();
     }
 
-    public void test()
-    {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = new Date();
-        String startTime = simpleDateFormat.format(date) + " 00:00:00";
-        String endTime = simpleDateFormat.format(date) + " 23:59:59";
-        LogUtil.e("startTime",startTime);
-        LogUtil.e("endTime",endTime);
-        String startTimeStamp = null;
-        String endTimeStamp = null;
-        String timeStampGap = null;
-        String testTime = null;
-        try {
-             //转换为秒级时间戳
-             testTime = String.valueOf(dateFormat.parse("2021-03-09 00:03:55").getTime()/1000);
-             startTimeStamp = String.valueOf(dateFormat.parse(startTime).getTime()/1000);
-             endTimeStamp = String.valueOf(dateFormat.parse(endTime).getTime()/1000);
-             //timeStampGap = String.valueOf(dateFormat.parse("2021-03-09 00:03:55").getTime()/1000 - dateFormat.parse("2021-03-09 00:00:00").getTime()/1000);
-             timeStampGap = String.valueOf(dateFormat.parse(endTime).getTime()/1000 - dateFormat.parse(startTime).getTime()/1000);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        LogUtil.e("测试时间戳", testTime);
-        LogUtil.e("一天开始时间+时间戳",simpleDateFormat.format(date) + " 00:00:00" + "  " + startTimeStamp);
-        LogUtil.e("一天结束时间+时间戳",simpleDateFormat.format(date) + " 23:59:59" + "  " + endTimeStamp);
-        LogUtil.e("时间差",String.valueOf(Float.parseFloat(timeStampGap)));
+    public void test() {
+
+        SimpleDateFormat secondFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        LogUtil.e("1小时开始时间",secondFormat.format(DateUtil.getHourBegin(1)));
+        LogUtil.e("1小时结束时间",secondFormat.format(DateUtil.getHourEnd()));
+        LogUtil.e("6小时开始时间",secondFormat.format(DateUtil.getHourBegin(6)));
+        LogUtil.e("6小时结束时间",secondFormat.format(DateUtil.getHourEnd()));
+        LogUtil.e("12小时开始时间",secondFormat.format(DateUtil.getHourBegin(12)));
+        LogUtil.e("12小时结束时间",secondFormat.format(DateUtil.getHourEnd()));
+        LogUtil.e("本天开始时间",secondFormat.format(DateUtil.getDayBegin()));
+        LogUtil.e("本天结束时间",secondFormat.format(DateUtil.getDayEnd()));
+        LogUtil.e("本周开始时间",secondFormat.format(DateUtil.getBeginDayOfWeek()));
+        LogUtil.e("本周结束时间",secondFormat.format(DateUtil.getEndDayOfWeek()));
+        LogUtil.e("本月开始时间",secondFormat.format(DateUtil.getBeginDayOfMonth()));
+        LogUtil.e("本月结束时间",secondFormat.format(DateUtil.getEndDayOfMonth()));
+        LogUtil.e("本年开始时间",secondFormat.format(DateUtil.getBeginDayOfYear()));
+        LogUtil.e("本年结束时间",secondFormat.format(DateUtil.getEndDayOfYear()));
+//        List<String> timeLabel = DateUtil.getHourXLabel(1);
+//        for (String s : timeLabel) {
+//            LogUtil.e("111", s);
+//        }
+//        timeLabel = DateUtil.getHourXLabel(6);
+//        for (String s : timeLabel) {
+//            LogUtil.e("111", s);
+//        }
+//        timeLabel = DateUtil.getHourXLabel(12);
+//        for (String s : timeLabel) {
+//            LogUtil.e("111", s);
+//        }
     }
 }

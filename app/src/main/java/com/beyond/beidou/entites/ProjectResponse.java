@@ -8,11 +8,12 @@ import java.util.List;
  */
 public class ProjectResponse {
 
+
     /**
      * ResponseCode : 200
      * ResponseMsg : 操作成功
-     * PageInfo : {"PageFlag":"ProjectStartTime","PageNumber":1,"PageSize":10,"TotalNumber":1}
-     * ProjectList : [{"ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","ProjectPrincipalUUID":"cc775619-7beb-61c3-e192-7018f776f554","ProjectName":"系统测试工程","ProjectAddress":"BDJC","ProjectPrincipalName":"管理员","ProjectPrincipalMobile":"13800138000","ProjectStartTime":"2020-01-01 00:00:00","ProjectEndTime":"2030-01-01 00:00:00","ProjectStatus":"1","ProjectCreateTime":"2020-01-01 00:00:00","ProjectModifyTime":"2020-01-01 00:00:00","StationList":[{"StationUUID":"dcbe771b-b3fa-efad-ff4b-fabc0a1841d6","DeviceUUID":"dcbe771b-b3fa-efad-ff4b-fabc0a1841d6","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点1","StationType":"1","StationAddress":"北京","StationLongitude":"116.480998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-02 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInfo","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"离线(监测点超过900秒无上报)","StationStartTime":"2020-02-23 02:00:00","StationEndTime":"2030-01-01 00:00:00","StationCreateTime":"2020-02-23 02:00:00","StationModifyTime":"2021-02-24 11:22:01","StationLastTime":"2021-02-23 15:53:52","ProjectName":"系统测试工程","StationConditionList":[]},{"StationUUID":"8eaec45b-559c-78ec-f7de-bc8c88e5efcd","DeviceUUID":"8eaec45b-559c-78ec-f7de-bc8c88e5efcd","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点2","StationType":"2","StationAddress":"北京","StationLongitude":"116.480998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-03 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInfo","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"离线(监测点超过900秒无上报)","StationStartTime":"2020-02-23 03:00:00","StationEndTime":"2030-01-01 00:00:00","StationCreateTime":"2020-02-23 03:00:00","StationModifyTime":"2021-02-23 15:53:52","StationLastTime":"2021-02-23 15:53:52","ProjectName":"系统测试工程","StationConditionList":[]},{"StationUUID":"6159529a-6bc3-4c73-84d1-e59f6f60ece6","DeviceUUID":"6159529a-6bc3-4c73-84d1-e59f6f60ece6","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点名称","StationType":"2","StationAddress":"北京","StationLongitude":"116.480998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-01 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInfo","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"离线(监测点超过900秒无上报)","StationStartTime":"2020-02-23 01:00:00","StationEndTime":"2030-01-01 00:00:00","StationCreateTime":"2020-02-23 01:00:00","StationModifyTime":"2021-02-24 15:01:00","StationLastTime":"2021-02-23 18:02:33","ProjectName":"系统测试工程","StationConditionList":[]}],"ProjectStationStatus":{"Total":3,"Online":0,"Error":0,"Warning":0,"Offline":3}}]
+     * PageInfo : {"PageFlag":"ProjectStartTime","PageNumber":1,"PageSize":"","TotalNumber":3}
+     * ProjectList : [{"ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","ProjectPrincipalUUID":"cc775619-7beb-61c3-e192-7018f776f554","ProjectName":"系统测试工程","ProjectAddress":"BDJC","ProjectPrincipalName":"管理员","ProjectPrincipalMobile":"13800138000","ProjectStartTime":"2021-03-03 00:00:00","ProjectEndTime":"2030-01-01 23:59:59","ProjectStatus":"1","ProjectCreateTime":"2020-01-01 00:00:00","ProjectModifyTime":"2021-03-11 15:22:37","StationList":[{"StationUUID":"2020a202-41dc-4075-bc43-8f643f74f91f","DeviceUUID":"2020a202-41dc-4075-bc43-8f643f74f91f","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点1","StationType":"1","StationAddress":"北京","StationLongitude":"116.490998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-02 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInf","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"监测点超过900秒无上报","StationStartTime":"2020-02-23 00:00:00","StationEndTime":"2030-01-01 23:59:59","StationCreateTime":"2020-02-23 02:00:00","StationModifyTime":"2021-03-24 10:03:39","StationLastTime":"2021-02-23 15:53:52","ProjectName":"系统测试工程","StationConditionList":[]},{"StationUUID":"8eaec45b-559c-78ec-f7de-bc8c88e5efcd","DeviceUUID":"8eaec45b-559c-78ec-f7de-bc8c88e5efcd","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点2","StationType":"1","StationAddress":"北京","StationLongitude":"116.490998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-03 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInfo","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"监测点超过900秒无上报","StationStartTime":"2020-02-23 03:00:00","StationEndTime":"2030-01-01 00:00:00","StationCreateTime":"2020-02-23 03:00:00","StationModifyTime":"2021-03-24 10:03:39","StationLastTime":"2021-02-23 15:53:52","ProjectName":"系统测试工程","StationConditionList":[]},{"StationUUID":"6159529a-6bc3-4c73-84d1-e59f6f60ece6","DeviceUUID":"6159529a-6bc3-4c73-84d1-e59f6f60ece6","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点名称","StationType":"2","StationAddress":"北京","StationLongitude":"116.480998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-01 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInfo","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"监测点超过900秒无上报","StationStartTime":"2020-02-23 01:00:00","StationEndTime":"2030-01-01 00:00:00","StationCreateTime":"2020-02-23 01:00:00","StationModifyTime":"2021-03-24 10:02:53","StationLastTime":"2021-02-23 18:02:33","ProjectName":"系统测试工程","StationConditionList":[]}],"ProjectStationStatus":{"Total":3,"Online":0,"Error":0,"Warning":0,"Offline":3}},{"ProjectUUID":"bd155692-f07c-09bc-ee75-86559c072dfb","ProjectPrincipalUUID":"cc775619-7beb-61c3-e192-7018f776f554","ProjectName":"测试工程项目1","ProjectAddress":"BDJC","ProjectPrincipalName":"管理员","ProjectPrincipalMobile":"13800138000","ProjectStartTime":"2021-03-05 14:37:12","ProjectEndTime":"2022-03-05 14:37:12","ProjectStatus":"1","ProjectCreateTime":"2021-03-05 14:37:12","ProjectModifyTime":"2021-03-05 14:37:12","StationList":[{"StationUUID":"443a6151-dbaf-08d0-5a83-b4c3781a85af","DeviceUUID":"443a6151-dbaf-08d0-5a83-b4c3781a85af","ProjectUUID":"bd155692-f07c-09bc-ee75-86559c072dfb","StationName":"监测点4","StationType":"1","StationAddress":"北京","StationLongitude":"","StationLatitude":"","StationAltitude":"","StationModel":"设备型号1","StationSerialNumber":"设备序列号","StationBatchNumber":"","StationProductDate":null,"StationManufacturer":"","StationMAC":"","StationIMSI":"","StationICCID":"","StationGNSSInfo":"","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"","StationStartTime":"2021-03-08 00:00:00","StationEndTime":"2021-03-08 23:59:59","StationCreateTime":null,"StationModifyTime":"2021-03-23 13:55:15","StationLastTime":null,"ProjectName":"测试工程项目1","StationConditionList":[]}],"ProjectStationStatus":{"Total":1,"Online":0,"Error":0,"Warning":0,"Offline":1}},{"ProjectUUID":"8db4b9bb-e70a-29a7-2fa2-1fc78d5028ea","ProjectPrincipalUUID":"cc775619-7beb-61c3-e192-7018f776f554","ProjectName":"测试工程项目2","ProjectAddress":"BDJC","ProjectPrincipalName":"管理员","ProjectPrincipalMobile":"13800138000","ProjectStartTime":"2021-03-05 14:57:57","ProjectEndTime":"2022-03-05 14:57:57","ProjectStatus":"1","ProjectCreateTime":"2021-03-05 14:57:57","ProjectModifyTime":"2021-03-05 14:57:57","StationList":[{"StationUUID":"bfefe93a-fef9-c0fc-6944-d7eb0b95beb7","DeviceUUID":"bfefe93a-fef9-c0fc-6944-d7eb0b95beb7","ProjectUUID":"8db4b9bb-e70a-29a7-2fa2-1fc78d5028ea","StationName":"监测点11","StationType":"2","StationAddress":"北京北京","StationLongitude":"","StationLatitude":"","StationAltitude":"","StationModel":"StationModel","StationSerialNumber":"设备序列号","StationBatchNumber":"","StationProductDate":null,"StationManufacturer":"StationManufacturer","StationMAC":"StationMAC","StationIMSI":"StationIMSI","StationICCID":"StationICCID","StationGNSSInfo":"StationGNSSInfo","StationPrincipleName":"管理员","StationPrincipleMobile":"13800138001","StationStatus":"20","StationStatusDetail":"监测点超过900秒无上报","StationStartTime":"2021-03-08 10:21:20","StationEndTime":"2023-03-08 10:21:20","StationCreateTime":null,"StationModifyTime":"2021-03-24 14:23:50","StationLastTime":null,"ProjectName":"测试工程项目2","StationConditionList":[]}],"ProjectStationStatus":{"Total":1,"Online":0,"Error":0,"Warning":0,"Offline":1}}]
      */
 
     private String ResponseCode;
@@ -56,13 +57,13 @@ public class ProjectResponse {
         /**
          * PageFlag : ProjectStartTime
          * PageNumber : 1
-         * PageSize : 10
-         * TotalNumber : 1
+         * PageSize :
+         * TotalNumber : 3
          */
 
         private String PageFlag;
         private int PageNumber;
-        private int PageSize;
+        private String PageSize;
         private int TotalNumber;
 
         public String getPageFlag() {
@@ -81,11 +82,11 @@ public class ProjectResponse {
             this.PageNumber = PageNumber;
         }
 
-        public int getPageSize() {
+        public String getPageSize() {
             return PageSize;
         }
 
-        public void setPageSize(int PageSize) {
+        public void setPageSize(String PageSize) {
             this.PageSize = PageSize;
         }
 
@@ -106,12 +107,12 @@ public class ProjectResponse {
          * ProjectAddress : BDJC
          * ProjectPrincipalName : 管理员
          * ProjectPrincipalMobile : 13800138000
-         * ProjectStartTime : 2020-01-01 00:00:00
-         * ProjectEndTime : 2030-01-01 00:00:00
+         * ProjectStartTime : 2021-03-03 00:00:00
+         * ProjectEndTime : 2030-01-01 23:59:59
          * ProjectStatus : 1
          * ProjectCreateTime : 2020-01-01 00:00:00
-         * ProjectModifyTime : 2020-01-01 00:00:00
-         * StationList : [{"StationUUID":"dcbe771b-b3fa-efad-ff4b-fabc0a1841d6","DeviceUUID":"dcbe771b-b3fa-efad-ff4b-fabc0a1841d6","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点1","StationType":"1","StationAddress":"北京","StationLongitude":"116.480998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-02 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInfo","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"离线(监测点超过900秒无上报)","StationStartTime":"2020-02-23 02:00:00","StationEndTime":"2030-01-01 00:00:00","StationCreateTime":"2020-02-23 02:00:00","StationModifyTime":"2021-02-24 11:22:01","StationLastTime":"2021-02-23 15:53:52","ProjectName":"系统测试工程","StationConditionList":[]},{"StationUUID":"8eaec45b-559c-78ec-f7de-bc8c88e5efcd","DeviceUUID":"8eaec45b-559c-78ec-f7de-bc8c88e5efcd","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点2","StationType":"2","StationAddress":"北京","StationLongitude":"116.480998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-03 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInfo","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"离线(监测点超过900秒无上报)","StationStartTime":"2020-02-23 03:00:00","StationEndTime":"2030-01-01 00:00:00","StationCreateTime":"2020-02-23 03:00:00","StationModifyTime":"2021-02-23 15:53:52","StationLastTime":"2021-02-23 15:53:52","ProjectName":"系统测试工程","StationConditionList":[]},{"StationUUID":"6159529a-6bc3-4c73-84d1-e59f6f60ece6","DeviceUUID":"6159529a-6bc3-4c73-84d1-e59f6f60ece6","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点名称","StationType":"2","StationAddress":"北京","StationLongitude":"116.480998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-01 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInfo","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"离线(监测点超过900秒无上报)","StationStartTime":"2020-02-23 01:00:00","StationEndTime":"2030-01-01 00:00:00","StationCreateTime":"2020-02-23 01:00:00","StationModifyTime":"2021-02-24 15:01:00","StationLastTime":"2021-02-23 18:02:33","ProjectName":"系统测试工程","StationConditionList":[]}]
+         * ProjectModifyTime : 2021-03-11 15:22:37
+         * StationList : [{"StationUUID":"2020a202-41dc-4075-bc43-8f643f74f91f","DeviceUUID":"2020a202-41dc-4075-bc43-8f643f74f91f","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点1","StationType":"1","StationAddress":"北京","StationLongitude":"116.490998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-02 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInf","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"监测点超过900秒无上报","StationStartTime":"2020-02-23 00:00:00","StationEndTime":"2030-01-01 23:59:59","StationCreateTime":"2020-02-23 02:00:00","StationModifyTime":"2021-03-24 10:03:39","StationLastTime":"2021-02-23 15:53:52","ProjectName":"系统测试工程","StationConditionList":[]},{"StationUUID":"8eaec45b-559c-78ec-f7de-bc8c88e5efcd","DeviceUUID":"8eaec45b-559c-78ec-f7de-bc8c88e5efcd","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点2","StationType":"1","StationAddress":"北京","StationLongitude":"116.490998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-03 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInfo","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"监测点超过900秒无上报","StationStartTime":"2020-02-23 03:00:00","StationEndTime":"2030-01-01 00:00:00","StationCreateTime":"2020-02-23 03:00:00","StationModifyTime":"2021-03-24 10:03:39","StationLastTime":"2021-02-23 15:53:52","ProjectName":"系统测试工程","StationConditionList":[]},{"StationUUID":"6159529a-6bc3-4c73-84d1-e59f6f60ece6","DeviceUUID":"6159529a-6bc3-4c73-84d1-e59f6f60ece6","ProjectUUID":"1febf7af-2159-6218-16b2-91d14c8dd186","StationName":"监测点名称","StationType":"2","StationAddress":"北京","StationLongitude":"116.480998473333","StationLatitude":"39.872120703333","StationAltitude":"57.613500000000","StationModel":"设备型号","StationSerialNumber":"设备序列号","StationBatchNumber":"生产批号","StationProductDate":"2020-01-01 00:00:00","StationManufacturer":"BDJC","StationMAC":"00:00:00:00:00","StationIMSI":"IMSI","StationICCID":"ICCID","StationGNSSInfo":"GNSSInfo","StationPrincipleName":"","StationPrincipleMobile":"","StationStatus":"20","StationStatusDetail":"监测点超过900秒无上报","StationStartTime":"2020-02-23 01:00:00","StationEndTime":"2030-01-01 00:00:00","StationCreateTime":"2020-02-23 01:00:00","StationModifyTime":"2021-03-24 10:02:53","StationLastTime":"2021-02-23 18:02:33","ProjectName":"系统测试工程","StationConditionList":[]}]
          * ProjectStationStatus : {"Total":3,"Online":0,"Error":0,"Warning":0,"Offline":3}
          */
 
@@ -291,13 +292,13 @@ public class ProjectResponse {
 
         public static class StationListBean {
             /**
-             * StationUUID : dcbe771b-b3fa-efad-ff4b-fabc0a1841d6
-             * DeviceUUID : dcbe771b-b3fa-efad-ff4b-fabc0a1841d6
+             * StationUUID : 2020a202-41dc-4075-bc43-8f643f74f91f
+             * DeviceUUID : 2020a202-41dc-4075-bc43-8f643f74f91f
              * ProjectUUID : 1febf7af-2159-6218-16b2-91d14c8dd186
              * StationName : 监测点1
              * StationType : 1
              * StationAddress : 北京
-             * StationLongitude : 116.480998473333
+             * StationLongitude : 116.490998473333
              * StationLatitude : 39.872120703333
              * StationAltitude : 57.613500000000
              * StationModel : 设备型号
@@ -308,15 +309,15 @@ public class ProjectResponse {
              * StationMAC : 00:00:00:00:00
              * StationIMSI : IMSI
              * StationICCID : ICCID
-             * StationGNSSInfo : GNSSInfo
+             * StationGNSSInfo : GNSSInf
              * StationPrincipleName :
              * StationPrincipleMobile :
              * StationStatus : 20
-             * StationStatusDetail : 离线(监测点超过900秒无上报)
-             * StationStartTime : 2020-02-23 02:00:00
-             * StationEndTime : 2030-01-01 00:00:00
+             * StationStatusDetail : 监测点超过900秒无上报
+             * StationStartTime : 2020-02-23 00:00:00
+             * StationEndTime : 2030-01-01 23:59:59
              * StationCreateTime : 2020-02-23 02:00:00
-             * StationModifyTime : 2021-02-24 11:22:01
+             * StationModifyTime : 2021-03-24 10:03:39
              * StationLastTime : 2021-02-23 15:53:52
              * ProjectName : 系统测试工程
              * StationConditionList : []

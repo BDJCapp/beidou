@@ -3,8 +3,12 @@ package com.beyond.beidou.data;
 import android.graphics.Color;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -17,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
@@ -25,9 +30,13 @@ import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.GNSSFilterInfoResponse;
+import com.beyond.beidou.util.DateUtil;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.MyPointValue;
 import com.google.gson.Gson;
+import com.zyao89.view.zloading.ZLoadingBuilder;
+import com.zyao89.view.zloading.ZLoadingDialog;
+import com.zyao89.view.zloading.Z_TYPE;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -36,9 +45,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import lecho.lib.hellocharts.gesture.ContainerScrollType;
 import lecho.lib.hellocharts.gesture.ZoomType;
+import lecho.lib.hellocharts.listener.LineChartOnValueSelectListener;
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Line;
@@ -52,12 +63,6 @@ import okhttp3.FormBody;
 public class ChartFragment extends BaseFragment implements View.OnClickListener {
     private Spinner spDevice, spChart, spTime;
     private LineChartView chartX, chartY, chartH;
-    //    private List<PointValue> xValues = new ArrayList<>();   //X图表数据
-//    private List<PointValue> yValues = new ArrayList<>();   //Y图表数据
-//    private List<PointValue> hValues = new ArrayList<>();   //H图表数据
-//    private List<PointValue> deltaValues = new ArrayList<>(); //水平位移图表数据
-//    private List<PointValue> deltaHValues = new ArrayList<>(); //垂直位移图表数据
-//    private List<MyPointValue> preValues = new ArrayList<>();
     private TextView xChartName, yChartName, hChartName;
     private TextView xChartCoo, yChartCoo, hChartCoo;
     private TextView xChartTime, yChartTime, hChartTime;
@@ -82,6 +87,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private boolean isFirstTimeSelectTime = true;
     private boolean isFirstTimeSelectChart = true;
 
+
     public static ChartFragment newInstance(String projectName, ArrayList<String> stationNameList, int position)
     {
         ChartFragment chartFragment = new ChartFragment();
@@ -104,17 +110,15 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         View view = inflater.inflate(R.layout.fragment_chart, container, false);
         initView(view);
         getData("GNSSFilterInfo","6159529a-6bc3-4c73-84d1-e59f6f60ece6","2021-03-09 00:00:00","2021-03-09 23:59:59");
-        drawXYHChart("本日");  //默认展示XYH一小时的图表
+        drawXYHChart("本日");
         return view;
     }
 
     public void initView(View view) {
-        LogUtil.e("initView开始执行","////////");
         mTitle = view.findViewById(R.id.tv_title);
         spChart = view.findViewById(R.id.sp_chart_type);
         spDevice = view.findViewById(R.id.sp_device);
         spTime = view.findViewById(R.id.sp_chart_time);
-
         if (getArguments() != null)
         {
             mTitle.setText(getArguments().getString("projectName"));
@@ -131,9 +135,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         ArrayAdapter<String> timeAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, times);
         timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
         spTime.setAdapter(timeAdapter);
+
         spTime.setSelection(3);
+//        spTime.setSelection(0);
+
         spChart.setAdapter(chartAdapter);
-//        spChart.setSelection(0, true);
 
         chartX = view.findViewById(R.id.chart_X);
         chartY = view.findViewById(R.id.chart_Y);
@@ -166,7 +172,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     isFirstTimeSelectChart = false;
                     return;
                 }
-                Log.e("spChart", "CNM" );
                 switchChart();
             }
 
@@ -182,7 +187,44 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     isFirstTimeSelectTime = false;
                     return;
                 }
-                Log.e("spTime", "CNM");
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                String graphicType = "GNSSFilterInfo";
+                String stationUUID = "6159529a-6bc3-4c73-84d1-e59f6f60ece6";
+                String startTime = null;
+                String endTime = null;
+                switch (position) {
+                    case 0:
+                        //暂时只有3.9号的数据，之后直接把"2021-03-09 "去掉即可。
+                        startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(1));
+                        endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+                        break;
+                    case 1:
+                        startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(6));
+                        endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+                        break;
+                    case 2:
+                        //12点之后调用
+                        startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(12));
+                        endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+                        //12点之前调用，当前只有一天的数据，跨天查询不行
+//                startTime = "2021-03-09 " + "04:00:00";
+//                endTime = "2021-03-09 " + "16:00:00";
+                        break;
+                    case 3:
+                        startTime = "2021-03-09 " + sdf.format(DateUtil.getDayBegin());
+                        endTime = "2021-03-09 " + sdf.format(DateUtil.getDayEnd());
+                        break;
+                    case 4:
+
+                        break;
+                    case 5:
+
+                        break;
+                    case 6:
+
+                        break;
+                }
+                getData(graphicType, stationUUID, startTime, endTime);
                 switchChart();
             }
 
@@ -195,7 +237,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         chartY.setOnTouchListener(touchListener);
         chartH.setOnTouchListener(touchListener);
         //数据选择监听
-        /*chartX.setOnValueTouchListener(new LineChartOnValueSelectListener() {
+        chartX.setOnValueTouchListener(new LineChartOnValueSelectListener() {
             @Override
             public void onValueSelected(int i, int i1, PointValue pointValue) {
                 Toast.makeText(getActivity(),pointValue.getX() + " , " + pointValue.getY(),Toast.LENGTH_SHORT).show();
@@ -229,7 +271,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             public void onValueDeselected() {
 
             }
-        });*/
+        });
     }
 
     /**
@@ -254,7 +296,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     yEnd = event.getY();
                     endTime = System.currentTimeMillis();
                     speed = (yEnd - yStart) / (endTime - startTime);
-                    //LogUtil.e("speed",speed + "");
 /*                    if (Math.abs(yEnd - yStart) > 300f) {
                         svCharts.requestDisallowInterceptTouchEvent(false);
                     }*/
@@ -271,30 +312,14 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      * 绘制XYH图表
      */
     public void drawXYHChart(String selectedTime) {
-        String time = null;     //模拟选择时间
-        switch (selectedTime) {
-            case "最近1小时":
-                time = "2021-02-02 10:00:00~2021-02-02 11:00:00";
-                break;
-            case "最近6小时":
-                time = "2021-02-02 10:00:00~2021-02-02 16:00:00";
-                break;
-            case "最近12小时":
-                time = "2021-02-02 10:00:00~2021-02-02 22:00:00";
-                break;
-            case "本日":
-                time = "2021-03-09 00:00:00~2021-03-09 24:00:00";
-                break;
-            case "本周":
-                time = "2021-02-01 00:00:00~2021-02-07 24:00:00";
-                break;
-            case "本月":
-                time = "2021-02-01 00:00:00~2021-02-08 24:00:00";
-                break;
-            case "本年":
-                time = "2020-01-01 00:00:00~2020-12-31 24:00:00";
-                break;
+        if ( "本周".equals(selectedTime)|| "本月".equals(selectedTime) || "本年".equals(selectedTime))
+        {
+            layoutChartX.setVisibility(View.GONE);
+            layoutChartY.setVisibility(View.GONE);
+            layoutChartH.setVisibility(View.GONE);
+            return;
         }
+        String time = DateUtil.getTimeInterval(selectedTime);
         xChartName.setText("X");
         xChartTime.setText(time);
         xChartCoo.setText("WGS84坐标系|");
@@ -307,42 +332,24 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         hChartTime.setText(time);
         hChartCoo.setText("WGS84坐标系|");
 
+        List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
+        List<AxisValue> yLabel = setAxisYLabel(minResponse.get(1).toString(), xConvertData);
+        convertLines(xConvertData,interval,maxInterval);
+        setChart(chartX,xConvertData,xAxisValues,yLabel);
+
+        xAxisValues = setXAxisValues(selectedTime);
+        yLabel = setAxisYLabel(minResponse.get(2).toString(), yConvertData);
+        convertLines(yConvertData,interval,maxInterval);
+        setChart(chartY,yConvertData,xAxisValues,yLabel);
+
+        xAxisValues = setXAxisValues(selectedTime);
+        yLabel = setAxisYLabel(minResponse.get(3).toString(), hConvertData);
+        convertLines(hConvertData,interval,maxInterval);
+        setChart(chartH,hConvertData,xAxisValues,yLabel);
+
         layoutChartX.setVisibility(View.VISIBLE);
         layoutChartY.setVisibility(View.VISIBLE);
         layoutChartH.setVisibility(View.VISIBLE);
-        if ("本日".equals(selectedTime))
-        {
-            List<AxisValue> xAxisValues = setXAxisValues("本日", xConvertData);
-            Log.e("drawXYHChart", "xConvertData");
-            List<AxisValue> yLabel = setAxisYLabel(minResponse.get(1).toString(), xConvertData);
-            convertLines(xConvertData,interval,maxInterval);
-            setChart(chartX,xConvertData,xAxisValues,yLabel);
-
-            xAxisValues = setXAxisValues("本日", yConvertData);
-            Log.e("drawXYHChart", "yConvertData");
-            yLabel = setAxisYLabel(minResponse.get(2).toString(), yConvertData);
-            convertLines(yConvertData,interval,maxInterval);
-            setChart(chartY,yConvertData,xAxisValues,yLabel);
-
-            xAxisValues = setXAxisValues("本日", hConvertData);
-            Log.e("drawXYHChart", "hConvertData");
-            yLabel = setAxisYLabel(minResponse.get(3).toString(), hConvertData);
-            convertLines(hConvertData,interval,maxInterval);
-            setChart(chartH,hConvertData,xAxisValues,yLabel);
-        }
-        else {
-//            layoutChartX.setVisibility(View.INVISIBLE);
-//            layoutChartY.setVisibility(View.INVISIBLE);
-//            layoutChartH.setVisibility(View.INVISIBLE);
-//            chartX.setVisibility(View.INVISIBLE);
-//            initXYHChartValue();
-//            List<AxisValue> xAxisValues = setXAxisValues(selectedTime, xValues);
-//            List<AxisValue> yAxisValues = setAxisYLabel("3550716.439", xValues);
-//            setChart(chartX, xValues, xAxisValues, yAxisValues);
-//            setChart(chartY, yValues, xAxisValues, yAxisValues);
-//            setChart(chartH, hValues, xAxisValues, yAxisValues);
-
-        }
     }
 
 
@@ -351,101 +358,38 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      */
     public void drawDeltaChart(String selectedTime) {
 //        Log.e("drawDeltaChart", "deltaD size: " + deltaDConvertData.size() + " deltaH size: " + deltaHConvertData.size());
-        String time = null;     //模拟时间，时间区间可由后端传
-        switch (selectedTime) {
-            case "最近1小时":
-                time = "2021-02-02 10:00:00~2021-02-02 11:00:00";
-                break;
-            case "最近6小时":
-                time = "2021-02-02 10:00:00~2021-02-02 16:00:00";
-                break;
+        String time = DateUtil.getTimeInterval(selectedTime);
+        xChartName.setText("水平位移图");
+        xChartTime.setText(time);
+        xChartCoo.setText("WGS84坐标系|");
 
-            case "最近12小时":
-                time = "2021-02-02 10:00:00~2021-02-02 22:00:00";
-                break;
-            case "本日":
-                time = "2021-02-02 00:00:00~2021-02-02 24:00:00";
-                break;
-            case "本周":
-                time = "2021-02-01 00:00:00~2021-02-07 24:00:00";
-                break;
-            case "本月":
-                time = "2021-02-01 00:00:00~2021-02-28 24:00:00";
-                break;
-            case "本年":
-                time = "2020-01-01 00:00:00~2020-12-31 24:00:00";
-                break;
-        }
-        if ("本日".equals(selectedTime))
+        yChartName.setText("垂直位移图");
+        yChartTime.setText(time);
+        yChartCoo.setText("WGS84坐标系|");
+
+        List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
+        List<AxisValue> yLabel = setAxisYLabel(minResponse.get(4).toString(), deltaDConvertData);
+        convertLines(deltaDConvertData,interval,maxInterval);
+        setChart(chartX,deltaDConvertData,xAxisValues,yLabel);
+
+        xAxisValues = setXAxisValues(selectedTime);
+        yLabel = setAxisYLabel(minResponse.get(5).toString(), deltaHConvertData);
+        convertLines(deltaHConvertData,interval,maxInterval);
+        setChart(chartY,deltaHConvertData,xAxisValues,yLabel);
+
+        layoutChartX.setVisibility(View.VISIBLE);
+        layoutChartY.setVisibility(View.VISIBLE);
+        layoutChartH.setVisibility(View.GONE);
+       if ( "本周".equals(selectedTime)|| "本月".equals(selectedTime) || "本年".equals(selectedTime))
         {
-            xChartName.setText("水平位移图");
-            xChartTime.setText(time);
-            xChartCoo.setText("WGS84坐标系|");
-
-            yChartName.setText("垂直位移图");
-            yChartTime.setText(time);
-            yChartCoo.setText("WGS84坐标系|");
-
-            layoutChartX.setVisibility(View.VISIBLE);
-            layoutChartY.setVisibility(View.VISIBLE);
+            layoutChartX.setVisibility(View.GONE);
+            layoutChartY.setVisibility(View.GONE);
             layoutChartH.setVisibility(View.GONE);
-
-            List<AxisValue> xAxisValues = setXAxisValues("本日", deltaDConvertData);
-            List<AxisValue> yLabel = setAxisYLabel(minResponse.get(4).toString(), deltaDConvertData);
-            convertLines(deltaDConvertData,interval,maxInterval);
-            setChart(chartX,deltaDConvertData,xAxisValues,yLabel);
-
-            xAxisValues = setXAxisValues("本日", deltaHConvertData);
-            yLabel = setAxisYLabel(minResponse.get(5).toString(), deltaHConvertData);
-            convertLines(deltaHConvertData,interval,maxInterval);
-            setChart(chartY,deltaHConvertData,xAxisValues,yLabel);
-        }
-        else {
-            /*initDeltaChartValue();
-            xChartName.setText("水平位移图");
-            xChartTime.setText(time);
-            xChartCoo.setText("WGS84坐标系|");
-
-            yChartName.setText("垂直位移图");
-            yChartTime.setText(time);
-            yChartCoo.setText("WGS84坐标系|");*/
-
-//            layoutChartX.setVisibility(View.GONE);
-//            layoutChartY.setVisibility(View.GONE);
-//            layoutChartH.setVisibility(View.GONE);
-
-/*            List<AxisValue> xAxisValues = setXAxisValues(selectedTime, deltaValues);
-            List<AxisValue> yAxisValues = setAxisYLabel("",deltaValues);
-            setChart(chartX, deltaValues, xAxisValues, yAxisValues);
-            setChart(chartY, deltaValues, xAxisValues, yAxisValues);*/
         }
     }
 
     public void drawHeartChart(String selectedTime) {
-        String time = null;     //模拟选择时间
-        switch (selectedTime) {
-            case "最近1小时":
-                time = "2021-02-02 10:00:00~2021-02-02 11:00:00";
-                break;
-            case "最近6小时":
-                time = "2021-02-02 10:00:00~2021-02-02 16:00:00";
-                break;
-            case "最近12小时":
-                time = "2021-02-02 10:00:00~2021-02-02 22:00:00";
-                break;
-            case "本日":
-                time = "2021-03-09 00:00:00~2021-03-09 24:00:00";
-                break;
-            case "本周":
-                time = "2021-02-01 00:00:00~2021-02-07 24:00:00";
-                break;
-            case "本月":
-                time = "2021-02-01 00:00:00~2021-02-08 24:00:00";
-                break;
-            case "本年":
-                time = "2020-01-01 00:00:00~2020-12-31 24:00:00";
-                break;
-        }
+        String time = DateUtil.getTimeInterval(selectedTime);
         xChartName.setText("心型图");
         xChartTime.setText(time);
         xChartCoo.setText("WGS84坐标系|");
@@ -459,10 +403,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         List<PointValue> pointValues = new ArrayList<>();
 
         convertHeartChartData(contentResponse, xAxisValues, yAxisValues, pointValues);
-//        Log.e("afterConvert", "xAxisValues size: " + xAxisValues.size() + " yAxisValues size: " + yAxisValues.size());
-
-//        setChart(chartX, xValues, xAxisValues, yAxisValues);
         setHeartChart(chartX, pointValues, xAxisValues, yAxisValues);
+
     }
 
     public void setHeartChart(LineChartView chartView, List<PointValue> values, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues) {
@@ -478,9 +420,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         axisX.setValues(xAxisValues);
         axisX.setHasTiltedLabels(true);
         axisX.setMaxLabelChars(10);
+        axisX.setName("单位(米)");
         Axis axisY = new Axis().setHasLines(true).setLineColor(Color.BLACK).setTextColor(Color.BLACK);
         axisY.setValues(yAxisValues);
         axisY.setMaxLabelChars(10);
+        axisY.setName("单位(米)");
 
         data.setAxisXBottom(axisX);
         data.setAxisYLeft(axisY);
@@ -488,14 +432,16 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         chartView.setLineChartData(data);
         chartView.setInteractive(true);
         chartView.setMaxZoom(20f);
+        chartView.setZoomType(ZoomType.HORIZONTAL_AND_VERTICAL);
 
         Viewport viewport = chartView.getMaximumViewport();
-        viewport.top = viewport.top + 0.01f;
-        viewport.bottom = viewport.bottom - 0.01f;
-        viewport.left = viewport.left - 0.01f;
-        viewport.right = viewport.right + 0.01f;
+        viewport.top = viewport.top + 0.02f;
+        viewport.bottom = viewport.bottom - 0.02f;
+        viewport.left = viewport.left - 0.02f;
+        viewport.right = viewport.right + 0.02f;
         chartView.setMaximumViewport(viewport);
 
+        chartView.setZoomLevel(0f, 0f, 0f);
     }
 
     public void convertHeartChartData(List<List<Object>> contentList, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues,  List<PointValue> pointValues) {
@@ -507,11 +453,15 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         BigDecimal bResponseYMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
         BigDecimal bResponseYMax = new BigDecimal(df.format(Double.parseDouble(maxResponse.get(2).toString())));
 
+        bResponseYMin = bResponseYMin.subtract(new BigDecimal("0.02"));
+        bResponseYMax = bResponseYMax.add(new BigDecimal("0.02"));
+
         convertYMin = Double.parseDouble(String.valueOf(bResponseYMin));
         convertYMax = Double.parseDouble(String.valueOf(bResponseYMax));
         double tempDouble = Double.parseDouble(String.valueOf(bResponseYMin));
         String tempString = String.valueOf(convertYMin);
         BigDecimal strYMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
+        strYMin = strYMin.subtract(new BigDecimal("0.02"));
         while (tempDouble <= convertYMax) {
             AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertYMin)));
             axisValue.setLabel(tempString);
@@ -525,12 +475,15 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         BigDecimal bResponseXMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
         BigDecimal bResponseXMax = new BigDecimal(df.format(Double.parseDouble(maxResponse.get(1).toString())));
 
+        bResponseXMin = bResponseXMin.subtract(new BigDecimal("0.02"));
+        bResponseXMax = bResponseXMax.add(new BigDecimal("0.02"));
 
         convertXMin = Double.parseDouble(String.valueOf(bResponseXMin));
         convertXMax = Double.parseDouble(String.valueOf(bResponseXMax));
         tempDouble = Double.parseDouble(String.valueOf(bResponseXMin));
         tempString = String.valueOf(convertXMin);
         BigDecimal strXMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
+        strXMin = strXMin.subtract(new BigDecimal("0.02"));
         while (tempDouble <= convertXMax) {
             AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertXMin)));
             axisValue.setLabel(tempString);
@@ -542,18 +495,31 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 //            Log.e("loop", "bResponseXMin: " + String.valueOf(bResponseXMin) + " strXMin : " + strXMin + " tempString: " + tempString + " tempFloat: " + String.valueOf(tempDouble));
 
         }
-        double tempX, tempY;
-        for (List<Object> content : contentList) {
+//        double tempX, tempY;
+//        for (List<Object> content : contentList) {
+//            tempX = Double.parseDouble(content.get(1).toString()) - Double.parseDouble(df.format(Double.parseDouble(minResponse.get(1).toString())));
+//            tempY = Double.parseDouble(content.get(2).toString()) - Double.parseDouble(df.format(Double.parseDouble(minResponse.get(2).toString())));
+//            pointValues.add(new PointValue(Float.parseFloat(String.valueOf(tempX)), Float.parseFloat(String.valueOf(tempY))));
+//        }
 
-            tempX = Double.parseDouble(df.format(Double.parseDouble(content.get(1).toString())).toString()) - Double.parseDouble(df.format(Double.parseDouble(minResponse.get(1).toString())));
-            tempY = Double.parseDouble(df.format(Double.parseDouble(content.get(2).toString())).toString()) - Double.parseDouble(df.format(Double.parseDouble(minResponse.get(2).toString())));
+        double tempX, tempY;
+        BigDecimal minuendX = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
+        minuendX = minuendX.subtract(new BigDecimal("0.02"));
+        BigDecimal minuendY = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
+        minuendY = minuendY.subtract(new BigDecimal("0.02"));
+        for (List<Object> content : contentList) {
+            tempX = Double.parseDouble(content.get(1).toString()) - Double.parseDouble(minuendX.toString());
+            tempY = Double.parseDouble(content.get(2).toString()) - Double.parseDouble(minuendY.toString());
             pointValues.add(new PointValue(Float.parseFloat(String.valueOf(tempX)), Float.parseFloat(String.valueOf(tempY))));
         }
+//        for (PointValue point:pointValues) {
+//            Log.wtf("pointValues", point.toString());
+//        }
     }
 
-    //修改之后
+
+
     public List<AxisValue> setAxisYLabel(String yMin, List<PointValue> values) {
-        Log.e("setAxisYLabel", values.size() + "");
         String tempString;
         float chartValue;
         List<AxisValue> axisValues = new ArrayList<>();
@@ -574,20 +540,22 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         convertYMax = valueYMax + 0.1f;
         convertYMin = valueYMin - 0.1f;
 
+//        LogUtil.e("convertYmin + convertYmax",convertYMin + "  " + convertYMax);
+        //保证convertYmin和yMin是真实值。这样即使转成只有两位小数，也是对应的。
         DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
         BigDecimal b_ymin = new BigDecimal(df.format(convertYMin));
         BigDecimal tempYmin = new BigDecimal(df.format(Double.parseDouble(yMin)));
         BigDecimal b_space = new BigDecimal(space);
         chartValue = convertYMin;
         tempYmin = tempYmin.subtract(new BigDecimal("0.1"));
-
 /*      LogUtil.e("减0.1之后的最小值", String.valueOf(tempYmin));
         LogUtil.e("tempfloat", String.valueOf(tempfloat));
         LogUtil.e("yMax after", String.valueOf(df.format(convertYMax)));
         LogUtil.e("yMin after", String.valueOf(df.format(convertYMin)));
         LogUtil.e("bymin", String.valueOf(b_ymin));*/
-
         BigDecimal s_yMin = new BigDecimal(df.format(tempYmin));  //传入格式化后的最小值
+//        LogUtil.e("valueYmin + ymin",valueYMin + "  " + yMin);
+//        LogUtil.e("bymin + tempYmin + s_ymin",b_ymin + " " + tempYmin + "  " + s_yMin);
 
         while (chartValue <= convertYMax) {
             b_ymin = b_ymin.add(b_space);
@@ -602,121 +570,34 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         return axisValues;
     }
 
-    public List<AxisValue> set1HourAxisXLabel(List<PointValue> values) {
-        /*模拟时间数据*/
-        String[] labels = new String[]{"10:00", "10:05", "10:10", "10:15", "10:20", "10:25", "10:30", "10:35", "10:40", "10:45", "10:50", "10:55", "11:00"};
-        List<AxisValue> axisValues = new ArrayList<>();
-        for (int i = 0; i < labels.length; i++) {
-            AxisValue axisValue = new AxisValue(values.get(i).getX());
-            axisValue.setLabel(labels[i]);
-            axisValues.add(axisValue);
-        }
-        return axisValues;
-    }
-
-    public List<AxisValue> set6HourAxisXLabel(List<PointValue> values) {
-        /*模拟时间标签数据*/
-        String[] labels = new String[]{"10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00"};
-        List<AxisValue> axisValues = new ArrayList<>();
-        for (int i = 0; i < labels.length; i++) {
-            AxisValue axisValue = new AxisValue(values.get(i).getX());
-            axisValue.setLabel(labels[i]);
-            axisValues.add(axisValue);
-        }
-        return axisValues;
-    }
-
-    public List<AxisValue> set12HourAxisXLabel(List<PointValue> values) {
-        /*模拟时间标签数据*/
-        String[] labels = new String[]{"10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"};
-        List<AxisValue> axisValues = new ArrayList<>();
-        for (int i = 0; i < labels.length; i++) {
-            AxisValue axisValue = new AxisValue(values.get(i).getX());
-            axisValue.setLabel(labels[i]);
-            axisValues.add(axisValue);
-        }
-        return axisValues;
-    }
-
-    public List<AxisValue> setDayHourAxisXLabel(List<PointValue> values) {
-        /*模拟时间标签1数据*/
-        String[] labels = new String[]{"00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "24:00"};
-        List<AxisValue> axisValues = new ArrayList<>();
-        for (int i = 0; i <= 1440; i += 120) {
-            AxisValue axisValue = new AxisValue(i);
-            axisValue.setLabel(labels[i / 120]);
-            axisValues.add(axisValue);
-        }
-        return axisValues;
-    }
-
-    public List<AxisValue> setWeekHourAxisXLabel(List<PointValue> values) {
-        /*模拟时间标签1数据*/
-        String[] labels = new String[]{"周一 00:00", "周一 12:00", "周二 00:00", "周二 12:00", "周三 00:00", "周三 12:00", "周四 00:00", "周四 12:00", "周五 00:00", "周五 12:00", "周六 00:00", "周六 12:00", "周日 00:00", "周日 12:00", "周日 24:00"};
-        List<AxisValue> axisValues = new ArrayList<>();
-        for (int i = 0; i < labels.length; i++) {
-            AxisValue axisValue = new AxisValue(values.get(i).getX());
-            axisValue.setLabel(labels[i]);
-            axisValues.add(axisValue);
-        }
-        return axisValues;
-    }
-
-    public List<AxisValue> setMonthHourAxisXLabel(List<PointValue> values) {
-        /*模拟时间标签1数据*/
-        String[] labels = new String[]{"2号", "4号", "6号", "8号", "10号", "12号", "14号", "16号", "18号", "20号", "22号", "24号", "26号", "28号", "30号"};
-        List<AxisValue> axisValues = new ArrayList<>();
-        for (int i = 2; i <= 16; i++) {
-            //标签不直接与数据绑定，否则当数据不完整时，标签也不完整
-            AxisValue axisValue = new AxisValue(i);
-            axisValue.setLabel(labels[i - 2]);
-            axisValues.add(axisValue);
-        }
-        return axisValues;
-    }
-
-    public List<AxisValue> setYearHourAxisXLabel(List<PointValue> values) {
-        /*模拟时间标签1数据*/
-        String[] labels = new String[]{"1.31", "2.28", "3.31", "4.30", "5.31", "6.30", "7.31", "8.31", "9.30", "10.31", "11.30", "12.31"};
-        List<AxisValue> axisValues = new ArrayList<>();
-        for (int i = 1; i <= labels.length; i++) {
-            AxisValue axisValue = new AxisValue(values.get(i).getX());
-            axisValue.setLabel(labels[i - 1]);
-            axisValues.add(axisValue);
-        }
-        return axisValues;
-    };
-
     /**
      * 设置X轴标签
-     *
      * @param selectedTime 当前所选时间
-     * @param values       图表数据
      * @return 标签列表
      */
-    public List<AxisValue> setXAxisValues(String selectedTime, List<PointValue> values) {
+    public List<AxisValue> setXAxisValues(String selectedTime) {
         List<AxisValue> xAxisValues = new ArrayList<>();
         switch (selectedTime) {
             case "最近1小时":
-                xAxisValues = set1HourAxisXLabel(values);
+                xAxisValues = DateUtil.getHourXAxisLabel(1);
                 break;
             case "最近6小时":
-                xAxisValues = set6HourAxisXLabel(values);
+                xAxisValues = DateUtil.getHourXAxisLabel(6);
                 break;
             case "最近12小时":
-                xAxisValues = set12HourAxisXLabel(values);
+                xAxisValues = DateUtil.getHourXAxisLabel(12);
                 break;
             case "本日":
-                xAxisValues = setDayHourAxisXLabel(values);
+                xAxisValues = DateUtil.getDayXAxisLabel();
                 break;
             case "本周":
-                xAxisValues = setWeekHourAxisXLabel(values);
+                //xAxisValues = setWeekHourAxisXLabel(values);
                 break;
             case "本月":
-                xAxisValues = setMonthHourAxisXLabel(values);
+               // xAxisValues = setMonthHourAxisXLabel(values);
                 break;
             case "本年":
-                xAxisValues = setYearHourAxisXLabel(values);
+                //xAxisValues = setYearHourAxisXLabel(values);
                 break;
         }
         return xAxisValues;
@@ -733,11 +614,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     public void setChart(LineChartView chartView, List<PointValue> values, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues) {
         String selectedTime = spTime.getSelectedItem().toString();
         List<Line> lines = new ArrayList<>();
-        String[] lineColor = {"#2196F3","#DC143C"};
         if ("本日".equals(spTime.getSelectedItem().toString()))   //测试，图表全部画完之后不再需要判断。
         {
             for (int i = 0; i < chartLines.size(); i++) {
-                Line line = new Line(chartLines.get(i)).setColor(Color.parseColor(lineColor[i % 2])).setCubic(false).setPointRadius(0).setStrokeWidth(2);
+                Line line = new Line(chartLines.get(i)).setColor(Color.parseColor("#2196F3")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
                 lines.add(line);
             }
         }
@@ -762,9 +642,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             axisY.setMaxLabelChars(5);
         else
             axisY.setMaxLabelChars(10);
-
         if ("本周".equals(selectedTime))
             axisX.setMaxLabelChars(8);
+        if ("最近1小时".equals(selectedTime) || "最近6小时".equals(selectedTime) || "最近12小时".equals(selectedTime))
+            axisX.setMaxLabelChars(7);
 
         //为两个坐标系设定名称
         axisY.setName("单位(米)");
@@ -774,7 +655,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         //将数据添加到View中
         chartView.setLineChartData(data);
         chartView.setInteractive(true);
-        chartView.setZoomType(ZoomType.HORIZONTAL_AND_VERTICAL);
+        chartView.setZoomType(ZoomType.HORIZONTAL);
         chartView.setMaxZoom(4f);
         chartView.setContainerScrollEnabled(true, ContainerScrollType.HORIZONTAL);
         chartView.setVisibility(View.VISIBLE);
@@ -785,31 +666,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
         //设置当前窗口，将每格长度大约设置成物理上的1cm
         Viewport currentWindow = new Viewport(chartView.getMaximumViewport());
-        currentWindow.bottom = convertYMin + 0.0635f;
-        currentWindow.top = convertYMax - 0.0635f;
-        switch (selectedTime) {
-            case "本周":
-                maxWindow.right = 15.2f;
-                currentWindow.right = 15.2f;
-                break;
-            case "本月":
-                maxWindow.right = 16.2f;
-                currentWindow.right = 16.2f;
-                break;
-            case "本日":
-                //经过计算：1dp = 0.015875cm；600dp = 9.525cm，所以设置当前窗口显示9个刻度即可保证一格为1cm
-                currentWindow.bottom = convertAverage - 0.05f;
-                currentWindow.top = convertAverage + 0.04f;
-                maxWindow.right = maxWindow.right + 8f;
-                maxWindow.left = 0f;
-                currentWindow.left = maxWindow.left;
-                currentWindow.right = (float) (maxWindow.right * 0.5);
-                break;
-            default:
-                maxWindow.right = 13.2f;
-                currentWindow.right = 13.2f;
-                break;
-        }
+        //经过计算：1dp = 0.015875cm；600dp = 9.525cm，所以设置当前窗口显示9个刻度即可保证一格为1cm
+        currentWindow.bottom = convertAverage - 0.05f;
+        currentWindow.top = convertAverage + 0.04f;
+        maxWindow.right = maxWindow.right + (float) (xConvertData.size() / 24);
+        maxWindow.left = 0f;
+        currentWindow.left = maxWindow.left;
+        currentWindow.right = (float) (maxWindow.right * 0.5);
         //LogUtil.e("1cm转换成px",String.valueOf(ScreenUtil.cm2px(getActivity(),1)));
         chartView.setMaximumViewport(maxWindow);
         chartView.setCurrentViewport(currentWindow);
@@ -834,37 +697,22 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         }
     }
 
-    /**
-     * 清空数据信息，解决重复出现上次线条的BUG
-     */
-    public void cleanValues() {
-        xConvertData.clear();
-        yConvertData.clear();
-        hConvertData.clear();
-        deltaDConvertData.clear();
-        deltaHConvertData.clear();
-    }
-
     public void switchChart() {
-        Log.e("switchChart", "switching...");
         String selectedTime = spTime.getSelectedItem().toString();
         switch (spChart.getSelectedItem().toString()) {
             case "XYH":
-//                cleanValues();
                 drawXYHChart(selectedTime);
                 break;
             case "位移图":
-//                cleanValues();
                 drawDeltaChart(selectedTime);
                 break;
             case "心型图":
-//                cleanValues();
                 drawHeartChart(selectedTime);
                 break;
         }
     }
 
-    public void requestChartDataSync(final String graphicType, String stationUUID, String startTime, String endTime)
+    public void requestChartDataSync(final String graphicType, String stationUUID, final String startTime, String endTime)
     {
         FormBody getChartDataBody = new FormBody.Builder()
                 .add("AccessToken", ApiConfig.getAccessToken())
@@ -919,11 +767,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     deltaDResponseData.add(deltaDValue);
                     deltaHResponseData.add(deltaHValue);
                 }
-                xConvertData = convertData(xResponseData, minResponse.get(1).toString(), "2021-03-09 00:00:00", averageResponse.get(1).toString());
-                yConvertData = convertData(yResponseData, minResponse.get(2).toString(), "2021-03-09 00:00:00", averageResponse.get(2).toString());
-                hConvertData = convertData(hResponseData, minResponse.get(3).toString(), "2021-03-09 00:00:00", averageResponse.get(3).toString());
-                deltaDConvertData = convertData(deltaDResponseData, minResponse.get(4).toString(), "2021-03-09 00:00:00", averageResponse.get(4).toString());
-                deltaHConvertData = convertData(deltaHResponseData, minResponse.get(5).toString(), "2021-03-09 00:00:00", averageResponse.get(5).toString());
+                xConvertData = convertData(xResponseData, minResponse.get(1).toString(), startTime, averageResponse.get(1).toString());
+                yConvertData = convertData(yResponseData, minResponse.get(2).toString(), startTime, averageResponse.get(2).toString());
+                hConvertData = convertData(hResponseData, minResponse.get(3).toString(), startTime, averageResponse.get(3).toString());
+                deltaDConvertData = convertData(deltaDResponseData, minResponse.get(4).toString(), startTime, averageResponse.get(4).toString());
+                deltaHConvertData = convertData(deltaHResponseData, minResponse.get(5).toString(), startTime, averageResponse.get(5).toString());
                 LogUtil.e("getData执行结束","*********");
             }
 
@@ -966,9 +814,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             axisXValue = Long.parseLong(time) / 60;
             convertData.add(new PointValue((float) (axisXValue - axisX0),convertValue));
         }
-/*        for (PointValue pointValue: convertData) {
-            LogUtil.e("转换后的时间数据+点数据", pointValue.getX() + "  " + pointValue.getY());
-        }*/
+//        for (PointValue pointValue: convertData) {
+//            LogUtil.e("转换后的时间数据+点数据", pointValue.getX() + "  " + pointValue.getY());
+//        }
         return convertData;
     }
 
@@ -992,7 +840,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             {
                 if ((values.get(i).getX() - values.get(i-1).getX()) != 1)
                 {
-//                LogUtil.e("断点处",values.get(i-1).getX() + "后一个点为" + values.get(i).getX());
                     chartLines.add(tempLines);
                     tempLines = new ArrayList<>();  //如果用clear()方法清空，那么所有使用该列表的数据都空了。
                 }
@@ -1002,6 +849,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         }
     }
 
+    /**
+     * 同步获取数据
+     * @param graphicType 图表数据类型
+     * @param stationUUID 设备ID
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     */
     public void getData(final String graphicType, final String stationUUID, final String startTime, final String endTime)
     {
         Thread httpThread = new Thread(new Runnable()
@@ -1016,6 +870,14 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             httpThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void test()
+    {
+        getData("GNSSFilterInfo","6159529a-6bc3-4c73-84d1-e59f6f60ece6","2021-03-09 14:00:00","2021-03-09 14:59:59");
+        for (PointValue pointValue: xConvertData) {
+            LogUtil.e("1小时数据转换后的x和y",pointValue.getX() + "  " + pointValue.getY());
         }
     }
 }
