@@ -1,5 +1,7 @@
 package com.beyond.beidou.util;
 
+import android.util.Log;
+
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -314,44 +316,46 @@ public class DateUtil {
         String lastSuffix = "号 24:00";
         switch (getMonthType()) {
             case TYPE_28:
-                for (int i = 0; i < TYPE_28 - 1; i++) {
+                for (int i = 0; i < TYPE_28 ; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_28 + lastSuffix);
-                for (int i = 0, j = 0; i < (1440 * TYPE_28); i += 1440) {
+                for (int i = 0, j = 0; i <= (TYPE_28 * 1440); i += 1440) {
                     AxisValue axisValue = new AxisValue(i);
                     axisValue.setLabel(labels.get(j++));
                     xAxis.add(axisValue);
                 }
                 break;
             case TYPE_29:
-                for (int i = 0; i < TYPE_29 - 1; i++) {
+                for (int i = 0; i < TYPE_29 ; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_29 + lastSuffix);
-                for (int i = 0, j = 0; i < (1440 * TYPE_29); i += 1440) {
+                for (int i = 0, j = 0; i <= (TYPE_29 * 1440); i += 1440) {
                     AxisValue axisValue = new AxisValue(i);
                     axisValue.setLabel(labels.get(j++));
                     xAxis.add(axisValue);
                 }
                 break;
             case TYPE_30:
-                for (int i = 0; i < TYPE_30 - 1; i++) {
+                for (int i = 0; i < TYPE_30 ; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_30 + lastSuffix);
-                for (int i = 0, j = 0; i < (1440 * TYPE_30); i += 1440) {
+                for (int i = 0, j = 0; i <= (TYPE_30 * 1440); i += 1440) {
                     AxisValue axisValue = new AxisValue(i);
+                    Log.e("Month", "  " + i );
+                    Log.e("Month", "  " + labels.get(j));
                     axisValue.setLabel(labels.get(j++));
                     xAxis.add(axisValue);
                 }
                 break;
             case TYPE_31:
-                for (int i = 0; i < TYPE_31 - 1; i++) {
+                for (int i = 0; i < TYPE_31 ; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_31 + lastSuffix);
-                for (int i = 0, j = 0; i < (1440 * TYPE_31); i += 1440) {
+                for (int i = 0, j = 0; i <= (TYPE_31 * 1440); i += 1440) {
                     AxisValue axisValue = new AxisValue(i);
                     axisValue.setLabel(labels.get(j++));
                     xAxis.add(axisValue);
@@ -366,7 +370,7 @@ public class DateUtil {
         String[] labels = new String[]{"1月1日 00:00", "2月1日 00:00", "3月1日 00:00", "4月1日 00:00", "5月1日 00:00", "6月1日 00:00", "7月1日 00:00", "8月1日 00:00", "9月1日 00:00", "10月1日 00:00", "11月1日 00:00", "12月1日 00:00", "12月31日 24:00"};
         int interval;
         if (isLeapYear()) {
-            for (int i = 0, j = 0; i < (1440 * 366); i += interval) {
+            for (int i = 0, j = 0; i <= (1440 * 366); i += interval) {
                 AxisValue axisValue = new AxisValue(i);
                 axisValue.setLabel(labels[j++]);
                 xAxis.add(axisValue);
@@ -379,7 +383,9 @@ public class DateUtil {
                 }
             }
         } else {
-            for (int i = 0, j = 0; i < (1440 * 365); i += interval) {
+            for (int i = 0, j = 0; i <= (1440 * 365); i += interval) {
+//                Log.e("Year", "  " + i );
+//                Log.e("Year", "  " + labels[j]);
                 AxisValue axisValue = new AxisValue(i);
                 axisValue.setLabel(labels[j++]);
                 xAxis.add(axisValue);
