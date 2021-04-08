@@ -29,6 +29,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Fragment aboutFragment = null;
     private Fragment feedbackFragment = null;
     private Fragment versioninfoFragment = null;
+    private Fragment securityFragment = null;
+    private Fragment updatePwdFragment = null;
     private BottomNavigationView navigationView;
     private String presentProject = null;
 
@@ -241,6 +243,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         this.versioninfoFragment = versioninfoFragment;
     }
 
+
     public Fragment getNowFragment() {
         return nowFragment;
     }
@@ -279,5 +282,21 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     public Fragment getProjectFragment() {
         return projectFragment;
+    }
+
+    public Fragment getSecurityFragment() {
+        return securityFragment;
+    }
+
+    public void setSecurityFragment(Fragment securityFragment) {
+        securityFragment = securityFragment;
+    }
+
+    public Fragment getUpdatePwdFragment() {
+        return updatePwdFragment;
+    }
+
+    public void setUpdatePwdFragment(Fragment updatePwdFragment) {
+        this.updatePwdFragment = updatePwdFragment;
     }
 }

@@ -8,7 +8,6 @@
     android:background="@color/main_white"
     android:orientation="vertical"
     android:textStyle="bold"
-
     >
 
 </TextView>

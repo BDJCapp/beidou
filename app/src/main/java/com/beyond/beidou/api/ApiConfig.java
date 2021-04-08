@@ -32,5 +32,5 @@ public class ApiConfig {
     public static final String GET_GRAPHIC_DATA = "getGraphicData.php";
     public static final String LOGIN = "doLogin.php";
     public static final String LOGOUT = "doLogout.php";
-
+    public static final String SET_PASSWORD = "setPassword.php";
 }

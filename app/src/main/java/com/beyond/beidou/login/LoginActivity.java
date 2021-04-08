@@ -1,8 +1,6 @@
 package com.beyond.beidou.login;
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -72,7 +70,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private ImageView imgPictureCode;
 
     private static int loginType = LoginUtil.LOGINBYPWD;   //默认为密码登录
-//    private final int IMAGECODESUCCESS = 1;            //设置msg.what
+    //    private final int IMAGECODESUCCESS = 1;            //设置msg.what
     private final int LOGINDEFAULTFAILED = 2;
     private final int CODE_ERROR = 421;
     private final int ACCOUNT_OR_PWD_ERROR = 400120;
@@ -92,6 +90,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             {
                 case ACCOUNT_OR_PWD_ERROR:
                     Toast.makeText(LoginActivity.this, String.valueOf(msg.obj),Toast.LENGTH_LONG).show();
+                    dialog.dismiss();
                     break;
                 case IIILEGAL_USER_SESSION:
                 case SESSION_EXPIRATION_LOGOUT:
@@ -105,7 +104,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
                     break;
                 case 0://判断是否连续点击两次
-                        isExit = false;
+                    isExit = false;
                     break;
             }
         }
@@ -176,7 +175,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         }
     }
 
-     /**
+    /**
      * 1.检查手机号或者邮箱是否有效
      * 2.发送验证码
      */
@@ -230,65 +229,65 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     public void login(String username,String password,String SessionUUID,String AccessToken)
     {
 //            loginUtil.loginByPwd("qazXSW0", "qazxswEDCVFR0*", SessionUUID, AccessToken, new Callback() {
-            loginUtil.loginByPwd(username, password, SessionUUID, AccessToken, new Callback() {
+        loginUtil.loginByPwd(username, password, SessionUUID, AccessToken, new Callback() {
 
-                /*loginUtil.loginByPwd(userName, password, imageCode, new Callback() {*/
-                @Override
-                public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                    //网络请求失败
-                    Toast.makeText(LoginActivity.this, "网络请求失败，请检查网络连接，稍后再试", Toast.LENGTH_SHORT).show();
-                }
-                @Override
-                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                    Log.e("登录的response", String.valueOf(response));
-                    String responseText = response.body().string();
-                    if (!TextUtils.isEmpty(responseText))
-                    {
-                        try {
-                            Message message = new Message();
-                            JSONObject object = new JSONObject(responseText);
-                            String errCode = object.getString("ResponseCode");
-                            String errMsg = object.getString("ResponseMsg");
-                            Log.e("登录的response",responseText);
-                            //获取json中的code。json是包含很多数据，这里只是单拿出其中的code吗
-                            switch (errCode){
-                                case "200": //登录成功
-                                    Log.e("200",responseText);
-                                    intent.setClass(LoginActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                    dialog.dismiss();
-                                    finish();
-                                    break;
-                                case "400"://操作失败/参数非法
-                                    message.obj = errMsg;
-                                    message.what = 400;
-                                    handler.sendMessage(message);
-                                    break;
-                                case "400010"://访问令牌非法
-                                    message.obj = errMsg;
-                                    message.what = 40010;
-                                    handler.sendMessage(message);
-                                    break;
-                                case "400120": //用户名和密码错误
-                                    message.obj = errMsg;
-                                    message.what = ACCOUNT_OR_PWD_ERROR;
-                                    handler.sendMessage(message);
-                                    break;
-                                case "400110"://用户会话非法
-                                    message.obj = errMsg;
-                                    message.what = IIILEGAL_USER_SESSION;
-                                    handler.sendMessage(message);
-                                    break;
-                                default:
-                                    message.what= LOGINDEFAULTFAILED;
-                                    handler.sendMessage(message);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+            /*loginUtil.loginByPwd(userName, password, imageCode, new Callback() {*/
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                //网络请求失败
+                Toast.makeText(LoginActivity.this, "网络请求失败，请检查网络连接，稍后再试", Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                Log.e("登录的response", String.valueOf(response));
+                String responseText = response.body().string();
+                if (!TextUtils.isEmpty(responseText))
+                {
+                    try {
+                        Message message = new Message();
+                        JSONObject object = new JSONObject(responseText);
+                        String errCode = object.getString("ResponseCode");
+                        String errMsg = object.getString("ResponseMsg");
+                        Log.e("登录的response",responseText);
+                        //获取json中的code。json是包含很多数据，这里只是单拿出其中的code吗
+                        switch (errCode){
+                            case "200": //登录成功
+                                Log.e("200",responseText);
+                                intent.setClass(LoginActivity.this, MainActivity.class);
+                                startActivity(intent);
+                                dialog.dismiss();
+                                finish();
+                                break;
+                            case "400"://操作失败/参数非法
+                                message.obj = errMsg;
+                                message.what = 400;
+                                handler.sendMessage(message);
+                                break;
+                            case "400010"://访问令牌非法
+                                message.obj = errMsg;
+                                message.what = 40010;
+                                handler.sendMessage(message);
+                                break;
+                            case "400120": //用户名和密码错误
+                                message.obj = errMsg;
+                                message.what = ACCOUNT_OR_PWD_ERROR;
+                                handler.sendMessage(message);
+                                break;
+                            case "400110"://用户会话非法
+                                message.obj = errMsg;
+                                message.what = IIILEGAL_USER_SESSION;
+                                handler.sendMessage(message);
+                                break;
+                            default:
+                                message.what= LOGINDEFAULTFAILED;
+                                handler.sendMessage(message);
                         }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
-            });
+            }
+        });
     }
 
     public void requestPermissions(){

@@ -31,6 +31,8 @@ public class LoginUtil {
     public static final int LOGINBYPHONE = 1;
     public static final int LOGINBYPWD = 2;
     public static final int LOGINBYEMAIL = 3;
+    public static final int CHANGEPWD = 0;
+    public static final int RESETPWD = 1;
 
 
     public LoginUtil() {
@@ -41,7 +43,7 @@ public class LoginUtil {
      * @param loginType 登录方式
      * @return  手机号有效返回为true，手机号无效返回false
      */
-    public boolean checkAccount(String account, int loginType)
+    public static boolean checkAccount(String account, int loginType)
     {
         Pattern p = null;
         if (loginType == LOGINBYPHONE)
@@ -69,7 +71,7 @@ public class LoginUtil {
      * @param pwd 用户输入的密码
      * @return 有效返回true,无效返回false
      */
-    public boolean checkPwd(String pwd)
+    public static boolean checkPwd(String pwd)
     {
         //密码12-64位且包含数字，大小写字母以及特殊符号
         Pattern p = Pattern.compile("(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%\\^&\\*()\\_]).{12,64}");
@@ -171,7 +173,7 @@ public class LoginUtil {
         Api.config(ApiConfig.LOGIN).postRequestFormBody(body,callback);
     }
 
-    public void logout(String Username, String SessionUUID,String AccessToken, Callback callback)
+    public static void logout(String Username, String SessionUUID,String AccessToken, Callback callback)
     {
         FormBody body = new FormBody.Builder()
                 .add("Username",Username)

@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -44,7 +45,6 @@ import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.Response;
 
-
 public class MyFragment extends BaseFragment implements View.OnClickListener{
     private TextView textView;
     private View view;
@@ -56,8 +56,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
     private String userName;
     private RelativeLayout RlHelp;
     private RelativeLayout RlAbout;
-
-
+    private CardView mCardViewSecurity;
 
     public Handler handler = new Handler(){
         @Override
@@ -67,6 +66,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
                     textView.setText(String.valueOf(msg.obj));
 //                    ProjectInfo prj = SPDatautils.getProjectInfo(getContext());
 //                    textView.setText(prj.getProjectName());
+                    saveStringToSP("userName", String.valueOf(msg.obj));
                     break;
             }
 
@@ -84,6 +84,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
         imgUserMore = view.findViewById(R.id.img_UserMore);
         RlHelp = view.findViewById(R.id.img_help);
         RlAbout = view.findViewById(R.id.img_about);
+        mCardViewSecurity = view.findViewById(R.id.cv_security);
         return view;
     }
 
@@ -102,11 +103,13 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
         imgUserMore.setOnClickListener(this);
         RlHelp.setOnClickListener(this);
         RlAbout.setOnClickListener(this);
+        mCardViewSecurity.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
         MainActivity activity = (MainActivity) getActivity();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
         switch (view.getId())
         {
             case R.id.btn_quit:
@@ -119,8 +122,6 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
                 Fragment helpFragment = new HelpFragment();
                 activity.setHelpFragment(helpFragment);
                 activity.setNowFragment(helpFragment);
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction ft = fragmentManager.beginTransaction();
                 ft.add(R.id.layout_home, helpFragment).hide(this);
                 ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
@@ -130,27 +131,32 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
 
             case R.id.img_about:
                 Fragment aboutFragment = new AboutFragment();
-                MainActivity activity2 = (MainActivity) getActivity();
-                activity2.setAboutFragment(aboutFragment);
-                activity2.setNowFragment(aboutFragment);
-                FragmentManager fragmentManager2 = getFragmentManager();
-                FragmentTransaction ft2 = fragmentManager2.beginTransaction();
-                ft2.add(R.id.layout_home, aboutFragment).hide(this);
-                ft2.addToBackStack(null);   //加入到返回栈中
-                ft2.commit();
+                activity.setAboutFragment(aboutFragment);
+                activity.setNowFragment(aboutFragment);
+                ft.add(R.id.layout_home, aboutFragment).hide(this);
+                ft.addToBackStack(null);   //加入到返回栈中
+                ft.commit();
                 break;
 //            case R.id.img_UserMore:
 //                intent.setClass(getActivity(), ShowUserInfoActivity.class);
 //                intent.putExtra("userName",userName);
 //                startActivity(intent);
 //                break;
+            case R.id.cv_security:
+                Fragment securityFragment = new SecurityFragment();
+                activity.setAboutFragment(securityFragment);
+                activity.setNowFragment(securityFragment);
+                ft.add(R.id.layout_home, securityFragment).hide(this);
+                ft.addToBackStack(null);   //加入到返回栈中
+                ft.commit();
+                break;
         }
     }
 
     public void logout(String Username, final String SessionUUID, String AccessToken)
     {
 
-        loginUtil.logout("qazXSW0",  SessionUUID, AccessToken, new Callback() {
+        LoginUtil.logout("qazXSW0",  SessionUUID, AccessToken, new Callback() {
 
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -173,6 +179,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
                         switch (errCode){
                             case "205": //退出成功
                                 ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
+                                while (!LoginUtil.getAccessToken()){}
                                 Intent intent= new Intent(getActivity(),LoginActivity.class);
                                 startActivity(intent);
                                 getActivity().finish();

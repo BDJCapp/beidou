@@ -141,12 +141,12 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         return fragment;
     }
 
-    protected int initLayout() {
+    public int initLayout() {
         SDKInitializer.initialize(getContext().getApplicationContext());
         return R.layout.fragment_project;
     }
 
-    protected void initView(View view) {
+    public void initView(View view) {
         mMapView = view.findViewById(R.id.bdmapView);
         mScrollLayout = view.findViewById(R.id.scrollLayout);
         mRelativeLayout = view.findViewById(R.id.relativeLayout);

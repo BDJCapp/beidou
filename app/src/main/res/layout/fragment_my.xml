@@ -4,16 +4,17 @@
     android:layout_height="match_parent"
     android:id="@+id/layout_myFragment"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="5dp"
+    >
 
     <RelativeLayout
         android:id="@+id/title"
         android:background="@drawable/bg_title_border"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:padding="15dp"
-        android:layout_marginTop="20sp"
+        android:layout_marginTop="10dp"
         app:layout_constraintTop_toTopOf="parent"
         >
         <ImageView
@@ -52,10 +53,9 @@
         android:id="@+id/img_about"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:background="@drawable/bg_title_border"
         android:padding="15dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintTop_toBottomOf="@+id/title"
         android:visibility="gone"
         >
@@ -92,7 +92,6 @@
         android:id="@+id/img_help"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:background="@drawable/bg_title_border"
         android:padding="15dp"
         app:layout_constraintTop_toBottomOf="@id/img_about"
@@ -127,6 +126,55 @@
             android:layout_alignParentRight="true"
             />
     </RelativeLayout>
+
+    <!-- 此处width若设置为match_parent显示不自然 -->
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        >
+
+        <androidx.cardview.widget.CardView
+            android:layout_margin="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            app:cardCornerRadius="20dp"
+            android:foreground="?attr/selectableItemBackground"
+            android:clickable="true"
+            app:cardElevation="5dp"
+            android:id="@+id/cv_security"
+            >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="12dp"
+                >
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="7"
+                    android:text="账户安全"
+                    android:textSize="18sp"
+                    android:textColor="@color/text_black"
+                    />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/svg_ic_more"
+                    />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </RelativeLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"

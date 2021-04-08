@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".my.UpdatePwdFragment"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/img_updatePwd_back"
+                android:src="@drawable/ic_svg_back"
+                android:layout_centerVertical="true"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_title"
+                android:text="修改密码"
+                android:textColor="@color/text_black"
+                android:textSize="24sp"
+                android:layout_centerInParent="true"
+                />
+
+            <Button
+                android:layout_width="80dp"
+                android:layout_height="35dp"
+                android:id="@+id/btn_confirm"
+                android:layout_alignParentEnd="true"
+                android:text="完成"
+                android:textSize="18sp"
+                android:background="@drawable/button_shape"
+                android:textColor="@color/main_white"
+                />
+
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3px"
+        android:background="@color/under_line"
+        android:layout_below="@+id/toolbar"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:padding="15dp"
+        android:orientation="vertical"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <TextView
+                android:id="@+id/tv_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="新密码必须是12-64位的数字、大小写字母、特殊符号组合"
+                />
+
+            <TextView
+                android:id="@+id/tv_forgetPwd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_info"
+                android:layout_marginTop="5dp"
+                android:text="忘记密码？"
+                android:textSize="18sp"
+                android:textColor="#5882FA"
+                />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="40dp"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="原密码："
+                android:textSize="18sp"
+                android:textColor="@color/text_black"
+                />
+
+            <EditText
+                android:id="@+id/et_originalPwd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:hint="填写原密码"
+                android:background="@null"
+                android:textSize="18sp"
+                android:textColor="@color/text_black"
+
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="新密码："
+                android:textSize="18sp"
+                android:textColor="@color/text_black"
+                />
+
+            <EditText
+                android:id="@+id/et_newPwd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:hint="填写新密码"
+                android:background="@null"
+                android:textSize="18sp"
+                android:textColor="@color/text_black"
+                android:inputType="textPassword"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="确认密码："
+                android:textSize="18sp"
+                android:textColor="@color/text_black"
+                />
+
+            <EditText
+                android:id="@+id/et_confirmPwd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:hint="再次填写确认"
+                android:background="@null"
+                android:textSize="18sp"
+                android:textColor="@color/text_black"
+                android:inputType="textPassword"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
