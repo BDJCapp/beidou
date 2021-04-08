@@ -114,7 +114,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         return chartFragment;
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
