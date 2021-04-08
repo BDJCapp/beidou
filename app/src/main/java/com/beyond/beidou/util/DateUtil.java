@@ -1,5 +1,7 @@
 package com.beyond.beidou.util;
 
+import android.util.Log;
+
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -234,44 +236,61 @@ public class DateUtil {
 
     public static String getTimeInterval(String selectedTime)
     {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
         String time = null;
         String startTime = null;
         String endTime = null;
         switch (selectedTime) {
             case "最近1小时":
                 //暂时只有3.9号的数据，之后直接把"2021-03-09 "去掉即可。
-                startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(1));
-                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+//                startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(1));
+//                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getHourBegin(1));
+                endTime = sdf.format(DateUtil.getHourEnd());
                 time = startTime + "~" + endTime;
                 break;
             case "最近6小时":
-                startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(6));
-                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+//                startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(6));
+//                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getHourBegin(6));
+                endTime = sdf.format(DateUtil.getHourEnd());
                 time = startTime + "~" + endTime;
                 break;
             case "最近12小时":
                 //12点之后调用
-                startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(12));
-                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+//                startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(12));
+//                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getHourBegin(12));
+                endTime = sdf.format(DateUtil.getHourEnd());
                 //12点之前调用，当前只有一天的数据，跨天查询不行
 //                startTime = "2021-03-09 " + "04:00:00";
 //                endTime = "2021-03-09 " + "16:00:00";
                 time = startTime + "~" + endTime;
                 break;
             case "本日":
-                startTime = "2021-03-09 " + sdf.format(DateUtil.getDayBegin());
-                endTime = "2021-03-09 " + sdf.format(DateUtil.getDayEnd());
+//                startTime = "2021-03-09 " + sdf.format(DateUtil.getDayBegin());
+//                endTime = "2021-03-09 " + sdf.format(DateUtil.getDayEnd());
+                startTime = sdf.format(DateUtil.getDayBegin());
+                endTime = sdf.format(DateUtil.getDayEnd());
                 time = startTime + "~" + endTime;
                 break;
             case "本周":
-                time = "2021-02-01 00:00:00~2021-02-07 24:00:00";
+                startTime = sdf.format(DateUtil.getBeginDayOfWeek());
+                endTime = sdf.format(DateUtil.getEndDayOfWeek());
+                time = startTime + "~" + endTime;
+//                time = "2021-02-01 00:00:00~2021-02-07 24:00:00";
                 break;
             case "本月":
-                time = "2021-02-01 00:00:00~2021-02-08 24:00:00";
+                startTime = sdf.format(DateUtil.getBeginDayOfMonth());
+                endTime = sdf.format(DateUtil.getEndDayOfMonth());
+                time = startTime + "~" + endTime;
+//                time = "2021-02-01 00:00:00~2021-02-08 24:00:00";
                 break;
             case "本年":
-                time = "2020-01-01 00:00:00~2020-12-31 24:00:00";
+                startTime = sdf.format(DateUtil.getBeginDayOfYear());
+                endTime = sdf.format(DateUtil.getEndDayOfYear());
+                time = startTime + "~" + endTime;
+//                time = "2020-01-01 00:00:00~2020-12-31 24:00:00";
                 break;
         }
         return time;
@@ -314,44 +333,46 @@ public class DateUtil {
         String lastSuffix = "号 24:00";
         switch (getMonthType()) {
             case TYPE_28:
-                for (int i = 0; i < TYPE_28 - 1; i++) {
+                for (int i = 0; i < TYPE_28 ; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_28 + lastSuffix);
-                for (int i = 0, j = 0; i < (1440 * TYPE_28); i += 1440) {
+                for (int i = 0, j = 0; i <= (TYPE_28 * 1440); i += 1440) {
                     AxisValue axisValue = new AxisValue(i);
                     axisValue.setLabel(labels.get(j++));
                     xAxis.add(axisValue);
                 }
                 break;
             case TYPE_29:
-                for (int i = 0; i < TYPE_29 - 1; i++) {
+                for (int i = 0; i < TYPE_29 ; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_29 + lastSuffix);
-                for (int i = 0, j = 0; i < (1440 * TYPE_29); i += 1440) {
+                for (int i = 0, j = 0; i <= (TYPE_29 * 1440); i += 1440) {
                     AxisValue axisValue = new AxisValue(i);
                     axisValue.setLabel(labels.get(j++));
                     xAxis.add(axisValue);
                 }
                 break;
             case TYPE_30:
-                for (int i = 0; i < TYPE_30 - 1; i++) {
+                for (int i = 0; i < TYPE_30 ; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_30 + lastSuffix);
-                for (int i = 0, j = 0; i < (1440 * TYPE_30); i += 1440) {
+                for (int i = 0, j = 0; i <= (TYPE_30 * 1440); i += 1440) {
                     AxisValue axisValue = new AxisValue(i);
+                    Log.e("Month", "  " + i );
+                    Log.e("Month", "  " + labels.get(j));
                     axisValue.setLabel(labels.get(j++));
                     xAxis.add(axisValue);
                 }
                 break;
             case TYPE_31:
-                for (int i = 0; i < TYPE_31 - 1; i++) {
+                for (int i = 0; i < TYPE_31 ; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_31 + lastSuffix);
-                for (int i = 0, j = 0; i < (1440 * TYPE_31); i += 1440) {
+                for (int i = 0, j = 0; i <= (TYPE_31 * 1440); i += 1440) {
                     AxisValue axisValue = new AxisValue(i);
                     axisValue.setLabel(labels.get(j++));
                     xAxis.add(axisValue);
@@ -366,7 +387,7 @@ public class DateUtil {
         String[] labels = new String[]{"1月1日 00:00", "2月1日 00:00", "3月1日 00:00", "4月1日 00:00", "5月1日 00:00", "6月1日 00:00", "7月1日 00:00", "8月1日 00:00", "9月1日 00:00", "10月1日 00:00", "11月1日 00:00", "12月1日 00:00", "12月31日 24:00"};
         int interval;
         if (isLeapYear()) {
-            for (int i = 0, j = 0; i < (1440 * 366); i += interval) {
+            for (int i = 0, j = 0; i <= (1440 * 366); i += interval) {
                 AxisValue axisValue = new AxisValue(i);
                 axisValue.setLabel(labels[j++]);
                 xAxis.add(axisValue);
@@ -379,7 +400,9 @@ public class DateUtil {
                 }
             }
         } else {
-            for (int i = 0, j = 0; i < (1440 * 365); i += interval) {
+            for (int i = 0, j = 0; i <= (1440 * 365); i += interval) {
+//                Log.e("Year", "  " + i );
+//                Log.e("Year", "  " + labels[j]);
                 AxisValue axisValue = new AxisValue(i);
                 axisValue.setLabel(labels[j++]);
                 xAxis.add(axisValue);

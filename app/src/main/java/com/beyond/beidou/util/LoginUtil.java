@@ -71,8 +71,8 @@ public class LoginUtil {
      */
     public boolean checkPwd(String pwd)
     {
-        //密码8-16位且包含数字，大小写字母以及特殊符号
-        Pattern p = Pattern.compile("(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%\\^&\\*()\\_]).{8,16}");
+        //密码12-64位且包含数字，大小写字母以及特殊符号
+        Pattern p = Pattern.compile("(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%\\^&\\*()\\_]).{12,64}");
         Matcher m = p.matcher(pwd);
         if (m.matches())
         {
@@ -87,10 +87,8 @@ public class LoginUtil {
      * 获取SessionUUID
      * @return SessionUUID
      */
-    public String getSessionId()
+    public static String getSessionId()
     {
-            Log.e("SessionUUI中的SessionUUID", ApiConfig.getSessionUUID());
-            Log.e("SessionUUID中的Token", ApiConfig.getAccessToken());
             FormBody body = new FormBody.Builder()
                     .add("AccessToken", ApiConfig.getAccessToken())
                     .add("SessionUUID", ApiConfig.getSessionUUID())
@@ -109,26 +107,22 @@ public class LoginUtil {
                         否则会出现EAndroidRuntime FATAL EXCEPTION OkHttp Dispatcher错误
                      */
                     String responseText = response.body().string();
-                    Log.e("SessionUUIDresponse的内容",responseText);
                     if (!TextUtils.isEmpty(responseText)) {
                         try {
                             JSONObject object = new JSONObject(responseText);
                             ApiConfig.setSessionUUID(object.getString("SessionUUID"));
-                            //监听SessionUUID值改变
-                            Log.e("请求SessionUUID", "Session:" + object.getString("SessionUUID"));
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Log.e("JsonException","SessionUUID错误信息为" + e.getMessage());
                         }
                     }
-                    Log.e("请求成功，SessionUUID为", ApiConfig.getSessionUUID());
+//                    Log.e("请求成功，SessionUUID为", ApiConfig.getSessionUUID());
                 }
             });
 
         return ApiConfig.getSessionUUID();
     }
 
-    public String getAccessToken() {
+    public static boolean getAccessToken() {
         FormBody body = new FormBody.Builder()
                 .add("GrantType", ApiConfig.GrantType)
                 .add("AppID", ApiConfig.AppID)
@@ -144,23 +138,25 @@ public class LoginUtil {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String responseText = response.body().string();
-                Log.e("AccessTokenresponse的内容",  responseText);
                 if (!TextUtils.isEmpty(responseText)) {
                     try {
                         JSONObject object = new JSONObject(responseText);
-                        //Log.e("解析的AccessTokenID",object.getString("AccessToken"));
                         ApiConfig.setAccessToken(object.getString("AccessToken"));
-                        Log.e("AccessToken", "access:" + object.getString("AccessToken"));
                         getSessionId();
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        Log.e("JsonException","AccessToken错误信息为" + e.getMessage());
                     }
                 }
-                //Log.e("请求成功,AccessTokenID为", APIUtil.getAccessTokenID());
+//                Log.e("请求成功，Token", ApiConfig.getAccessToken());
             }
         });
-        return ApiConfig.getAccessToken();
+        if ("".equals(ApiConfig.getAccessToken()) && ApiConfig.SessionUUID.equals(ApiConfig.getSessionUUID()))
+        {
+            return false;
+        }
+        else {
+            return true;
+        }
     }
 
 

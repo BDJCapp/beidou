@@ -1,5 +1,6 @@
 package com.beyond.beidou.data;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -27,6 +28,8 @@ import com.beyond.beidou.entites.ProjectResponse;
 import com.beyond.beidou.util.DateUtil;
 import com.beyond.beidou.util.LogUtil;
 import com.google.gson.Gson;
+import com.zyao89.view.zloading.ZLoadingDialog;
+import com.zyao89.view.zloading.Z_TYPE;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,7 +45,8 @@ public class DataHomeFragment extends BaseFragment {
 
     private Spinner spProjectName;
     private RecyclerView deviceList;
-
+    ZLoadingDialog dialog;
+    MainActivity activity;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,6 +62,8 @@ public class DataHomeFragment extends BaseFragment {
     }
 
     public void initView(View view) {
+        dialog = new ZLoadingDialog(getActivity());
+        activity = (MainActivity) getActivity();
         spProjectName = view.findViewById(R.id.spinner_projectName);
         deviceList = view.findViewById(R.id.rv_device);
         setViews();
@@ -66,7 +72,10 @@ public class DataHomeFragment extends BaseFragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        setViews();
+        if (activity.getNowFragment() == activity.getDataFragment())
+        {
+            setViews();
+        }
     }
 
     public void setViews()
@@ -75,6 +84,12 @@ public class DataHomeFragment extends BaseFragment {
         final HashMap<String,Object> requestParams = new HashMap<>();
         requestParams.put("AccessToken", ApiConfig.getAccessToken());
         requestParams.put("SessionUUID",ApiConfig.getSessionUUID());
+
+//        dialog.setLoadingBuilder( Z_TYPE.ROTATE_CIRCLE)//设置类型
+//                .setLoadingColor(Color.BLACK)//颜色
+//                .setHintText("Loading...")
+//                .show();
+
         Api.config(ApiConfig.GET_PROJECTS,requestParams).postRequest(getActivity(), new ApiCallback() {
             @Override
             public void onSuccess(String res) {
@@ -111,8 +126,8 @@ public class DataHomeFragment extends BaseFragment {
                         spProjectName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                SimpleDateFormat sdfTwo =new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
-                                LogUtil.e("Spinner切换工程的时间",sdfTwo.format(System.currentTimeMillis()));
+//                                SimpleDateFormat sdfTwo =new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
+//                                LogUtil.e("Spinner切换工程的时间",sdfTwo.format(System.currentTimeMillis()));
                                 setDeviceList(spProjectName.getSelectedItem().toString());  //设置设备列表
                                 activity.setPresentProject(spProjectName.getSelectedItem().toString());
                             }
@@ -129,6 +144,7 @@ public class DataHomeFragment extends BaseFragment {
                 LogUtil.e("获取工程网络请求失败",e.getMessage());
             }
         });
+
     }
 
     public void setDeviceList(String selectedProject)
@@ -142,6 +158,8 @@ public class DataHomeFragment extends BaseFragment {
 
         SimpleDateFormat sdfTwo =new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
         LogUtil.e("请求工程数据开始时间",sdfTwo.format(System.currentTimeMillis()));
+
+
 
         Api.config(ApiConfig.GET_PROJECTS,requestParams)
                 .postRequest(getActivity(), new ApiCallback() {
@@ -157,12 +175,14 @@ public class DataHomeFragment extends BaseFragment {
                         final List<String> deviceTypes = new ArrayList<>();
                         final List<String> lastTimes = new ArrayList<>();
                         final List<String> deviceStatus = new ArrayList<>();
+                        final ArrayList<String> stationUUIDList = new ArrayList<>();
                         List<ProjectResponse.ProjectListBean.StationListBean> stationList = projectResponse.getProjectList().get(0).getStationList();
                         for (int i = 0; i < stationList.size(); i++) {
                             deviceNames.add(stationList.get(i).getStationName());
                             deviceTypes.add(getStationType(stationList.get(i).getStationType()));
                             lastTimes.add(stationList.get(i).getStationLastTime());
                             deviceStatus.add(stationList.get(i).getStationStatus());
+                            stationUUIDList.add(stationList.get(i).getStationUUID());
                         }
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -172,13 +192,16 @@ public class DataHomeFragment extends BaseFragment {
                                     @Override
                                     public void onItemClick(View view, int position) {
                                         // LogUtil.e("查看的监测点", deviceNames.get(position));
-                                        switchFragment(spProjectName.getSelectedItem().toString(), deviceNames,position);
+                                        switchFragment(spProjectName.getSelectedItem().toString(), deviceNames,position,stationUUIDList);
                                     }
                                 });
                                 deviceList.setAdapter(adapter);
                                 LinearLayoutManager manager = new LinearLayoutManager(getActivity());
                                 manager.setOrientation(RecyclerView.VERTICAL);
                                 deviceList.setLayoutManager(manager);
+
+//                                dialog.dismiss();
+
                             }
                         });
                     }
@@ -204,9 +227,9 @@ public class DataHomeFragment extends BaseFragment {
         }
     }
 
-    public void switchFragment(String projectName,ArrayList<String> stationNameList,int position) {
+    public void switchFragment(String projectName,ArrayList<String> stationNameList,int devicePosition,ArrayList<String> stationUUIDList) {
         //Fragment chartFragment = new ChartFragment();
-        ChartFragment chartFragment = ChartFragment.newInstance(projectName,stationNameList,position);
+        ChartFragment chartFragment = ChartFragment.newInstance(projectName,stationNameList,devicePosition,stationUUIDList);
         MainActivity activity = (MainActivity) getActivity();
         activity.setChartFragment(chartFragment);
         activity.setNowFragment(chartFragment);

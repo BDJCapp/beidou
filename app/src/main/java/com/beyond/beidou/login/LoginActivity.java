@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -84,87 +85,40 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private Intent intent;
     private boolean isVisible = false;
     private LoginUtil loginUtil;
-    public Handler handler = new  Handler(){
+    public Handler handler = new  Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what)
             {
-//                case IMAGECODESUCCESS:
-//                    byte[] Picture = (byte[]) msg.obj;
-//
-//                    Bitmap bitmap = BitmapFactory.decodeByteArray(Picture, 0, Picture.length);
-//                    //将图片流传化为bitmap类型 这样才能用到
-//                    Matrix matrix = new Matrix();
-//                    matrix.postScale(2,2);//对图片进行缩放第一个参数是X轴的缩放大小，第二个参数是Y轴的缩放大小
-//                    Bitmap resizeBmp = Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,true);
-//
-//                    imgPictureCode.setImageBitmap(resizeBmp);
-//                    break;
-        /*        case LOGINDEFAULTFAILED:
-                    Toast.makeText(LoginActivity.this,"输入信息有误，请重新登录",Toast.LENGTH_LONG).show();
-                    etLoginAccount.setText("");
-                    etLoginCheck.setText("");
-                    etPictureCode.setText("");*/
-//                    getImageCode();
-                    //break;
-//                case CODE_ERROR:
-//                    Toast.makeText(LoginActivity.this, String.valueOf(msg.obj),Toast.LENGTH_LONG).show();
-//                    etPictureCode.setText("");
-////                    getImageCode();
-//                    break;
                 case ACCOUNT_OR_PWD_ERROR:
                     Toast.makeText(LoginActivity.this, String.valueOf(msg.obj),Toast.LENGTH_LONG).show();
                     break;
                 case IIILEGAL_USER_SESSION:
                 case SESSION_EXPIRATION_LOGOUT:
                 case 400:
-                case 400010:
-                    loginUtil.getAccessToken();
-                    login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
-                    break;
+//                case 400010:
+//                    loginUtil.getAccessToken();
+//                    login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
+//                    break;
                 case 1:
                     //加载动画之后登录
                     login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
                     break;
                 case 0://判断是否连续点击两次
                         isExit = false;
-                //                case CODE_NULL:
-//                    Toast.makeText(LoginActivity.this, String.valueOf(msg.obj),Toast.LENGTH_LONG).show();
-////                    getImageCode();
-//                    break;
+                    break;
             }
-
         }
     };
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        //Log.e("请求成功,启动页AccessTokenID为", APIUtil.getAccessTokenID());
+
         requestPermissions();
         init();
         initView();
         initEvent();
-        loginUtil.getAccessToken();
-//        !ApiConfig.getSessionUUID().equals("00000000-0000-0000-0000-000000000000")
-//        while(ApiConfig.getSessionUUID() !="00000000-0000-0000-0000-000000000000") {
-//            Log.e("1","对话框消失");
-//            dialog.dismiss();
-//            break;
-//        }
-//        BeanTest b = new BeanTest();
-//        b.addPropertyChangeListener(new PropertyChangeListener() {
-//            @Override
-//            public void propertyChange(PropertyChangeEvent evt) {
-////                dialog.dismiss();
-//                Log.e("1","对话框消失");
-//            }
-//        });
-
-//        loginUtil.getSessionId();  //获取SessionUUID
-        etLoginAccount.setText("qazXSW0");
-        etLoginCheck.setText("qazxswEDCVFR0*");
-        //Log.e("启动页获取的SessionUUID为", APIUtil.getSessionUUID());
     }
 
 
@@ -182,31 +136,19 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
     @Override
     public void initView() {
-//        tvLoginByPhone = findViewById(R.id.tv_loginByPhone);
+
         tvLoginByPwd = findViewById(R.id.tv_loginByPwd);
-//        tvLoginByEmail = findViewById(R.id.tv_loginByEmail);
         tvAccount = findViewById(R.id.tv_account);
-//        tvCheckCode = findViewById(R.id.tv_checkCode);
         etLoginAccount = findViewById(R.id.et_loginAccount);
         etLoginCheck = findViewById(R.id.et_loginCheck);
-//        btnSendCode = findViewById(R.id.btn_loginSendCode);
         imgVisible = findViewById(R.id.img_visiblePwd);
         btnLogin = findViewById(R.id.btn_login);
-//        tvRegister = findViewById(R.id.tv_register);
         tvForgetPwd = findViewById(R.id.tv_forgetPwd);
-//        tvPictureCode = findViewById(R.id.tv_pictureCode);
-//        etPictureCode = findViewById(R.id.et_pictureCheck);
-//        imgPictureCode = findViewById(R.id.img_pictureCode);
-//
-//        tvLoginByPwd.setOnClickListener(this);
-//        tvLoginByPhone.setOnClickListener(this);
-//        tvLoginByEmail.setOnClickListener(this);
         imgVisible.setOnClickListener(this);
-//        tvRegister.setOnClickListener(this);
-//        tvForgetPwd.setOnClickListener(this);
-//        btnSendCode.setOnClickListener(this);
         btnLogin.setOnClickListener(this);
-//        imgPictureCode.setOnClickListener(this);
+
+        etLoginAccount.setText("qazXSW0");
+        etLoginCheck.setText("qazxswEDCVFR0*");
     }
 
     @Override
@@ -219,54 +161,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     public void onClick(View view) {
         switch (view.getId())
         {
-//            case R.id.tv_loginByPhone:
-//                loginType = LoginUtil.LOGINBYPHONE;
-//                setPhoneUI();
-//                break;
-//            case R.id.tv_loginByPwd:
-//                loginType = LoginUtil.LOGINBYPWD;
-//                setPwdUI();
-//                break;
-//            case R.id.tv_loginByEmail:
-//                loginType = LoginUtil.LOGINBYEMAIL;
-//                setEmailUI();
-//                break;
             case R.id.img_visiblePwd:
                 setPwdVisible();
                 break;
-//            case R.id.tv_register:
-//                intent.setClass(LoginActivity.this,RegisterActivity.class);
-//                startActivity(intent);
-//                finish();
-//                break;
-//            case R.id.btn_loginSendCode:
-//                    sendCode();
-//                    break;
             case R.id.btn_login:
-                Log.e("denglu的token为", ApiConfig.getAccessToken());
-                Log.e("denglu的SessionUUID为",  ApiConfig.getSessionUUID());
+                Log.e("token为", ApiConfig.getAccessToken());
+                Log.e("SessionUUID为",  ApiConfig.getSessionUUID());
                 dialog.setLoadingBuilder( Z_TYPE.ROTATE_CIRCLE)//设置类型
                         .setLoadingColor(Color.BLACK)//颜色
                         .setHintText("Loading...")
                         .show();
                 handler.sendEmptyMessageDelayed(1,1500);
-//                login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
-                //loginUtil.test(etPictureCode.getText().toString());
-//                intent.setClass(LoginActivity.this, MainActivity.class);
-//                startActivity(intent);
-//                finish();
-
                 break;
-//            case R.id.img_pictureCode:
-//                getImageCode();
-//                break;
-//            case R.id.tv_forgetPwd:
-//                intent.setClass(LoginActivity.this,ForgetPwdActivity.class);
-//                startActivity(intent);
-//                break;
         }
     }
-
 
      /**
      * 1.检查手机号或者邮箱是否有效
@@ -297,10 +205,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         }
     }
 
-
-
-
-
     private void setPwdVisible() {
         if (!isVisible)
         {
@@ -323,10 +227,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         etLoginCheck.setSelection(etLoginCheck.getText().toString().length());
     }
 
-    public void login(String Username,String Password,String SessionUUID,String AccessToken)
+    public void login(String username,String password,String SessionUUID,String AccessToken)
     {
-
-            loginUtil.loginByPwd("qazXSW0", "qazxswEDCVFR0*", SessionUUID, AccessToken, new Callback() {
+//            loginUtil.loginByPwd("qazXSW0", "qazxswEDCVFR0*", SessionUUID, AccessToken, new Callback() {
+            loginUtil.loginByPwd(username, password, SessionUUID, AccessToken, new Callback() {
 
                 /*loginUtil.loginByPwd(userName, password, imageCode, new Callback() {*/
                 @Override
@@ -375,12 +279,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                                     message.what = IIILEGAL_USER_SESSION;
                                     handler.sendMessage(message);
                                     break;
-//                                case "204"://用户会话非法
-//                                    message.obj = errMsg;
-//                                    message.what = SESSION_EXPIRATION_LOGOUT;
-//                                    handler.sendMessage(message);
-//                                    break;
-
                                 default:
                                     message.what= LOGINDEFAULTFAILED;
                                     handler.sendMessage(message);
@@ -391,10 +289,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     }
                 }
             });
-
     }
-
-
 
     public void requestPermissions(){
         List<String> permissionList = new ArrayList<String>();
@@ -434,36 +329,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-
-//        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-//            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//            builder.setTitle("提示");
-//            builder.setMessage("确定要退出应用");
-//            builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-//                @Override
-//                public void onClick(DialogInterface arg0, int arg1) {
-//                    // TODO Auto-generated method stub
-//                    System.exit(0);
-//                    // System.exit(code);
-//                }
-//            });
-//            builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-//                @Override
-//                public void onClick(DialogInterface arg0, int arg1) {
-//                    // TODO Auto-generated method stub
-//
-//                }
-//            });
-//            builder.show();
-//            return true;
-//        }
-//        return super.onKeyDown(keyCode, event);
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             exit();
             return false;
         }
         return super.onKeyDown(keyCode, event);
     }
+
     private void exit() {
         if (!isExit) {
             isExit = true;

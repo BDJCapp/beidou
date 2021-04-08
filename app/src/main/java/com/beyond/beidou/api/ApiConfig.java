@@ -20,7 +20,7 @@ public class ApiConfig {
         SessionUUID = sessionUUID;
     }
     public static final String BASE_URL = "http://172.18.7.86/dist/API/";
-    private static String SessionUUID = "00000000-0000-0000-0000-000000000000";
+    public static String SessionUUID = "00000000-0000-0000-0000-000000000000";
     public static final String GrantType = "BDJC";
     public static final String AppID = "UzHky82L6hOKCAsI5MBQYImw";
     public static final String AppSecret = "HCarvgfeeCQlFoWfo8lylh7aF61wNNBjv8FriEw";

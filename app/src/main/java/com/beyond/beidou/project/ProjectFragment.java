@@ -94,6 +94,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private MonitoringPointsAdapter mPointsAdapter;
     private LinearLayoutManager layoutManager;
     private ArrayList<String> stationNameList = new ArrayList<>();
+    private ArrayList<String> stationUUIDList = new ArrayList<>();
 
     private static boolean isFirstLogin = true;
     private static String presentProject;
@@ -125,7 +126,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 isFirstLocate = true;
             }
             presentProject = mMainActivity.getPresentProject();
-            Log.e("refreshData", "onHiddenChanged");
             refreshData();
         }
     }
@@ -245,6 +245,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                         projectStationList = project.getStationList();
                                         for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
                                             stationNameList.add(station.getStationName());
+                                            stationUUIDList.add(station.getStationUUID());
                                         }
                                     }
                                 }
@@ -256,6 +257,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                         mSpinner.setSelection(projectList.indexOf(project));
                                         for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
                                             stationNameList.add(station.getStationName());
+                                            stationUUIDList.add(station.getStationUUID());
+
                                         }
                                     }
                                 }
@@ -279,7 +282,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(View view, int position) {
-                                    switchFragment(presentProject, stationNameList, position);
+                                    switchFragment(presentProject, stationNameList, position, stationUUIDList);
                                     MainActivity activity = (MainActivity) getActivity();
                                     activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(1).getItemId());
                                     Log.e("project", "you click " + position);
@@ -330,9 +333,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         if(isReLogin){
             isFirstLogin = true;
         }
-        Log.e("refreshData", "refreshData");
-        Log.e("project", "projectList size: " + projectList.size());
-        Log.e("project", "projectName: " + presentProject);
         for (ProjectResponse.ProjectListBean project : projectList) {
             if (project.getProjectName().equals(presentProject)) {
                 projectStationStatus = project.getProjectStationStatus();
@@ -628,9 +628,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         }
     }
 
-    public void switchFragment(String projectName, ArrayList<String> stationNameList, int position) {
+    public void switchFragment(String projectName, ArrayList<String> stationNameList, int position, ArrayList<String> stationUUIDList) {
         //Fragment chartFragment = new ChartFragment();
-        ChartFragment chartFragment = ChartFragment.newInstance(projectName, stationNameList, position);
+        ChartFragment chartFragment = ChartFragment.newInstance(projectName, stationNameList, position, stationUUIDList);
         MainActivity activity = (MainActivity) getActivity();
         activity.setChartFragment(chartFragment);
         activity.setNowFragment(chartFragment);
