@@ -223,4 +223,3 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
         });
     }
 }
-
