@@ -102,6 +102,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         }
     };
 
+
     public static ChartFragment newInstance(String projectName, ArrayList<String> stationNameList, int position,ArrayList<String> stationUUIDList) {
         ChartFragment chartFragment = new ChartFragment();
         Bundle args = new Bundle();
