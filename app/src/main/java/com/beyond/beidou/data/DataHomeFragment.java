@@ -61,7 +61,6 @@ public class DataHomeFragment extends BaseFragment {
         return view;
     }
 
-
     public void initView(View view) {
         dialog = new ZLoadingDialog(getActivity());
         activity = (MainActivity) getActivity();
