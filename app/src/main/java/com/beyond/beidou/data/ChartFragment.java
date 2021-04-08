@@ -82,7 +82,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private ArrayList<String> stationUUIDList = new ArrayList<>();
     private int selectedDevicePosition;
 
-
     private ZLoadingDialog dialog;
     private Handler handler = new Handler(Looper.getMainLooper())
     {
