@@ -128,7 +128,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                 } else {
                     mParams.put("AccessToken", ApiConfig.getAccessToken());
                     mParams.put("SessionUUID", ApiConfig.getSessionUUID());
-                    mParams.put("Password", originalPwd);
+                    mParams.put("OldPassword", originalPwd);
                     mParams.put("NewPassword", newPwd);
                     Api.config(ApiConfig.SET_PASSWORD, mParams).postRequest(getContext(), new ApiCallback() {
                         @Override
@@ -211,33 +211,6 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
             public void onFailure(Exception e) {
 
             }
-
-/*            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                try {
-                    String responseText = response.body().string();
-                    JSONObject object = new JSONObject(responseText);
-                    String responseCode = object.getString("ResponseCode");
-                    Log.e("log out response ", "logggggggg outtttt   " + responseCode);
-                    switch (responseCode) {
-                        case "205":
-                            ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
-                            while (!LoginUtil.getAccessToken(getActivity())) {}
-                            while (!LoginUtil.getSessionId(getActivity())){}
-                            Intent intent = new Intent(getActivity(), LoginActivity.class);
-                            startActivity(intent);
-                            getActivity().finish();
-                            break;
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }*/
         });
     }
 }
