@@ -30,26 +30,17 @@ import androidx.core.content.ContextCompat;
 import com.beyond.beidou.BaseActivity;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
+import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
-import com.beyond.beidou.test.BeanTest;
 import com.beyond.beidou.util.LoginUtil;
-import com.xuexiang.xui.widget.toast.XToast;
 import com.zyao89.view.zloading.ZLoadingDialog;
 import com.zyao89.view.zloading.Z_TYPE;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
@@ -70,7 +61,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private ImageView imgPictureCode;
 
     private static int loginType = LoginUtil.LOGINBYPWD;   //默认为密码登录
-    //    private final int IMAGECODESUCCESS = 1;            //设置msg.what
+    private final int QUITAPP = 0;
+    private final int LOGIN = 1;
     private final int LOGINDEFAULTFAILED = 2;
     private final int CODE_ERROR = 421;
     private final int ACCOUNT_OR_PWD_ERROR = 400120;
@@ -89,21 +81,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             switch (msg.what)
             {
                 case ACCOUNT_OR_PWD_ERROR:
+
+                case IIILEGAL_USER_SESSION:
+
+                case SESSION_EXPIRATION_LOGOUT:
+
+                case 400:
                     Toast.makeText(LoginActivity.this, String.valueOf(msg.obj),Toast.LENGTH_LONG).show();
                     dialog.dismiss();
                     break;
-                case IIILEGAL_USER_SESSION:
-                case SESSION_EXPIRATION_LOGOUT:
-                case 400:
-//                case 400010:
-//                    loginUtil.getAccessToken();
-//                    login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
-//                    break;
-                case 1:
+                case LOGIN:
                     //加载动画之后登录
                     login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
                     break;
-                case 0://判断是否连续点击两次
+                case QUITAPP://判断是否连续点击两次
                     isExit = false;
                     break;
             }
@@ -170,37 +161,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                         .setLoadingColor(Color.BLACK)//颜色
                         .setHintText("Loading...")
                         .show();
-                handler.sendEmptyMessageDelayed(1,1500);
+                handler.sendEmptyMessageDelayed(LOGIN,1500);
                 break;
-        }
-    }
-
-    /**
-     * 1.检查手机号或者邮箱是否有效
-     * 2.发送验证码
-     */
-    private void sendCode() {
-        if (loginType == LoginUtil.LOGINBYPHONE)
-        {
-            String phone = etLoginAccount.getText().toString();
-            boolean isPhone = loginUtil.checkAccount(phone, LoginUtil.LOGINBYPHONE);
-            if (!isPhone)
-            {
-                //如果手机号格式不正确
-                etLoginAccount.setText("");
-                XToast.warning(this,"手机号格式错误，请重新输入").show();
-            }
-        }
-        else if (loginType == LoginUtil.LOGINBYEMAIL)
-        {
-            String email = etLoginAccount.getText().toString();
-            boolean isEmail = loginUtil.checkAccount(email, LoginUtil.LOGINBYEMAIL);
-            if (!isEmail)
-            {
-                //如果手机号格式不正确
-                etLoginAccount.setText("");
-                XToast.warning(this,"邮箱格式错误，请重新输入").show();
-            }
         }
     }
 
@@ -229,30 +191,19 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     public void login(String username,String password,String SessionUUID,String AccessToken)
     {
 //            loginUtil.loginByPwd("qazXSW0", "qazxswEDCVFR0*", SessionUUID, AccessToken, new Callback() {
-        loginUtil.loginByPwd(username, password, SessionUUID, AccessToken, new Callback() {
+        loginUtil.loginByPwd(LoginActivity.this,username, password, SessionUUID, AccessToken, new ApiCallback() {
 
-            /*loginUtil.loginByPwd(userName, password, imageCode, new Callback() {*/
             @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                //网络请求失败
-                Toast.makeText(LoginActivity.this, "网络请求失败，请检查网络连接，稍后再试", Toast.LENGTH_SHORT).show();
-            }
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                Log.e("登录的response", String.valueOf(response));
-                String responseText = response.body().string();
-                if (!TextUtils.isEmpty(responseText))
-                {
+            public void onSuccess(String res) {
+                Log.e("登录的response", String.valueOf(res));
+                if (!TextUtils.isEmpty(res)) {
                     try {
                         Message message = new Message();
-                        JSONObject object = new JSONObject(responseText);
+                        JSONObject object = new JSONObject(res);
                         String errCode = object.getString("ResponseCode");
                         String errMsg = object.getString("ResponseMsg");
-                        Log.e("登录的response",responseText);
-                        //获取json中的code。json是包含很多数据，这里只是单拿出其中的code吗
-                        switch (errCode){
+                        switch (errCode) {
                             case "200": //登录成功
-                                Log.e("200",responseText);
                                 intent.setClass(LoginActivity.this, MainActivity.class);
                                 startActivity(intent);
                                 dialog.dismiss();
@@ -279,13 +230,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                                 handler.sendMessage(message);
                                 break;
                             default:
-                                message.what= LOGINDEFAULTFAILED;
+                                message.what = LOGINDEFAULTFAILED;
                                 handler.sendMessage(message);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(LoginActivity.this, "网络请求失败，请检查网络连接，稍后再试", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -341,7 +297,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             Toast.makeText(getApplicationContext(), "再按一次退出程序",
                     Toast.LENGTH_SHORT).show();
             // 利用handler延迟发送更改状态信息
-            handler.sendEmptyMessageDelayed(0, 2000);
+            handler.sendEmptyMessageDelayed(QUITAPP, 2000);
         } else {
             finish();
             System.exit(0);

@@ -24,6 +24,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
+import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.project.ProjectFragment;
 import com.beyond.beidou.project.ProjectInfo;
 import com.beyond.beidou.R;
@@ -144,8 +145,9 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
 //                break;
             case R.id.cv_security:
                 Fragment securityFragment = new SecurityFragment();
-                activity.setAboutFragment(securityFragment);
+                activity.setSecurityFragment(securityFragment);
                 activity.setNowFragment(securityFragment);
+                LogUtil.e("444nowFragment",activity.getNowFragment().toString());
                 ft.add(R.id.layout_home, securityFragment).hide(this);
                 ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
@@ -156,30 +158,26 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
     public void logout(String Username, final String SessionUUID, String AccessToken)
     {
 
-        LoginUtil.logout("qazXSW0",  SessionUUID, AccessToken, new Callback() {
+        LoginUtil.logout(getActivity(),"qazXSW0",  SessionUUID, AccessToken, new ApiCallback() {
 
             @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                //网络请求失败
+            public void onSuccess(String res) {
+                Log.e("退出的response", String.valueOf(res));
 
-            }
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                Log.e("退出的response", String.valueOf(response));
-                String responseText = response.body().string();
-                if (!TextUtils.isEmpty(responseText))
+                if (!TextUtils.isEmpty(res))
                 {
                     try {
                         Message message = new Message();
-                        JSONObject object = new JSONObject(responseText);
+                        JSONObject object = new JSONObject(res);
                         String errCode = object.getString("ResponseCode");
                         String errMsg = object.getString("ResponseMsg");
-                        Log.e("退出的response",responseText);
+                        Log.e("退出的response",res);
                         //获取json中的code。json是包含很多数据，这里只是单拿出其中的code吗
                         switch (errCode){
                             case "205": //退出成功
                                 ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
-                                while (!LoginUtil.getAccessToken()){}
+                                while (!LoginUtil.getAccessToken(getActivity())){}
+                                while (!LoginUtil.getSessionId(getActivity())){}
                                 Intent intent= new Intent(getActivity(),LoginActivity.class);
                                 startActivity(intent);
                                 getActivity().finish();
@@ -190,6 +188,12 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
                     }
                 }
             }
+
+            @Override
+            public void onFailure(Exception e) {
+
+            }
+
         });
 
     }
@@ -201,19 +205,12 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
                 .add("AccessToken", ApiConfig.getAccessToken())
                 .build();
 
-        Api.config(ApiConfig.GET_SESSION_UUID).postRequestFormBody( body, new Callback() {
+        Api.config(ApiConfig.GET_SESSION_UUID).postRequestFormBody(getActivity(),body,new ApiCallback() {
             @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                LogUtil.e("设置用户名请求失败", "错误原因"+e.getMessage());
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                String responseText = response.body().string();
-                LogUtil.e("SessionUUID再次请求成功,内容为",responseText);
-                if (!TextUtils.isEmpty(responseText)){
+            public void onSuccess(String res) {
+                if (!TextUtils.isEmpty(res)){
                     try {
-                        JSONObject object = new JSONObject(responseText);
+                        JSONObject object = new JSONObject(res);
                         userName = object.getString("UserName");
                         LogUtil.e("setUserName",userName);
                         Message message = new Message();
@@ -226,6 +223,11 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
                 }else {
                     LogUtil.e("MyFragment setUserName()","设置用户名的response为空");
                 }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+
             }
         });
     }

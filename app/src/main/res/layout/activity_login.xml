@@ -140,7 +140,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="忘记密码？"></TextView>
+                    android:text="忘记密码？"
+                    android:visibility="gone"
+                    >
+                </TextView>
 
             </LinearLayout>
 

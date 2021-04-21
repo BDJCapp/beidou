@@ -9,13 +9,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 
-import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.data.DataHomeFragment;
 import com.beyond.beidou.my.MyFragment;
 import com.beyond.beidou.project.ProjectFragment;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.warning.WarningFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.sql.Time;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener{
 
@@ -28,7 +31,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Fragment helpFragment = null;
     private Fragment aboutFragment = null;
     private Fragment feedbackFragment = null;
-    private Fragment versioninfoFragment = null;
+    private Fragment versionInfoFragment = null;
     private Fragment securityFragment = null;
     private Fragment updatePwdFragment = null;
     private BottomNavigationView navigationView;
@@ -99,6 +102,21 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public void changePageFragment(int id) {
         switch (id) {
             case R.id.nav_my:
+                LogUtil.e("111nowFragement",nowFragment.toString());
+                if (nowFragment == securityFragment || nowFragment == updatePwdFragment) {
+                    LogUtil.e("1111",(nowFragment == securityFragment || nowFragment == updatePwdFragment) + " ");
+                    break;
+                }
+                LogUtil.e("222",(nowFragment == securityFragment) + "");
+                if (updatePwdFragment != null)
+                {
+                    switchFragment(nowFragment,updatePwdFragment);
+                    break;
+                }else if (securityFragment != null)
+                {
+                    switchFragment(nowFragment,securityFragment);
+                    break;
+                }
                 if (myFragment == null) { //减少new fragment,避免不必要的内存消耗
                     myFragment = new MyFragment();
                 }
@@ -166,22 +184,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
         if (nowFragment == chartFragment)
         {
-//            if(projectFragment != null && dataFragment == null){
-//                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//                transaction.remove(chartFragment).show(projectFragment);
-//                nowFragment = projectFragment;
-//                getNavigationView().setSelectedItemId(getNavigationView().getMenu().getItem(0).getItemId());
-//                chartFragment = null;
-//                Log.e("onBackPressed", "projectFragment != null && dataFragment == null" );
-//            }else{
-//                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//                transaction.remove(chartFragment).show(dataFragment);
-//                nowFragment = dataFragment;
-//                chartFragment = null;
-//                transaction.commitAllowingStateLoss();
-//                Log.e("onBackPressed", "else" );
-//
-//            }
             FragmentManager fm = getProjectFragment().getFragmentManager();
 //            fm.popBackStack();
             fm.beginTransaction().remove(nowFragment);
@@ -201,22 +203,20 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
         }
 
-
-        if (nowFragment == helpFragment)
+        if (nowFragment == securityFragment)
         {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(helpFragment).show(myFragment);
+            transaction.remove(nowFragment);
             nowFragment = myFragment;
-            helpFragment = null;
+            securityFragment = null;
         }
 
-
-        if (nowFragment == aboutFragment)
+        if (nowFragment == updatePwdFragment)
         {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(aboutFragment).show(myFragment);
-            nowFragment = myFragment;
-            aboutFragment = null;
+            transaction.remove(updatePwdFragment);
+            nowFragment = securityFragment;
+            updatePwdFragment = null;
         }
         super.onBackPressed();
     }
@@ -240,7 +240,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     }
 
     public void setVersionInfoFragment(Fragment versioninfoFragment) {
-        this.versioninfoFragment = versioninfoFragment;
+        this.versionInfoFragment = versioninfoFragment;
     }
 
 
@@ -289,7 +289,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     }
 
     public void setSecurityFragment(Fragment securityFragment) {
-        securityFragment = securityFragment;
+        this.securityFragment = securityFragment;
     }
 
     public Fragment getUpdatePwdFragment() {

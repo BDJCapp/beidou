@@ -12,8 +12,16 @@ import androidx.annotation.Nullable;
 
 import com.beyond.beidou.BaseActivity;
 import com.beyond.beidou.R;
+import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 
 /**
@@ -24,7 +32,6 @@ public class StartActivity extends BaseActivity {
 
     private LoginUtil loginUtil;
     private Intent intent;
-    boolean isFinish;
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -46,7 +53,38 @@ public class StartActivity extends BaseActivity {
 
     @Override
     public void initData() {
+        Thread getTokenThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!LoginUtil.getAccessToken(StartActivity.this)){}
+                LoginUtil.upDateToken(getApplicationContext());
+                LogUtil.e("成功获取Token", ApiConfig.getAccessToken());
+            }
+        });
+        getTokenThread.start();
 
+        try {
+            getTokenThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Thread getSessionThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!LoginUtil.getSessionId(StartActivity.this)){}
+                LogUtil.e("成功获取Session", ApiConfig.getSessionUUID());
+            }
+        });
+        getSessionThread.start();
+        try {
+            getSessionThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        //获取到Token和SessionUUID之后等待200毫秒结束启动页
+        handler.sendEmptyMessageDelayed(1001, 200);
     }
 
     @Override
@@ -56,13 +94,6 @@ public class StartActivity extends BaseActivity {
 
     @Override
     public void initEvent() {
-        isFinish = LoginUtil.getAccessToken();
-        while (!isFinish)
-        {
-            isFinish = LoginUtil.getAccessToken();
-        }
-        //获取到Token和SessionUUID之后结束启动页
-        handler.sendEmptyMessageDelayed(1001, 200);
     }
 
     @Override
@@ -70,12 +101,6 @@ public class StartActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
         init();
-        Thread httpThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                initEvent();
-            }
-        });
-        httpThread.start();
+        initData();
     }
 }

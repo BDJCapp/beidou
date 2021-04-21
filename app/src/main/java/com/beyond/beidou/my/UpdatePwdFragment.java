@@ -185,8 +185,34 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
 
     private void logOut(String userName, String AccessToken, String SessionUUID) {
         Log.e("logout  ", "position 2");
-        LoginUtil.logout(userName, SessionUUID, AccessToken, new Callback() {
+        LoginUtil.logout(getActivity(),userName, SessionUUID, AccessToken, new ApiCallback() {
             @Override
+            public void onSuccess(String res) {
+                try {
+                    JSONObject object = new JSONObject(res);
+                    String responseCode = object.getString("ResponseCode");
+                    Log.e("log out response ", "logggggggg outtttt   " + responseCode);
+                    switch (responseCode) {
+                        case "205":
+                            ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
+                            while (!LoginUtil.getAccessToken(getActivity())) {}
+                            while (!LoginUtil.getSessionId(getActivity())){}
+                            Intent intent = new Intent(getActivity(), LoginActivity.class);
+                            startActivity(intent);
+                            getActivity().finish();
+                            break;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+
+            }
+
+/*            @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
 
             }
@@ -201,8 +227,8 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                     switch (responseCode) {
                         case "205":
                             ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
-                            while (!LoginUtil.getAccessToken()) {
-                            }
+                            while (!LoginUtil.getAccessToken(getActivity())) {}
+                            while (!LoginUtil.getSessionId(getActivity())){}
                             Intent intent = new Intent(getActivity(), LoginActivity.class);
                             startActivity(intent);
                             getActivity().finish();
@@ -211,7 +237,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            }
+            }*/
         });
     }
 }

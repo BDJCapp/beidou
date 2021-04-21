@@ -199,9 +199,6 @@ public class DataHomeFragment extends BaseFragment {
                                 LinearLayoutManager manager = new LinearLayoutManager(getActivity());
                                 manager.setOrientation(RecyclerView.VERTICAL);
                                 deviceList.setLayoutManager(manager);
-
-//                                dialog.dismiss();
-
                             }
                         });
                     }

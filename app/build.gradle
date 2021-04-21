@@ -49,5 +49,4 @@ dependencies {
 
     //登陆动画
     compile 'com.zyao89:zloading:1.0.11'
-
 }

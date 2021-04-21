@@ -3,15 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <com.baidu.mapapi.map.MapView
         android:id="@+id/bdmapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true"
-        />
+        android:clickable="true" />
 
     <com.yinglan.scrolllayout.ScrollLayout
         android:id="@+id/scrollLayout"
@@ -39,52 +37,79 @@
                         android:layout_gravity="center_horizontal"
                         android:src="@drawable/ic_minus" />
 
-                    <Spinner
-                        android:id="@+id/spinner"
-                        android:layout_width="wrap_content"
+                    <RelativeLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
                         android:layout_marginBottom="10dp"
-                        android:theme="@style/spinner_style"
-                        />
+                        android:gravity="center_horizontal"
+                        android:padding="5dp">
+
+                        <Spinner
+                            android:id="@+id/spinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:theme="@style/spinner_style" />
+
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginRight="20dp"
+                            >
+
+                            <ImageView
+                                android:id="@+id/iv_refresh"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/ic_refresh"
+                                android:layout_alignParentLeft="true"
+                                />
+
+                            <TextView
+                                android:id="@+id/tv_refresh"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="刷新"
+                                android:layout_toRightOf="@+id/iv_refresh"
+                                />
+
+                        </RelativeLayout>
+
+                    </RelativeLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="5dp"
                         android:orientation="horizontal"
-                        android:padding="5dp"
-                        >
+                        android:padding="5dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="监测点总数:"
-                            />
+                            android:text="监测点总数:" />
 
                         <TextView
                             android:id="@+id/tv_amount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
                             android:maxLines="1"
-                            />
+                            android:text="0" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="更新于:"
-                            android:maxLines="1"
                             android:layout_marginLeft="20dp"
-                            />
+                            android:maxLines="1"
+                            android:text="更新于:" />
 
                         <TextView
                             android:id="@+id/tv_time"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:maxLines="1"
-                            android:text="2021-02-06-00:00:00"
-                            />
+                            android:text="_????-??-??-??:??:??" />
 
                     </LinearLayout>
 
@@ -93,59 +118,57 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="10dp"
                         android:orientation="horizontal"
-                        android:padding="5dp"
-                        >
+                        android:padding="5dp">
 
                         <Button
                             android:id="@+id/btn_amount"
                             android:layout_width="0dp"
                             android:layout_height="60dp"
-                            android:gravity="center"
-                            android:background="@drawable/btn_amount_bg"
-                            android:text="总数：\n4"
                             android:layout_marginStart="5dp"
                             android:layout_weight="1"
-                            />
+                            android:background="@drawable/btn_amount_bg"
+                            android:gravity="center"
+                            android:text="总数：\n?" />
+
                         <Button
                             android:id="@+id/btn_online"
                             android:layout_width="0dp"
                             android:layout_height="60dp"
-                            android:gravity="center"
-                            android:background="@drawable/btn_online_bg"
-                            android:text="在线：\n1"
                             android:layout_marginStart="5dp"
                             android:layout_weight="1"
-                            />
+                            android:background="@drawable/btn_online_bg"
+                            android:gravity="center"
+                            android:text="在线：\n?" />
+
                         <Button
                             android:id="@+id/btn_warning"
                             android:layout_width="0dp"
                             android:layout_height="60dp"
-                            android:gravity="center"
-                            android:background="@drawable/btn_warning_bg"
-                            android:text="警告：\n1"
                             android:layout_marginStart="5dp"
                             android:layout_weight="1"
-                            />
+                            android:background="@drawable/btn_warning_bg"
+                            android:gravity="center"
+                            android:text="警告：\n?" />
+
                         <Button
                             android:id="@+id/btn_error"
                             android:layout_width="0dp"
                             android:layout_height="60dp"
-                            android:gravity="center"
-                            android:background="@drawable/btn_error_bg"
-                            android:text="故障：\n1"
                             android:layout_marginStart="5dp"
                             android:layout_weight="1"
-                            />
+                            android:background="@drawable/btn_error_bg"
+                            android:gravity="center"
+                            android:text="故障：\n?" />
+
                         <Button
                             android:id="@+id/btn_offline"
                             android:layout_width="0dp"
                             android:layout_height="60dp"
-                            android:gravity="center"
-                            android:background="@drawable/btn_offline_bg"
-                            android:text="离线：\n1"
                             android:layout_marginStart="5dp"
                             android:layout_weight="1"
-                            />
+                            android:background="@drawable/btn_offline_bg"
+                            android:gravity="center"
+                            android:text="离线：\n?" />
 
                     </LinearLayout>
 
@@ -153,14 +176,12 @@
                         android:id="@+id/recycle_view"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="54dp"
-                        />
+                        android:layout_marginBottom="54dp" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
-                        android:background="@null"
-                        />
+                        android:background="@null" />
 
                 </LinearLayout>
 

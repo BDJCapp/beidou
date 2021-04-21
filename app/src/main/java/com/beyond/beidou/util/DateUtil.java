@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 
 import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.PointValue;
@@ -209,7 +210,8 @@ public class DateUtil {
     }
 
     public static List<AxisValue> getDayXAxisLabel() {
-        String[] labels = new String[]{"00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "24:00"};
+//        String[] labels = new String[]{"00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "24:00"};
+        String[] labels = new String[]{"00", "02", "04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "24"};
         List<AxisValue> axisValues = new ArrayList<>();
         for (int i = 0; i <= 1440; i += 120) {
             AxisValue axisValue = new AxisValue(i);
@@ -243,33 +245,21 @@ public class DateUtil {
         switch (selectedTime) {
             case "最近1小时":
                 //暂时只有3.9号的数据，之后直接把"2021-03-09 "去掉即可。
-//                startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(1));
-//                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
                 startTime = sdf.format(DateUtil.getHourBegin(1));
                 endTime = sdf.format(DateUtil.getHourEnd());
                 time = startTime + "~" + endTime;
                 break;
             case "最近6小时":
-//                startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(6));
-//                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
                 startTime = sdf.format(DateUtil.getHourBegin(6));
                 endTime = sdf.format(DateUtil.getHourEnd());
                 time = startTime + "~" + endTime;
                 break;
             case "最近12小时":
-                //12点之后调用
-//                startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(12));
-//                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
                 startTime = sdf.format(DateUtil.getHourBegin(12));
                 endTime = sdf.format(DateUtil.getHourEnd());
-                //12点之前调用，当前只有一天的数据，跨天查询不行
-//                startTime = "2021-03-09 " + "04:00:00";
-//                endTime = "2021-03-09 " + "16:00:00";
                 time = startTime + "~" + endTime;
                 break;
             case "本日":
-//                startTime = "2021-03-09 " + sdf.format(DateUtil.getDayBegin());
-//                endTime = "2021-03-09 " + sdf.format(DateUtil.getDayEnd());
                 startTime = sdf.format(DateUtil.getDayBegin());
                 endTime = sdf.format(DateUtil.getDayEnd());
                 time = startTime + "~" + endTime;
@@ -278,19 +268,16 @@ public class DateUtil {
                 startTime = sdf.format(DateUtil.getBeginDayOfWeek());
                 endTime = sdf.format(DateUtil.getEndDayOfWeek());
                 time = startTime + "~" + endTime;
-//                time = "2021-02-01 00:00:00~2021-02-07 24:00:00";
                 break;
             case "本月":
                 startTime = sdf.format(DateUtil.getBeginDayOfMonth());
                 endTime = sdf.format(DateUtil.getEndDayOfMonth());
                 time = startTime + "~" + endTime;
-//                time = "2021-02-01 00:00:00~2021-02-08 24:00:00";
                 break;
             case "本年":
                 startTime = sdf.format(DateUtil.getBeginDayOfYear());
                 endTime = sdf.format(DateUtil.getEndDayOfYear());
                 time = startTime + "~" + endTime;
-//                time = "2020-01-01 00:00:00~2020-12-31 24:00:00";
                 break;
         }
         return time;
@@ -310,8 +297,7 @@ public class DateUtil {
         return cal.get(Calendar.DATE);
     }
 
-    public static boolean isLeapYear() {
-        int year = getYear();
+    public static boolean isLeapYear(int year) {
         return ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0);
     }
 
@@ -333,7 +319,7 @@ public class DateUtil {
         String lastSuffix = "号 24:00";
         switch (getMonthType()) {
             case TYPE_28:
-                for (int i = 0; i < TYPE_28 ; i++) {
+                for (int i = 0; i < TYPE_28; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_28 + lastSuffix);
@@ -344,7 +330,7 @@ public class DateUtil {
                 }
                 break;
             case TYPE_29:
-                for (int i = 0; i < TYPE_29 ; i++) {
+                for (int i = 0; i < TYPE_29; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_29 + lastSuffix);
@@ -355,20 +341,20 @@ public class DateUtil {
                 }
                 break;
             case TYPE_30:
-                for (int i = 0; i < TYPE_30 ; i++) {
+                for (int i = 0; i < TYPE_30; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_30 + lastSuffix);
                 for (int i = 0, j = 0; i <= (TYPE_30 * 1440); i += 1440) {
                     AxisValue axisValue = new AxisValue(i);
-                    Log.e("Month", "  " + i );
+                    Log.e("Month", "  " + i);
                     Log.e("Month", "  " + labels.get(j));
                     axisValue.setLabel(labels.get(j++));
                     xAxis.add(axisValue);
                 }
                 break;
             case TYPE_31:
-                for (int i = 0; i < TYPE_31 ; i++) {
+                for (int i = 0; i < TYPE_31; i++) {
                     labels.add((i + 1) + normalSuffix);
                 }
                 labels.add(TYPE_31 + lastSuffix);
@@ -386,7 +372,7 @@ public class DateUtil {
         List<AxisValue> xAxis = new ArrayList<>();
         String[] labels = new String[]{"1月1日 00:00", "2月1日 00:00", "3月1日 00:00", "4月1日 00:00", "5月1日 00:00", "6月1日 00:00", "7月1日 00:00", "8月1日 00:00", "9月1日 00:00", "10月1日 00:00", "11月1日 00:00", "12月1日 00:00", "12月31日 24:00"};
         int interval;
-        if (isLeapYear()) {
+        if (isLeapYear(getYear())) {
             for (int i = 0, j = 0; i <= (1440 * 366); i += interval) {
                 AxisValue axisValue = new AxisValue(i);
                 axisValue.setLabel(labels[j++]);
@@ -424,7 +410,7 @@ public class DateUtil {
      */
     private static int getMonthType() {
         //平年
-        if (!isLeapYear()) {
+        if (!isLeapYear(getYear())) {
             if (monthList_30.contains(getMonth())) {
                 return TYPE_30;
             } else if (monthList_31.contains(getMonth())) {
@@ -440,6 +426,111 @@ public class DateUtil {
             } else {
                 return TYPE_29;
             }
+        }
+    }
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+    public static List<AxisValue> getRecentWeekXAxis() {
+        List<AxisValue> xAxis = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd", Locale.CHINA);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, 1);
+        Date date = calendar.getTime();
+        labels.add(sdf.format(date) + " 24:00");
+        for (int i = 0; i < 14; i++) {
+            if(i % 2 == 0){
+                labels.add(sdf.format(date) + " 12:00");
+            }else{
+                labels.add(sdf.format(date) + " 00:00");
+                calendar.add(Calendar.DATE, -1);
+            }
+            date = calendar.getTime();
+        }
+        for (int i = 0, j = 14; i <= 10080; i += 720) {
+            AxisValue axisValue = new AxisValue(i);
+            axisValue.setLabel(labels.get(j--));
+            xAxis.add(axisValue);
+        }
+        return xAxis;
+    }
+
+    public static List<AxisValue> getRecentMonthXAxis() {
+        List<AxisValue> xAxis = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd", Locale.CHINA);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, 1);
+        Date date = calendar.getTime();
+        calendar.add(Calendar.MONTH, -1);
+        calendar.add(Calendar.DATE, -1);
+        Date dateBefore = calendar.getTime();
+        int days = calcDayOffset(dateBefore, date);
+        for (int i = 0; i <= days; i++) {
+            labels.add(sdf.format(date));
+            calendar.setTime(date);
+            calendar.add(Calendar.DATE, -1);
+            date = calendar.getTime();
+        }
+        for (int i = 0, j = days; i <= days * 1440; i += 1440) {
+            AxisValue axisValue = new AxisValue(i);
+            axisValue.setLabel(labels.get(j--));
+            xAxis.add(axisValue);
+        }
+        return xAxis;
+    }
+
+    public static List<AxisValue> getRecentYearXAxis() {
+        int interval = 0;
+        List<AxisValue> xAxis = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        List<Integer> intervals = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, 1);
+        Date present = calendar.getTime();
+        calendar.add(Calendar.DATE, -1);
+        for (int i = 0; i <= 12; i++) {
+            labels.add(sdf.format(present));
+            calendar.add(Calendar.MONTH, -1);
+            intervals.add(calcDayOffset(calendar.getTime(), present));
+            present = calendar.getTime();
+        }
+
+        int totalXCount = isLeapYear(getYear() - 1) ? 366 * 1440 : 365 * 1440;
+        for (int i = 0, j = 12; i <= totalXCount; i += 1440 * interval) {
+            if (j >= 0) {
+                interval = intervals.get(12 - j);
+                AxisValue axisValue = new AxisValue(i);
+                axisValue.setLabel(labels.get(j--));
+                xAxis.add(axisValue);
+            }
+        }
+        return xAxis;
+    }
+
+    public static int calcDayOffset(Date date1, Date date2) {
+        Calendar cal1 = Calendar.getInstance();
+        cal1.setTime(date1);
+        Calendar cal2 = Calendar.getInstance();
+        cal2.setTime(date2);
+        int day1 = cal1.get(Calendar.DAY_OF_YEAR);
+        int day2 = cal2.get(Calendar.DAY_OF_YEAR);
+        int year1 = cal1.get(Calendar.YEAR);
+        int year2 = cal2.get(Calendar.YEAR);
+        if (year1 != year2) {
+            int timeDistance = 0;
+            for (int i = year1; i < year2; i++) {
+                if (isLeapYear(getYear() - 1)) {  //闰年
+                    timeDistance += 366;
+                } else {
+                    timeDistance += 365;
+                }
+            }
+            return timeDistance + (day2 - day1);
+        } else {
+            return day2 - day1;
         }
     }
 }

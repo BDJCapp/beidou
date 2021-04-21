@@ -43,6 +43,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:id="@+id/tv_load_excel"
+                    android:visibility="gone"
                     />
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>
@@ -71,18 +72,7 @@
             android:entries="@array/ProjectName"
             android:spinnerMode="dropdown"
             android:overlapAnchor="false"
-            android:dropDownWidth="100dp"
-            android:theme="@style/spinner_style"
-            />
-        <Spinner
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/sp_chart_type"
-            android:entries="@array/ProjectName"
-            android:spinnerMode="dropdown"
-            android:overlapAnchor="false"
-            android:dropDownWidth="90dp"
+            android:dropDownWidth="180dp"
             android:theme="@style/spinner_style"
             />
         <Spinner
@@ -93,7 +83,7 @@
             android:entries="@array/ProjectName"
             android:spinnerMode="dropdown"
             android:overlapAnchor="false"
-            android:dropDownWidth="120dp"
+            android:dropDownWidth="180dp"
             android:theme="@style/spinner_style"
             />
     </LinearLayout>
@@ -109,6 +99,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:id="@+id/layout_chart"
     >
 
     <LinearLayout
@@ -117,6 +108,7 @@
         android:padding="5dp"
         android:orientation="vertical"
         android:id="@+id/layout_chartX"
+        android:background="@color/main_white"
         >
         <RelativeLayout
             android:layout_width="match_parent"
@@ -133,7 +125,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_chartNameX"
-                android:text="Test"
+                android:text="N"
                 android:textSize="18dp"
                 android:textColor="@color/text_black"
                 android:layout_toRightOf="@id/img_icChartX"
@@ -168,6 +160,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/chart_X"
             android:layout_marginTop="20dp"
+            android:background="@color/main_white"
             />
     </LinearLayout>
 
@@ -195,7 +188,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_chartNameY"
-                android:text="Test"
+                android:text="E"
                 android:textSize="18dp"
                 android:textColor="@color/text_black"
                 android:layout_toRightOf="@id/img_icChartY"
@@ -225,7 +218,6 @@
                 android:layout_below="@+id/tv_chartNameY"
                 />
         </RelativeLayout>
-
         <lecho.lib.hellocharts.view.LineChartView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -233,6 +225,7 @@
             android:layout_marginTop="20dp"
             />
     </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -258,7 +251,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_chartNameH"
-                android:text="Test"
+                android:text="H"
                 android:textSize="18dp"
                 android:textColor="@color/text_black"
                 android:layout_toRightOf="@id/img_icChartH"
@@ -287,11 +280,193 @@
                 android:layout_below="@+id/tv_chartNameH"
                 />
         </RelativeLayout>
-
         <lecho.lib.hellocharts.view.LineChartView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_H"
+            android:layout_marginTop="20dp"
+            />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        android:padding="5dp"
+        android:orientation="vertical"
+        android:id="@+id/layout_deltaD"
+        android:layout_marginTop="20dp"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_svg_chart"
+                android:id="@+id/img_icDeltaD"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_DeltaDChartName"
+                android:text="水平位移图"
+                android:textSize="18dp"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/img_icDeltaD"
+                android:layout_marginLeft="10dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_coordinateSystemDeltaD"
+                android:text="Test"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_DeltaDChartName"
+                android:layout_toLeftOf="@+id/tv_chartTimeDeltaD"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_chartTimeDeltaD"
+                android:text="Test"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_DeltaDChartName"
+                android:layout_alignParentRight="true"
+                />
+        </RelativeLayout>
+
+        <lecho.lib.hellocharts.view.LineChartView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/chart_DeltaD"
+            android:layout_marginTop="20dp"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        android:padding="5dp"
+        android:orientation="vertical"
+        android:id="@+id/layout_deltaH"
+        android:layout_marginTop="20dp"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_svg_chart"
+                android:id="@+id/img_icChartDeltaH"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_chartNameDeltaH"
+                android:text="垂直位移图"
+                android:textSize="18dp"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/img_icChartDeltaH"
+                android:layout_marginLeft="10dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_coordinateSystemDeltaH"
+                android:text="Test"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_chartNameDeltaH"
+                android:layout_toLeftOf="@+id/tv_chartTimeDeltaH"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_chartTimeDeltaH"
+                android:text="Test"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_chartNameDeltaH"
+                android:layout_alignParentRight="true"
+                />
+        </RelativeLayout>
+
+        <lecho.lib.hellocharts.view.LineChartView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/chart_DeltaH"
+            android:layout_marginTop="20dp"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        android:padding="5dp"
+        android:orientation="vertical"
+        android:id="@+id/layout_chartHeart"
+        android:layout_marginTop="20dp"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_svg_chart"
+                android:id="@+id/img_icChartHeart"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_chartNameHeart"
+                android:text="心型图"
+                android:textSize="18dp"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/img_icChartHeart"
+                android:layout_marginLeft="10dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_coordinateSystemHeart"
+                android:text="Test"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_chartNameHeart"
+                android:layout_toLeftOf="@+id/tv_chartTimeHeart"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_chartTimeHeart"
+                android:text="Test"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_chartNameHeart"
+                android:layout_alignParentRight="true"
+                />
+        </RelativeLayout>
+
+        <lecho.lib.hellocharts.view.LineChartView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/chart_Heart"
             android:layout_marginTop="20dp"
             />
     </LinearLayout>
