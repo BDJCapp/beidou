@@ -195,7 +195,6 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
             }
 
         });
-
     }
 
     public void setUserName()

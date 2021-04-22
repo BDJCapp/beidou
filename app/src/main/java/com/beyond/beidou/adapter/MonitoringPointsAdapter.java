@@ -110,6 +110,6 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
         if(mOnItemClickListener == null){
             Log.e("setOnItemClickListener", "mOnItemClickListener is null");
         }
-        this.mOnItemClickListener = mOnItemClickListener;
+        MonitoringPointsAdapter.mOnItemClickListener = mOnItemClickListener;
     }
 }

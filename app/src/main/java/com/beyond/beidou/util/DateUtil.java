@@ -1,5 +1,6 @@
 package com.beyond.beidou.util;
 
+import android.animation.FloatEvaluator;
 import android.util.Log;
 
 import java.sql.Timestamp;
@@ -33,20 +34,18 @@ public class DateUtil {
 
     //获取hour小时的开始时间
     public static Date getHourBegin(int hour) {
-        Date date = getHourTime(getHourEnd(),hour,"-");
+        Date date = getHourTime(getHourEnd(), hour, "-");
         return date;
     }
 
     //获取hour的结束时间
-    public static Date getHourEnd(){
+    public static Date getHourEnd() {
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-        if ("00:00".equals(sdf.format(date)))
-        {
-            date = getHourTime(new Date(),0,"=");
-        }
-        else {
-            date = getHourTime(new Date(),1,"+");
+        if ("00:00".equals(sdf.format(date))) {
+            date = getHourTime(new Date(), 0, "=");
+        } else {
+            date = getHourTime(new Date(), 1, "+");
         }
         return date;
     }
@@ -87,7 +86,7 @@ public class DateUtil {
     }
 
     //获取本周的结束时间
-    public static Date getEndDayOfWeek(){
+    public static Date getEndDayOfWeek() {
         Calendar cal = Calendar.getInstance();
         cal.setTime(getBeginDayOfWeek());
         cal.add(Calendar.DAY_OF_WEEK, 6);
@@ -120,6 +119,7 @@ public class DateUtil {
         cal.set(Calendar.DATE, 1);
         return getDayStartTime(cal.getTime());
     }
+
     //获取本年的结束时间
     public static Date getEndDayOfYear() {
         Calendar cal = Calendar.getInstance();
@@ -132,22 +132,23 @@ public class DateUtil {
     //获取某个日期的开始时间
     public static Timestamp getDayStartTime(Date d) {
         Calendar calendar = Calendar.getInstance();
-        if(null != d) calendar.setTime(d);
-        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),    calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        if (null != d) calendar.setTime(d);
+        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         return new Timestamp(calendar.getTimeInMillis());
     }
+
     //获取某个日期的结束时间
     public static Timestamp getDayEndTime(Date d) {
         Calendar calendar = Calendar.getInstance();
-        if(null != d) calendar.setTime(d);
-        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),    calendar.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        if (null != d) calendar.setTime(d);
+        calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
         calendar.set(Calendar.MILLISECOND, 999);
         return new Timestamp(calendar.getTimeInMillis());
     }
 
     //获取当前是几点
-    public static int getNowHour(){
+    public static int getNowHour() {
         Calendar calendar = Calendar.getInstance();
         int curHour24 = calendar.get(Calendar.HOUR_OF_DAY);  //24小时制
         return curHour24;
@@ -160,6 +161,7 @@ public class DateUtil {
         gc.setTime(date);
         return gc.get(1);
     }
+
     //获取本月是哪一月
     public static int getNowMonth() {
         Date date = new Date();
@@ -194,8 +196,7 @@ public class DateUtil {
     }
 
     //获取1，6，12h的X轴标签
-    public static List<String> getHourXLabel(int hour)
-    {
+    public static List<String> getHourXLabel(int hour) {
         int timeSpace = 5 * hour;
         SimpleDateFormat secondFormat = new SimpleDateFormat("MM-dd HH:mm");
         List<String> timeLabel = new ArrayList<>();
@@ -203,7 +204,7 @@ public class DateUtil {
         calendar.setTime(DateUtil.getHourBegin(hour));
         timeLabel.add(secondFormat.format(DateUtil.getHourBegin(hour)));
         for (int i = 0; i < 12; i++) {
-            calendar.add(Calendar.MINUTE,timeSpace);
+            calendar.add(Calendar.MINUTE, timeSpace);
             timeLabel.add(secondFormat.format(calendar.getTime()));
         }
         return timeLabel;
@@ -222,13 +223,12 @@ public class DateUtil {
     }
 
 
-    public static List<AxisValue> getHourXAxisLabel(int hour)
-    {
+    public static List<AxisValue> getHourXAxisLabel(int hour) {
         int totalPoint = 60 * hour;
         int spaceTIme = 5 * hour;
         List<AxisValue> axisValues = new ArrayList<>();
         List<String> labelList = DateUtil.getHourXLabel(hour);
-        for (int i = 0; i <= totalPoint; i+=spaceTIme) {
+        for (int i = 0; i <= totalPoint; i += spaceTIme) {
             AxisValue axisValue = new AxisValue(i);
             axisValue.setLabel(labelList.get(i / spaceTIme));
             axisValues.add(axisValue);
@@ -236,8 +236,7 @@ public class DateUtil {
         return axisValues;
     }
 
-    public static String getTimeInterval(String selectedTime)
-    {
+    public static String getTimeInterval(String selectedTime) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
         String time = null;
         String startTime = null;
