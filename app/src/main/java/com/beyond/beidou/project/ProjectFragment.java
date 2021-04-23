@@ -364,6 +364,7 @@ private boolean isAmount = true;
                     Log.e("ResponseMsg", response.getResponseMsg());
                 }
                 else{
+                    showToastSync("未请求到数据，请重新登录！");
                     isReLogin = true;
                     ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
                     while (!LoginUtil.getAccessToken(getContext())){}
@@ -725,5 +726,4 @@ private boolean isAmount = true;
         mMapView = null;
         super.onDestroy();
     }
-
 }
