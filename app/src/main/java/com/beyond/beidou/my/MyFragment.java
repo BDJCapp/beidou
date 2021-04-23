@@ -31,6 +31,7 @@ import com.beyond.beidou.R;
 import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.login.LoginActivity;
+import com.beyond.beidou.util.FileUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.SPDatautils;
@@ -118,31 +119,6 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
                 ProjectFragment.isReLogin = true;
                 logout("qazXSW0",ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
                 break;
-
-            case R.id.img_help:
-                Fragment helpFragment = new HelpFragment();
-                activity.setHelpFragment(helpFragment);
-                activity.setNowFragment(helpFragment);
-                ft.add(R.id.layout_home, helpFragment).hide(this);
-                ft.addToBackStack(null);   //加入到返回栈中
-                ft.commit();
-//                Intent intent = new Intent(getActivity(),HelpActivity.class);
-//                startActivity(intent);
-                break;
-
-            case R.id.img_about:
-                Fragment aboutFragment = new AboutFragment();
-                activity.setAboutFragment(aboutFragment);
-                activity.setNowFragment(aboutFragment);
-                ft.add(R.id.layout_home, aboutFragment).hide(this);
-                ft.addToBackStack(null);   //加入到返回栈中
-                ft.commit();
-                break;
-//            case R.id.img_UserMore:
-//                intent.setClass(getActivity(), ShowUserInfoActivity.class);
-//                intent.putExtra("userName",userName);
-//                startActivity(intent);
-//                break;
             case R.id.cv_security:
                 Fragment securityFragment = new SecurityFragment();
                 activity.setSecurityFragment(securityFragment);

@@ -33,4 +33,5 @@ public class ApiConfig {
     public static final String LOGIN = "doLogin.php";
     public static final String LOGOUT = "doLogout.php";
     public static final String SET_PASSWORD = "setPassword.php";
+    public static final String GET_STATION_REPORT = "getStationReport.php";
 }

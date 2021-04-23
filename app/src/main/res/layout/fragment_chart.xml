@@ -43,7 +43,6 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:id="@+id/tv_load_excel"
-                    android:visibility="gone"
                     />
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>

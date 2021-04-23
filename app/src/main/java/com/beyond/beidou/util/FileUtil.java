@@ -1,7 +1,20 @@
 package com.beyond.beidou.util;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Toast;
+
+import androidx.core.content.FileProvider;
+
+import com.beyond.beidou.R;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -55,4 +68,40 @@ public class FileUtil {
             }
         }
     }
+
+    public static void openExcelFile(Context context,String fileUrl)
+    {
+        if (fileUrl!= null) {
+            try {
+                Uri uri;
+                File file = new File(fileUrl);
+                Intent intent = new Intent("android.intent.action.VIEW");
+                intent.addCategory("android.intent.category.DEFAULT");
+                if (Build.VERSION.SDK_INT > 23){
+                    //Android 7.0之后
+                    uri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", file);
+                    intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);//给目标文件临时授权
+                }else {
+                    uri = Uri.fromFile(file);
+                }
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                LogUtil.e("该文件是否存在",fileIsExist(fileUrl) + " ");
+
+                intent.setDataAndType(uri, "application/vnd.ms-excel");
+
+                context.startActivity(intent);
+            } catch (Exception e) {
+                //没有安装第三方的软件会提示
+                LogUtil.e("打开文件异常信息",e.toString());
+                Toast toast = Toast.makeText(context, "没有找到打开该文件的应用程序", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        } else {
+            Toast.makeText(context, "文件路径错误", Toast.LENGTH_SHORT).show();
+            return;
+        }
+    }
+
+
+
 }
