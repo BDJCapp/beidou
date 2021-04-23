@@ -1032,6 +1032,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 }
             }
 
+
             @Override
             public void onFailure(Exception e) {
                 LogUtil.e("downloadReport network failure",e.toString());
