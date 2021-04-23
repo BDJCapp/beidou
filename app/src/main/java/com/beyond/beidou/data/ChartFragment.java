@@ -11,11 +11,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,6 +31,8 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
@@ -36,10 +40,12 @@ import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.GNSSFilterInfoResponse;
+import com.beyond.beidou.entites.LoginResponse;
 import com.beyond.beidou.login.StartActivity;
 import com.beyond.beidou.util.DateUtil;
 import com.beyond.beidou.util.FileUtil;
 import com.beyond.beidou.util.LogUtil;
+import com.beyond.beidou.util.LoginUtil;
 import com.google.gson.Gson;
 import com.zyao89.view.zloading.ZLoadingDialog;
 import com.zyao89.view.zloading.Z_TYPE;
@@ -68,6 +74,8 @@ import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.LineChartView;
 import okhttp3.FormBody;
 
+import static android.content.Context.BIND_AUTO_CREATE;
+
 public class ChartFragment extends BaseFragment implements View.OnClickListener {
     private Spinner spDevice, spTime;
     private LineChartView xChart, yChart, HChart,deltaDChart,deltaHChart,heartChart;
@@ -75,6 +83,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private TextView xChartCoo, yChartCoo, hChartCoo,deltaDChartCoo,deltaHChartCoo,heartChartCoo;
     private TextView xChartTime, yChartTime, hChartTime,deltaDChartTime,deltaHChartTime,heartChartTime;
     private TextView mTitle;
+    private TextView mDownLoadExcel;
     private float convertYMax;
     private float convertYMin;
     private float convertAverage;
@@ -95,6 +104,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private ArrayList<String> stationUUIDList = new ArrayList<>();
     private int selectedDevicePosition;
     private LinearLayout chartXLayout;
+    private String startTime = null;
+    private String endTime = null;
 
     public static ChartFragment newInstance(String projectName, ArrayList<String> stationNameList, int position,ArrayList<String> stationUUIDList) {
         ChartFragment chartFragment = new ChartFragment();
@@ -119,6 +130,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         getData("GNSSFilterInfo", "6159529a-6bc3-4c73-84d1-e59f6f60ece6", "2021-03-09 00:00:00", "2021-03-09 23:59:59");
 //        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        getData("GNSSFilterInfo", stationUUIDList.get(selectedDevicePosition), df.format(DateUtil.getDayBegin()), df.format(DateUtil.getDayEnd()));
+
+        startTime = "2021-03-09 00:00:00";  //当前只有该天的数据，默认展示本日的数据
+        endTime = "2021-03-09 23:59:59";
         drawXYHChart("本日");
         drawDeltaChart("本日");
         drawHeartChart("本日");
@@ -129,6 +143,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mTitle = view.findViewById(R.id.tv_title);
         spDevice = view.findViewById(R.id.sp_device);
         spTime = view.findViewById(R.id.sp_chart_time);
+        mDownLoadExcel = view.findViewById(R.id.tv_load_excel);
         if (getArguments() != null) {
             mTitle.setText(getArguments().getString("projectName"));
             ArrayAdapter<String> deviceAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, getArguments().getStringArrayList("stationNameList"));
@@ -198,6 +213,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         });
 
+        mDownLoadExcel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                downLoadExcel();
+            }
+        });
 //        spDevice.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 //            @Override
 //            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -541,11 +562,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             tempY = Double.parseDouble(content.get(2).toString()) - Double.parseDouble(minuendY.toString());
             pointValues.add(new PointValue(Float.parseFloat(String.valueOf(tempX)), Float.parseFloat(String.valueOf(tempY))));
         }
-//        for (PointValue point:pointValues) {
-//            Log.wtf("pointValues", point.toString());
-//        }
     }
-
 
     public List<AxisValue> setAxisYLabel(String yMin, List<PointValue> values) {
         String tempString;
@@ -656,11 +673,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         //axisY.setInside(true);
         axisY.setValues(yAxisValues);
 
-        //设置坐标轴标签宽度
-//        if ("位移图".equals(spChart.getSelectedItem().toString()))
-//            axisY.setMaxLabelChars(5);
-//        else
-
         axisY.setMaxLabelChars(7);
 
         if ("一周".equals(selectedTime)) {
@@ -670,9 +682,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         } else if ("一年".equals(selectedTime)) {
             axisX.setMaxLabelChars(12);
         }
-        if ("最近1小时".equals(selectedTime) || "最近6小时".equals(selectedTime) || "最近12小时".equals(selectedTime)) {
-            axisX.setMaxLabelChars(7);
-        }
+//        if ("最近1小时".equals(selectedTime) || "最近6小时".equals(selectedTime) || "最近12小时".equals(selectedTime)) {
+//            axisX.setMaxLabelChars(7);
+//        }
         //为两个坐标系设定名称
         axisY.setName("单位(米)");
         //设置图标所在位置
@@ -892,8 +904,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         String graphicType = "GNSSFilterInfo";
         String stationUUID = "6159529a-6bc3-4c73-84d1-e59f6f60ece6";
 //        String stationUUID = stationUUIDList.get(spDevice.getSelectedItemPosition());
-        String startTime = null;
-        String endTime = null;
+
         switch (spTime.getSelectedItemPosition()) {
             case 0:
                 //最近1小时
@@ -993,6 +1004,43 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         }
     }
 
+    public void downLoadExcel()
+    {
+        //获取URL
+        LogUtil.e("导出报表开始时间",startTime);
+        LogUtil.e("导出报表结束时间",endTime);
+        FormBody body = new FormBody.Builder()
+                .add("AccessToken", ApiConfig.getAccessToken())
+                .add("SessionUUID", ApiConfig.getSessionUUID())
+                .add("StationUUID","6159529a-6bc3-4c73-84d1-e59f6f60ece6")//当前只有该点有数据
+//                .add("StationUUID",stationUUIDList.get(selectedDevicePosition))
+                .add("StartTime",startTime)
+                .add("EndTime",endTime)
+//                .add("StartTime","2021-03-09 00:00:00")
+//                .add("EndTime","2021-03-09 23:10:00")
+                .build();
+        final Api api = Api.config(ApiConfig.GET_STATION_REPORT);
+        api.postRequestFormBody(getActivity(), body, new ApiCallback() {
+            @Override
+            public void onSuccess(String res) {
+                String url = api.parseJSONObject(res,"ReportFilePath");
+                LogUtil.e("获取的下载·地址为",url);
+                MainActivity mainActivity = (MainActivity) getActivity();
+                if (mainActivity != null)
+                {
+                    mainActivity.getDownloadBinder().startDownload(url);
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                LogUtil.e("downloadReport network failure",e.toString());
+                Toast.makeText(getActivity(),"网络连接错误，请稍后再试",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
     public void test() {
         chartXLayout.post(new Runnable() {
             @Override
@@ -1014,7 +1062,5 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         });
     }
-
-
 
 }

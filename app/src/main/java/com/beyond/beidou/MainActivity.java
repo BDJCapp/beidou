@@ -1,24 +1,35 @@
 package com.beyond.beidou;
 
 import androidx.annotation.NonNull;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import com.beyond.beidou.data.DataHomeFragment;
+import com.beyond.beidou.data.DownloadService;
 import com.beyond.beidou.my.MyFragment;
 import com.beyond.beidou.project.ProjectFragment;
+import com.beyond.beidou.util.FileUtil;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.warning.WarningFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
-import java.sql.Time;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener{
 
@@ -36,6 +47,43 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Fragment updatePwdFragment = null;
     private BottomNavigationView navigationView;
     private String presentProject = null;
+    private Intent downloadIntent;
+    private CoordinatorLayout coordinatorLayout;
+
+    private DownloadService.DownloadBinder downloadBinder;
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            downloadBinder = (DownloadService.DownloadBinder) iBinder;
+
+            final DownloadService service = downloadBinder.getService();
+            service.setDownLoadExcelSuccess(new DownloadService.DownLoadExcelSuccess() {
+                @Override
+                public void showSnackBar() {
+                    Snackbar snackbar = Snackbar.make(coordinatorLayout, "导出报表成功，是否打开报表", Snackbar.LENGTH_LONG)
+                            .setAction("是", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    LogUtil.e("获取的FilePath",service.getFilePath());
+                                    FileUtil.openExcelFile(getApplicationContext(), service.getFilePath());
+                                }
+                            })
+                            .setActionTextColor(getResources().getColor(R.color.main_blue));
+                    snackbar.show();
+                }
+            });
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName){
+        }
+    };
+
+    public DownloadService.DownloadBinder getDownloadBinder() {
+        return downloadBinder;
+    }
 
     public String getPresentProject() {
         return presentProject;
@@ -48,6 +96,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopService(downloadIntent);
+        unbindService(connection);  //解绑服务
     }
 
     @Override
@@ -69,6 +119,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     @Override
     public void initView() {
+        coordinatorLayout =findViewById(R.id.layout_snack);
         navigationView = findViewById(R.id.layout_bottomNavigation);
     }
 
@@ -76,6 +127,12 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public void initEvent() {
         //首次启动时，应显示工程的Fragment
         switchFragment(nowFragment,projectFragment);
+
+        downloadIntent = new Intent(this,DownloadService.class);
+        //绑定服务，绑定服务时会自动调用实参connection对象中的onServiceConnected方法
+        bindService(downloadIntent,connection,BIND_AUTO_CREATE);
+
+        startService(downloadIntent);
     }
 
     @Override

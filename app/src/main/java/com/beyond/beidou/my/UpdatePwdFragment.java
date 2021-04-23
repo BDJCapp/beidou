@@ -126,6 +126,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                             });
                     builder.create().show();
                 } else {
+
                     mParams.put("AccessToken", ApiConfig.getAccessToken());
                     mParams.put("SessionUUID", ApiConfig.getSessionUUID());
                     mParams.put("OldPassword", originalPwd);

@@ -12,7 +12,14 @@
         android:id="@+id/layout_home"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/layout_bottomNavigation"
+        android:layout_above="@id/layout_snack"
+        />
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layout_snack"
+        android:layout_above="@+id/layout_bottomNavigation"
         />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView

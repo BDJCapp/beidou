@@ -197,7 +197,7 @@ public class DateUtil {
     public static List<String> getHourXLabel(int hour)
     {
         int timeSpace = 5 * hour;
-        SimpleDateFormat secondFormat = new SimpleDateFormat("MM-dd HH:mm");
+        SimpleDateFormat secondFormat = new SimpleDateFormat("HH:mm");
         List<String> timeLabel = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(DateUtil.getHourBegin(hour));
@@ -210,8 +210,8 @@ public class DateUtil {
     }
 
     public static List<AxisValue> getDayXAxisLabel() {
-//        String[] labels = new String[]{"00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "24:00"};
-        String[] labels = new String[]{"00", "02", "04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "24"};
+        String[] labels = new String[]{"00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "24:00"};
+//        String[] labels = new String[]{"00", "02", "04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "24"};
         List<AxisValue> axisValues = new ArrayList<>();
         for (int i = 0; i <= 1440; i += 120) {
             AxisValue axisValue = new AxisValue(i);
