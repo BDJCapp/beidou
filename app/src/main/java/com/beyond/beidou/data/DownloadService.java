@@ -44,7 +44,6 @@ public class DownloadService extends Service {
             getNotificationManager().notify(1,getNotification("正在导出，请稍后",progress));
         }
 
-
         @Override
         public void onSuccess() {
             downloadTask = null;
@@ -54,13 +53,12 @@ public class DownloadService extends Service {
 //            Toast.makeText(DownloadService.this,"导出成功",Toast.LENGTH_SHORT).show();
         }
 
-
         @Override
         public void onFailed(String reason) {
             downloadTask = null;
             stopForeground(true);
-            getNotificationManager().notify(1,getNotification(reason,-1));;
-            Toast.makeText(DownloadService.this,reason,Toast.LENGTH_SHORT).show();
+            getNotificationManager().notify(1,getNotification(reason,-1));
+//            Toast.makeText(DownloadService.this,reason,Toast.LENGTH_SHORT).show();
         }
 
 

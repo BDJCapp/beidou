@@ -56,9 +56,11 @@ public class StartActivity extends BaseActivity {
         Thread getTokenThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (!LoginUtil.getAccessToken(StartActivity.this)){}
+                while (!LoginUtil.getAccessToken(StartActivity.this)){
+                    LogUtil.e("StartActivity initData()","循环请求Token");
+                }
                 LoginUtil.upDateToken(getApplicationContext());
-                LogUtil.e("成功获取Token", ApiConfig.getAccessToken());
+                LogUtil.e("StartActivity 成功获取Token", ApiConfig.getAccessToken());
             }
         });
         getTokenThread.start();
@@ -72,8 +74,9 @@ public class StartActivity extends BaseActivity {
         Thread getSessionThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (!LoginUtil.getSessionId(StartActivity.this)){}
-                LogUtil.e("成功获取Session", ApiConfig.getSessionUUID());
+                while (!LoginUtil.getSessionId(StartActivity.this)){
+                    LogUtil.e("StartActivity initData()","循环请求Session");
+                }
             }
         });
         getSessionThread.start();
@@ -83,8 +86,8 @@ public class StartActivity extends BaseActivity {
             e.printStackTrace();
         }
 
-        //获取到Token和SessionUUID之后等待200毫秒结束启动页
-        handler.sendEmptyMessageDelayed(1001, 200);
+        //获取到Token和SessionUUID之后等待500毫秒结束启动页
+        handler.sendEmptyMessageDelayed(1001, 500);
     }
 
     @Override
