@@ -105,7 +105,6 @@ public class Api {
     }
 
 
-
     public void postRequestFormBody(final Context context,FormBody body, final ApiCallback callback)
     {
         Request request = new Request.Builder().url(requestUrl).post(body).build();
@@ -118,7 +117,6 @@ public class Api {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 final String result = response.body().string();
-
                 String responseCode = parseJSONObject(result,"ResponseCode");
                 if (!responseCodeHandling(context,responseCode))
                 {
@@ -140,8 +138,6 @@ public class Api {
             {
                 String responseText = response.body().string();
                 String responseCode = parseJSONObject(responseText,"ResponseCode");
-                LogUtil.e("ResponseCode   :",responseCode);
-
                 //如果返回的结果不正确，不调用Success。维持原状，提示用户重新操作
                 if (!responseCodeHandling(context,responseCode))
                 {
@@ -172,7 +168,7 @@ public class Api {
         final AlertDialog.Builder builder = new AlertDialog.Builder(context);
         if ("400010".equals(responseCode))          //令牌过期非法，重新获取令牌后再重新操作。
         {
-            //1.不做判断，令牌过期再处理
+            //1.不做判断，令牌过期再处理。2.后台每隔59分钟更新一次Token
             isError = true;
             builder.setTitle("提示");
             builder.setMessage("操作失败，请稍后再试");

@@ -32,6 +32,7 @@ import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
+import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.zyao89.view.zloading.ZLoadingDialog;
 import com.zyao89.view.zloading.Z_TYPE;
@@ -60,7 +61,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private EditText etPictureCode;
     private ImageView imgPictureCode;
 
-    private static int loginType = LoginUtil.LOGINBYPWD;   //默认为密码登录
     private final int QUITAPP = 0;
     private final int LOGIN = 1;
     private final int LOGINDEFAULTFAILED = 2;
@@ -104,14 +104,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         requestPermissions();
         init();
         initView();
         initEvent();
     }
-
-
 
     @Override
     public void init() {
@@ -139,6 +136,26 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
         etLoginAccount.setText("qazXSW0");
         etLoginCheck.setText("qazxswEDCVFR0*");
+
+        etLoginAccount.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus)
+                {
+                    checkAccount();
+                }
+            }
+        });
+
+        etLoginCheck.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus)
+                {
+                    checkPassword();
+                }
+            }
+        });
     }
 
     @Override
@@ -155,13 +172,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 setPwdVisible();
                 break;
             case R.id.btn_login:
+                if (!(checkAccount()&&checkPassword()))
+                {
+                    break;
+                }
                 Log.e("token为", ApiConfig.getAccessToken());
                 Log.e("SessionUUID为",  ApiConfig.getSessionUUID());
-                dialog.setLoadingBuilder( Z_TYPE.ROTATE_CIRCLE)//设置类型
+                dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                         .setLoadingColor(Color.BLACK)//颜色
                         .setHintText("Loading...")
                         .show();
-                handler.sendEmptyMessageDelayed(LOGIN,1500);
+                handler.sendEmptyMessageDelayed(LOGIN,150);
                 break;
         }
     }
@@ -190,9 +211,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
     public void login(String username,String password,String SessionUUID,String AccessToken)
     {
-//            loginUtil.loginByPwd("qazXSW0", "qazxswEDCVFR0*", SessionUUID, AccessToken, new Callback() {
         loginUtil.loginByPwd(LoginActivity.this,username, password, SessionUUID, AccessToken, new ApiCallback() {
-
             @Override
             public void onSuccess(String res) {
                 Log.e("登录的response", String.valueOf(res));
@@ -307,4 +326,57 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         }
     }
 
+    public boolean checkAccount()
+    {
+        String account = etLoginAccount.getText().toString();
+        boolean isCorrect = true;
+        if ("".equals(account))
+        {
+            Toast.makeText(getApplicationContext(),"用户名输入为空,请重新输入",Toast.LENGTH_SHORT).show();
+        }else if (Character.isLetter(account.charAt(0)))
+        {
+            //用户名
+            if (!LoginUtil.checkAccount(account,LoginUtil.LOGINBYPWD))
+            {
+                isCorrect = false;
+                LogUtil.e("LoginActivity Account","用户名格式错误");
+            }
+        }else if (account.contains("@"))
+        {
+            //邮箱
+            if (!LoginUtil.checkAccount(account,LoginUtil.LOGINBYEMAIL))
+            {
+                isCorrect = false;
+                LogUtil.e("LoginActivity Account","邮箱格式错误");
+            }
+        }else {
+            //手机号
+            if (!LoginUtil.checkAccount(account,LoginUtil.LOGINBYPHONE))
+            {
+                isCorrect = false;
+                LogUtil.e("LoginActivity Account","手机号格式错误");
+            }
+        }
+        if (!isCorrect)
+        {
+            Toast.makeText(getApplicationContext(),"账号输入有误，请重新输入",Toast.LENGTH_SHORT).show();
+        }
+        return isCorrect;
+    }
+
+    public boolean checkPassword()
+    {
+        String password = etLoginCheck.getText().toString();
+        boolean isCorrect = true;
+        if ("".equals(password))
+        {
+            isCorrect = false;
+            Toast.makeText(getApplicationContext(),"密码输入空,请重新输入",Toast.LENGTH_SHORT).show();
+        } else if (!LoginUtil.checkPwd(password))
+        {
+            isCorrect = false;
+            Toast.makeText(getApplicationContext(),"密码输入有误，请重新输入",Toast.LENGTH_SHORT).show();
+        }
+        return isCorrect;
+    }
 }

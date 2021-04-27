@@ -74,8 +74,6 @@ import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.LineChartView;
 import okhttp3.FormBody;
 
-import static android.content.Context.BIND_AUTO_CREATE;
-
 public class ChartFragment extends BaseFragment implements View.OnClickListener {
     private Spinner spDevice, spTime;
     private LineChartView xChart, yChart, HChart,deltaDChart,deltaHChart,heartChart;
@@ -1026,12 +1024,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 String url = api.parseJSONObject(res,"ReportFilePath");
                 LogUtil.e("获取的下载·地址为",url);
                 MainActivity mainActivity = (MainActivity) getActivity();
-                if (mainActivity != null)
+                if (mainActivity != null && !"".equals(url))
                 {
                     mainActivity.getDownloadBinder().startDownload(url);
+                }else {
+                    Toast.makeText(getActivity(),"获取URL有误，请稍后再试",Toast.LENGTH_SHORT).show();
                 }
             }
-
 
             @Override
             public void onFailure(Exception e) {

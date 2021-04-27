@@ -61,10 +61,15 @@ public abstract class BaseActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    protected void saveStringToSP(String key, String value){
+    public void saveStringToSP(String key, String value){
         SharedPreferences sp = getSharedPreferences("sp_user", MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(key, value);
         editor.commit();
+    }
+
+    public String getStringFromSP(String key){
+        SharedPreferences sp = getSharedPreferences("sp_user", MODE_PRIVATE);
+        return  sp.getString(key, "");
     }
 }

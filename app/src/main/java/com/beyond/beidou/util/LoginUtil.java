@@ -12,6 +12,8 @@ import com.beyond.beidou.BaseActivity;
 import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
+import com.beyond.beidou.login.LoginActivity;
+import com.beyond.beidou.login.StartActivity;
 import com.beyond.beidou.test.BeanTest;
 
 import org.jetbrains.annotations.NotNull;
@@ -72,10 +74,16 @@ public class LoginUtil {
     public static boolean checkAccount(String account, int loginType)
     {
         Pattern p = null;
-        if (loginType == LOGINBYPHONE)
+        if (loginType == LOGINBYPWD)
         {
-            //设置手机号正则表达式
-            p = Pattern.compile("^1(3([0-35-9]\\d|4[1-8])|4[14-9]\\d|5([0-35689]\\d|7[1-79])|66\\d|7[2-35-8]\\d|8\\d{2}|9[13589]\\d)\\d{7}$");
+            //账号以大写或小写字母开头，+（4-31位大小写字符或数字）
+            p = Pattern.compile("^[a-zA-Z][a-zA-Z\\d]{4,31}$");
+        }
+        else if (loginType == LOGINBYPHONE)
+        {
+            //手机号第一位为1，第二位为3/4/5/7/8，+（5-9位数字）
+            p = Pattern.compile("^1[3|4|5|7|8][0-9]\\d{4,8}$");
+//            p = Pattern.compile("^1(3([0-35-9]\\d|4[1-8])|4[14-9]\\d|5([0-35689]\\d|7[1-79])|66\\d|7[2-35-8]\\d|8\\d{2}|9[13589]\\d)\\d{7}$");
         }else if (loginType == LOGINBYEMAIL)
         {
             //设置邮箱正则表达式
@@ -100,7 +108,7 @@ public class LoginUtil {
     public static boolean checkPwd(String pwd)
     {
         //密码12-64位且包含数字，大小写字母以及特殊符号
-        Pattern p = Pattern.compile("(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%\\^&\\*()\\_]).{12,64}");
+        Pattern p = Pattern.compile("(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[\\W_]).{12,64}");
         Matcher m = p.matcher(pwd);
         if (m.matches())
         {
@@ -115,21 +123,39 @@ public class LoginUtil {
      * 获取SessionUUID
      * @return SessionUUID
      */
-    public static boolean getSessionId(Context context)
+    public static boolean getSessionId(final Context context)
     {
-            FormBody body = new FormBody.Builder()
+        final String[] responseCode = new String[1];
+        String sessionUUID = ((BaseActivity)context).getStringFromSP("SessionUUID");
+        if ("".equals(sessionUUID))//缓存中无数据时，获取默认的一串0
+        {
+            sessionUUID = ApiConfig.getSessionUUID();
+        }
+        LogUtil.e("缓存中的SessionUUID",((BaseActivity)context).getStringFromSP("SessionUUID"));
+        LogUtil.e("登录使用的SessionUUID",sessionUUID);
+
+        FormBody body = new FormBody.Builder()
                     .add("AccessToken", ApiConfig.getAccessToken())
-                    .add("SessionUUID", ApiConfig.getSessionUUID())
+                    .add("SessionUUID", sessionUUID)
                     .build();
 
-            Api.config(ApiConfig.GET_SESSION_UUID).postRequestFormBodySync(context,body,new ApiCallback() {
+        Api.config(ApiConfig.GET_SESSION_UUID).postRequestFormBodySync(context,body,new ApiCallback() {
                 @Override
                 public void onSuccess(String res) {
                     if (!TextUtils.isEmpty(res)) {
                         try {
+                            LogUtil.e("LoginUtil 获取SessionUUID的返回值",res);
                             JSONObject object = new JSONObject(res);
-                            ApiConfig.setSessionUUID(object.getString("SessionUUID"));
-                            LogUtil.e("getSession  ",res);
+                            responseCode[0] = object.getString("ResponseCode");
+                            if ("201".equals(responseCode[0]))
+                            {
+                                //当缓存中SessionUUID已登录时，更新内存中SessionUUID
+                                ApiConfig.setSessionUUID(((BaseActivity)context).getStringFromSP("SessionUUID"));
+                                return;
+                            }
+                            String sessionUUID = object.getString("SessionUUID");
+                            ApiConfig.setSessionUUID(sessionUUID);
+                            ((BaseActivity)context).saveStringToSP("SessionUUID",sessionUUID);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -140,16 +166,27 @@ public class LoginUtil {
                     Log.e("请求session失败","错误原因" + e.getMessage());
                 }
             });
-        if ("00000000-0000-0000-0000-000000000000".equals(ApiConfig.getSessionUUID()))
+        if ("202".equals(responseCode[0]) || "201".equals(responseCode[0]))
         {
-            return false;
-        }
-        else {
+            //会话请求成功（202）或者会话已登录（201）
             return true;
+        }
+        else if ("204".equals(responseCode[0]))
+        {
+            //会话已注销
+            while (!getAccessToken(context)){
+                LogUtil.e("LoginUtil getSession","循环获取Token");
+            }
+            ((BaseActivity)context).saveStringToSP("SessionUUID","");
+            ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
+            return false;
+        }else {
+                return false;
         }
     }
 
     public static boolean getAccessToken(Context context) {
+        final String[] responseCode = new String[1];
         FormBody body = new FormBody.Builder()
                 .add("GrantType", ApiConfig.GrantType)
                 .add("AppID", ApiConfig.AppID)
@@ -163,27 +200,27 @@ public class LoginUtil {
                     try {
                         JSONObject object = new JSONObject(res);
                         ApiConfig.setAccessToken(object.getString("AccessToken"));
-
-                        LogUtil.e("getToken  ",res);
+                        responseCode[0] = object.getString("ResponseCode");
+                        LogUtil.e("getToken  执行结束",res);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
             }
-
             @Override
             public void onFailure(Exception e) {
                 Log.e("请求AccessToken失败", "错误原因" + e.getMessage());
             }
         });
-        if ("".equals(ApiConfig.getAccessToken()))
+        if ("200".equals(responseCode[0]))
         {
-            return false;
-        }
-        else {
             return true;
         }
+        else {
+            return false;
+        }
     }
+
 
     public void loginByPwd(Context context,String Username, String Password, String SessionUUID,String AccessToken, ApiCallback callback)
     {
@@ -206,7 +243,10 @@ public class LoginUtil {
         Api.config(ApiConfig.LOGOUT).postRequestFormBody(context,body,callback);
     }
 
-    //每隔59分钟获取一次Token
+    /**
+     * 每隔59分钟更新一次Token
+     * @param context 上下文
+     */
     public static void upDateToken(final Context context)
     {
         Timer timer = new Timer(true);
@@ -214,7 +254,9 @@ public class LoginUtil {
             @Override
             public void run() {
 //                LogUtil.e("定时任务","1111");
-                while (!LoginUtil.getAccessToken(context)){}
+                while (!LoginUtil.getAccessToken(context)){
+                    LogUtil.e("LoginUtil upDateToken","循环获取Token");
+                }
             }
         };
         timer.schedule(timerTask,59*60*1000,59*60*1000);     //每隔59分钟执行一次
