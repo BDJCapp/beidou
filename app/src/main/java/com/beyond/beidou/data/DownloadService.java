@@ -1,6 +1,5 @@
 package com.beyond.beidou.data;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -12,18 +11,12 @@ import android.graphics.Color;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
-import com.beyond.beidou.util.FileUtil;
-import com.beyond.beidou.util.LogUtil;
-import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 
@@ -159,8 +152,8 @@ public class DownloadService extends Service {
         PendingIntent pi = PendingIntent.getActivity(this,0,intent,0);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setChannelId(CHANNEL_ONE_ID);//新增,设置通知渠道
-        builder.setSmallIcon(R.mipmap.ic_dd);
-        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_dd));
+        builder.setSmallIcon(R.mipmap.ic_app_icon);
+        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_app_icon));
         builder.setContentIntent(pi);
         builder.setContentTitle(title);
         if (progress > 0){
