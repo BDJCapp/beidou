@@ -31,7 +31,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
 
-public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private Fragment projectFragment;
     private Fragment dataFragment;
@@ -43,6 +43,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Fragment aboutFragment = null;
     private Fragment feedbackFragment = null;
     private Fragment versionInfoFragment = null;
+    private Fragment settingsFragment = null;
     private Fragment securityFragment = null;
     private Fragment updatePwdFragment = null;
     private BottomNavigationView navigationView;
@@ -65,7 +66,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                             .setAction("是", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    LogUtil.e("获取的FilePath",service.getFilePath());
+                                    LogUtil.e("获取的FilePath", service.getFilePath());
                                     FileUtil.openExcelFile(getApplicationContext(), service.getFilePath());
                                 }
                             })
@@ -77,7 +78,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName componentName){
+        public void onServiceDisconnected(ComponentName componentName) {
         }
     };
 
@@ -119,18 +120,19 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     @Override
     public void initView() {
-        coordinatorLayout =findViewById(R.id.layout_snack);
+        coordinatorLayout = findViewById(R.id.layout_snack);
         navigationView = findViewById(R.id.layout_bottomNavigation);
     }
 
     @Override
     public void initEvent() {
         //首次启动时，应显示工程的Fragment
-        switchFragment(nowFragment,projectFragment);
+        switchFragment(nowFragment, projectFragment);
 
-        downloadIntent = new Intent(this,DownloadService.class);
+        downloadIntent = new Intent(this, DownloadService.class);
         //绑定服务，绑定服务时会自动调用实参connection对象中的onServiceConnected方法
-        bindService(downloadIntent,connection,BIND_AUTO_CREATE);
+        bindService(downloadIntent, connection, BIND_AUTO_CREATE);
+
         startService(downloadIntent);
     }
 
@@ -148,7 +150,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.nav_warning)
         {
-            //设置预警模块不可点击，后续版本再实现该模块
             return false;
         }
         changePageFragment(item.getItemId());
@@ -163,21 +164,20 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public void changePageFragment(int id) {
         switch (id) {
             case R.id.nav_my:
-                if (nowFragment == securityFragment || nowFragment == updatePwdFragment) {
-                    LogUtil.e("1111",(nowFragment == securityFragment || nowFragment == updatePwdFragment) + " ");
+                LogUtil.e("111nowFragement", nowFragment.toString());
+                if (nowFragment == settingsFragment || nowFragment == securityFragment || nowFragment == updatePwdFragment) {
                     break;
                 }
-                LogUtil.e("222",(nowFragment == securityFragment) + "");
-                if (updatePwdFragment != null)
-                {
-                    switchFragment(nowFragment,updatePwdFragment);
+                if (updatePwdFragment != null) {
+                    switchFragment(nowFragment, updatePwdFragment);
                     break;
-                }else if (securityFragment != null)
-                {
-                    switchFragment(nowFragment,securityFragment);
+                } else if (securityFragment != null) {
+                    switchFragment(nowFragment, securityFragment);
                     break;
-                }
-                if (myFragment == null) { //减少new fragment,避免不必要的内存消耗
+                } else if (settingsFragment != null) {
+                    switchFragment(nowFragment, settingsFragment);
+                    break;
+                } else if (myFragment == null) { //减少new fragment,避免不必要的内存消耗
                     myFragment = new MyFragment();
                 }
                 switchFragment(nowFragment, myFragment);
@@ -191,12 +191,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             case R.id.nav_data:
                 if (nowFragment == chartFragment)
                     break;
-                if (chartFragment != null)
-                {
-                    switchFragment(nowFragment,chartFragment);
+                if (chartFragment != null) {
+                    switchFragment(nowFragment, chartFragment);
                     break;
-                }
-                else if (dataFragment == null) {
+                } else if (dataFragment == null) {
                     dataFragment = new DataHomeFragment();
                 }
                 switchFragment(nowFragment, dataFragment);
@@ -206,10 +204,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                     warningFragment = new WarningFragment();
                 }
                 switchFragment(nowFragment, warningFragment);
-
                 break;
         }
     }
+
     /**
      * 隐藏显示fragment
      *
@@ -219,7 +217,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public void switchFragment(Fragment from, Fragment to) {
         if (to == null)
             return;
-       FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         if (!to.isAdded()) {
             if (from == null) {
                 transaction.add(R.id.layout_home, to).show(to).commit();
@@ -236,27 +234,25 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     }
 
 
-
     /**
      * 监听物理返回键，判断当前是否是chartfragment，解决返回重影问题
      */
     @Override
     public void onBackPressed() {
 
-        if (nowFragment == chartFragment)
-        {
+        if (nowFragment == chartFragment) {
             FragmentManager fm = getProjectFragment().getFragmentManager();
 //            fm.popBackStack();
             fm.beginTransaction().remove(nowFragment);
             this.setChartFragment(null);
-            LogUtil.e("nowFragment",nowFragment.toString());
+            LogUtil.e("nowFragment", nowFragment.toString());
 
 //            Log.e("BackStack11:", "" + fm.getBackStackEntryCount());
 //            Log.e("BackStack11:", fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName());
-            if(fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName().equals("projectFragment")){
+            if (fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName().equals("projectFragment")) {
                 this.setNowFragment(this.getProjectFragment());
                 this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(0).getItemId());
-            }else{
+            } else {
                 this.setNowFragment(this.getDataFragment());
                 Log.e("fragment now1111", nowFragment.toString());
                 this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(1).getItemId());
@@ -264,16 +260,21 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
         }
 
-        if (nowFragment == securityFragment)
-        {
+        if (nowFragment == settingsFragment) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.remove(nowFragment);
             nowFragment = myFragment;
+            settingsFragment = null;
+        }
+
+        if (nowFragment == securityFragment) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.remove(nowFragment);
+            nowFragment = settingsFragment;
             securityFragment = null;
         }
 
-        if (nowFragment == updatePwdFragment)
-        {
+        if (nowFragment == updatePwdFragment) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.remove(updatePwdFragment);
             nowFragment = securityFragment;
@@ -294,7 +295,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         this.helpFragment = helpFragment;
     }
 
-    public void setAboutFragment(Fragment aboutFragment) { this.aboutFragment = aboutFragment; }
+    public void setAboutFragment(Fragment aboutFragment) {
+        this.aboutFragment = aboutFragment;
+    }
 
     public void setFeedBackFragment(Fragment feedbackFragment) {
         this.feedbackFragment = feedbackFragment;
@@ -359,5 +362,13 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     public void setUpdatePwdFragment(Fragment updatePwdFragment) {
         this.updatePwdFragment = updatePwdFragment;
+    }
+
+    public Fragment getSettingsFragment() {
+        return settingsFragment;
+    }
+
+    public void setSettingsFragment(Fragment settingsFragment) {
+        this.settingsFragment = settingsFragment;
     }
 }

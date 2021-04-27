@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".my.SettingsFragment"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/img_settings_back"
+                android:src="@drawable/ic_svg_back"
+                android:layout_centerVertical="true"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_title"
+                android:text="设置"
+                android:textColor="@color/text_black"
+                android:textSize="24sp"
+                android:gravity="center"
+                />
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3px"
+        android:background="@color/under_line"
+        android:layout_below="@+id/toolbar"
+        />
+
+    <!-- 此处width若设置为match_parent显示不自然 -->
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        >
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cv_security"
+            android:layout_margin="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            app:cardCornerRadius="20dp"
+            android:foreground="?attr/selectableItemBackground"
+            android:clickable="true"
+            app:cardElevation="5dp"
+            >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="12dp"
+                >
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="7"
+                    android:text="账户安全"
+                    android:textSize="18sp"
+                    android:textColor="@color/text_black"
+                    />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/svg_ic_more"
+                    />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+    <Button
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:id="@+id/btn_quit"
+        android:background="@drawable/button_shape"
+        android:text="退出登录"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        app:backgroundTint="@color/main_blue"
+        app:cornerRadius="20dp"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="30dp"
+        android:layout_centerHorizontal="true"
+        />
+
+    </RelativeLayout>
+
+</LinearLayout>

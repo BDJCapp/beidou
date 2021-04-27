@@ -76,7 +76,7 @@ public class SecurityFragment extends BaseFragment implements View.OnClickListen
             case R.id.img_security_back:
                 getFragmentManager().popBackStack();
                 activity.setSecurityFragment(null);
-                activity.setNowFragment(activity.getMyFragment());
+                activity.setNowFragment(activity.getSettingsFragment());
                 break;
         }
     }

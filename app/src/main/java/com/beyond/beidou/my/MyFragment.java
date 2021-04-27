@@ -13,39 +13,25 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
-
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.project.ProjectFragment;
-import com.beyond.beidou.project.ProjectInfo;
 import com.beyond.beidou.R;
 import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.login.LoginActivity;
-import com.beyond.beidou.util.FileUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.beyond.beidou.util.LogUtil;
-import com.beyond.beidou.util.SPDatautils;
-
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.FormBody;
-import okhttp3.Response;
+
 
 public class MyFragment extends BaseFragment implements View.OnClickListener{
     private TextView textView;
@@ -55,10 +41,10 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
     private LoginUtil loginUtil;
     private ImageView imgUserMore;
     private final int whatUSERNAME = 1;
-    private String userName;
+    public static String userName = "";
     private RelativeLayout RlHelp;
     private RelativeLayout RlAbout;
-    private CardView mCardViewSecurity;
+    private CardView mCardViewSettings;
 
     public Handler handler = new Handler(){
         @Override
@@ -86,7 +72,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
         imgUserMore = view.findViewById(R.id.img_UserMore);
         RlHelp = view.findViewById(R.id.img_help);
         RlAbout = view.findViewById(R.id.img_about);
-        mCardViewSecurity = view.findViewById(R.id.cv_security);
+        mCardViewSettings = view.findViewById(R.id.cv_settings);
         return view;
     }
 
@@ -105,7 +91,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
         imgUserMore.setOnClickListener(this);
         RlHelp.setOnClickListener(this);
         RlAbout.setOnClickListener(this);
-        mCardViewSecurity.setOnClickListener(this);
+        mCardViewSettings.setOnClickListener(this);
     }
 
     @Override
@@ -117,14 +103,14 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
             case R.id.btn_quit:
                 saveStringToSP("lastProjectName", activity.getPresentProject());
                 ProjectFragment.isReLogin = true;
-                logout("qazXSW0",ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
+                logout(textView.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
                 break;
-            case R.id.cv_security:
-                Fragment securityFragment = new SecurityFragment();
-                activity.setSecurityFragment(securityFragment);
-                activity.setNowFragment(securityFragment);
+            case R.id.cv_settings:
+                Fragment settingsFragment = new SettingsFragment();
+                activity.setSettingsFragment(settingsFragment);
+                activity.setNowFragment(settingsFragment);
                 LogUtil.e("444nowFragment",activity.getNowFragment().toString());
-                ft.add(R.id.layout_home, securityFragment).hide(this);
+                ft.add(R.id.layout_home, settingsFragment).hide(this);
                 ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
                 break;
@@ -134,7 +120,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
     public void logout(String Username, final String SessionUUID, String AccessToken)
     {
 
-        LoginUtil.logout(getActivity(),"qazXSW0",  SessionUUID, AccessToken, new ApiCallback() {
+        LoginUtil.logout(getActivity(),Username,  SessionUUID, AccessToken, new ApiCallback() {
 
             @Override
             public void onSuccess(String res) {

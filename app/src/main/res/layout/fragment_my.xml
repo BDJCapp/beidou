@@ -143,7 +143,7 @@
             android:foreground="?attr/selectableItemBackground"
             android:clickable="true"
             app:cardElevation="5dp"
-            android:id="@+id/cv_security"
+            android:id="@+id/cv_settings"
             >
 
             <LinearLayout
@@ -153,12 +153,18 @@
                 android:gravity="center_vertical"
                 android:padding="12dp"
                 >
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_settings"
+                    />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="7"
-                    android:text="账户安全"
+                    android:text="设置"
                     android:textSize="18sp"
                     android:textColor="@color/text_black"
                     />
@@ -183,7 +189,9 @@
         android:layout_gravity="bottom"
         android:layout_weight="0.1"
         android:gravity="bottom"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:visibility="gone"
+        >
         <Button
             android:layout_gravity="center"
             android:layout_width="300dp"

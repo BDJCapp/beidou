@@ -108,7 +108,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private static boolean isFirstBindListener = true;
 //    private static final double DEFAULT_LATITUDE = 39.8932725;
 //    private static final double DEFAULT_LONGITUDE = 116.3894879;
-private boolean isAmount = true;
+    private boolean isAmount = true;
     private boolean isOnline = false;
     private boolean isWarning = false;
     private boolean isError = false;
@@ -215,8 +215,8 @@ private boolean isAmount = true;
         mRelativeLayout.setOnClickListener(this);
         mBtnAmount.setOnClickListener(this);
         mBtnOnline.setOnClickListener(this);
-        mBtnWarning.setOnClickListener(this);
-        mBtnError.setOnClickListener(this);
+//        mBtnWarning.setOnClickListener(this);
+//        mBtnError.setOnClickListener(this);
         mBtnOffline.setOnClickListener(this);
         mIvRefresh.setOnClickListener(this);
         mTvRefresh.setOnClickListener(this);
@@ -321,14 +321,16 @@ private boolean isAmount = true;
                             layoutManager = new LinearLayoutManager(getContext());
                             mRecyclerView.setLayoutManager(layoutManager);
                             mPointsAdapter = new MonitoringPointsAdapter(mPointList);
+//                            mPointsAdapter.setData(mPointList);
+//                            mPointsAdapter.notifyDataSetChanged();
                             mRecyclerView.setAdapter(mPointsAdapter);
                             mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(View view, int position) {
                                     switchFragment(presentProject, stationNameList, position, stationUUIDList);
+                                    Log.e("project", "you click " + position);
                                     MainActivity activity = (MainActivity) getActivity();
                                     activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(1).getItemId());
-                                    Log.e("project", "you click " + position);
                                 }
                             });
 
@@ -363,11 +365,12 @@ private boolean isAmount = true;
                     });
                     Log.e("ResponseMsg", response.getResponseMsg());
                 }
+                //other response code
                 else{
                     showToastSync("未请求到数据，请重新登录！");
                     isReLogin = true;
                     ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
-                    while (!LoginUtil.getAccessToken(getContext())){}
+                    while (!LoginUtil.getAccessToken(getContext()) && !LoginUtil.getSessionId(getContext())){}
                     Intent intent= new Intent(getActivity(), LoginActivity.class);
                     startActivity(intent);
                     getActivity().finish();
@@ -419,14 +422,18 @@ private boolean isAmount = true;
         mBaiduMap.clear();
         mPointList.clear();
         LatLng sourcePoint = null;
+        Log.wtf("projectStationList size   :", projectStationList.size() + "=============");
         for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                 projectStationList) {
             mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+            Log.wtf("initStationList projectStationList", projectStationList.size() + "");
+            Log.wtf("initStationList mPointList", mPointList.size() + "");
             if (!TextUtils.isEmpty(projectStation.getStationLatitude()) && !TextUtils.isEmpty(projectStation.getStationLongitude())) {
                 sourcePoint = new LatLng(Double.parseDouble(projectStation.getStationLatitude()), Double.parseDouble(projectStation.getStationLongitude()));
             } else {
-                mBaiduMap.clear();
-                return;
+//                mBaiduMap.clear();
+                //若监测点无坐标则跳过
+                continue;
             }
             CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
             LatLng targetPoint = converter.convert();
@@ -688,6 +695,7 @@ private boolean isAmount = true;
 //                    .direction(bdLocation.getDirection()).latitude(bdLocation.getLatitude())
 //                    .longitude(bdLocation.getLongitude()).build();
 //            mBaiduMap.setMyLocationData(locData);
+
         }
     }
 

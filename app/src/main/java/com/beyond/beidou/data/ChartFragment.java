@@ -314,7 +314,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         calendar.add(Calendar.DATE, 1);
         Date date = calendar.getTime();
         calendar.add(Calendar.MONTH, -1);
-        calendar.add(Calendar.DATE, -1);
+
         Date dateBefore = calendar.getTime();
         int days = DateUtil.calcDayOffset(dateBefore, date);
         for (int i = 0; i < values.size(); i++) {

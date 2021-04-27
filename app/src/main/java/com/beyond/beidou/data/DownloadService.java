@@ -159,8 +159,8 @@ public class DownloadService extends Service {
         PendingIntent pi = PendingIntent.getActivity(this,0,intent,0);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setChannelId(CHANNEL_ONE_ID);//新增,设置通知渠道
-        builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_launcher));
+        builder.setSmallIcon(R.mipmap.ic_dd);
+        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_dd));
         builder.setContentIntent(pi);
         builder.setContentTitle(title);
         if (progress > 0){
