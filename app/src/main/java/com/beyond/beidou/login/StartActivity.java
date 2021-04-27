@@ -28,7 +28,6 @@ import javax.crypto.NoSuchPaddingException;
  * @author: 李垚
  * @date: 2020/12/22
  */
-
 public class StartActivity extends BaseActivity {
 
     private LoginUtil loginUtil;
