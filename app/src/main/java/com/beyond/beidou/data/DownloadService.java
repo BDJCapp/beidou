@@ -130,8 +130,8 @@ public class DownloadService extends Service {
         return (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     }
 
-    private Notification getNotification(String title,int progress){
 
+    private Notification getNotification(String title,int progress){
         //8.0以上新增,设置通知渠道否则无法展示通知。
         String CHANNEL_ONE_ID = "com.beyond.beidou";
         String CHANNEL_ONE_NAME = "Channel One";

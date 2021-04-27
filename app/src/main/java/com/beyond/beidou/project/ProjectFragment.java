@@ -106,7 +106,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private static String presentProject;
     public static boolean isReLogin = false;
     private static boolean isFirstBindListener = true;
-//    private static final double DEFAULT_LATITUDE = 39.8932725;
+    //    private static final double DEFAULT_LATITUDE = 39.8932725;
 //    private static final double DEFAULT_LONGITUDE = 116.3894879;
     private boolean isAmount = true;
     private boolean isOnline = false;
@@ -266,6 +266,10 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 if (Integer.parseInt(response.getResponseCode()) == 200) {
                     projectList = response.getProjectList();
                     for (ProjectResponse.ProjectListBean project : projectList) {
+                        //项目名为空则直接跳过
+                        if (project.getProjectName().equals("")) {
+                            continue;
+                        }
                         projectNameList.add(project.getProjectName());
                     }
                     Log.wtf("projectNameList", projectNameList.toString());
@@ -321,8 +325,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             layoutManager = new LinearLayoutManager(getContext());
                             mRecyclerView.setLayoutManager(layoutManager);
                             mPointsAdapter = new MonitoringPointsAdapter(mPointList);
-//                            mPointsAdapter.setData(mPointList);
-//                            mPointsAdapter.notifyDataSetChanged();
                             mRecyclerView.setAdapter(mPointsAdapter);
                             mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
                                 @Override
@@ -365,13 +367,14 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     });
                     Log.e("ResponseMsg", response.getResponseMsg());
                 }
-                //other response code
-                else{
+                //其他返回码重新登录
+                else {
                     showToastSync("未请求到数据，请重新登录！");
                     isReLogin = true;
-                    ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
-                    while (!LoginUtil.getAccessToken(getContext()) && !LoginUtil.getSessionId(getContext())){}
-                    Intent intent= new Intent(getActivity(), LoginActivity.class);
+//                    ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
+                    while (!LoginUtil.getAccessToken(getContext()) && !LoginUtil.getSessionId(getContext())) {
+                    }
+                    Intent intent = new Intent(getActivity(), LoginActivity.class);
                     startActivity(intent);
                     getActivity().finish();
                 }
@@ -422,12 +425,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mBaiduMap.clear();
         mPointList.clear();
         LatLng sourcePoint = null;
-        Log.wtf("projectStationList size   :", projectStationList.size() + "=============");
         for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                 projectStationList) {
             mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
-            Log.wtf("initStationList projectStationList", projectStationList.size() + "");
-            Log.wtf("initStationList mPointList", mPointList.size() + "");
             if (!TextUtils.isEmpty(projectStation.getStationLatitude()) && !TextUtils.isEmpty(projectStation.getStationLongitude())) {
                 sourcePoint = new LatLng(Double.parseDouble(projectStation.getStationLatitude()), Double.parseDouble(projectStation.getStationLongitude()));
             } else {
@@ -484,30 +484,41 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         LatLng ll = new LatLng(latitude, longitude);
         if (isFirstLocate) {
             if (projectStationStatus.getTotal() != 0) {
-                ProjectResponse.ProjectListBean.StationListBean projectStation = projectStationList.get(0);
-//                latitude = "".equals(projectStation.getStationLatitude()) ? DEFAULT_LATITUDE : Double.parseDouble(projectStation.getStationLatitude());
-//                longitude = "".equals(projectStation.getStationLongitude()) ? DEFAULT_LONGITUDE : Double.parseDouble(projectStation.getStationLongitude());
-//                latitude = "".equals(projectStation.getStationLatitude()) ? location.getLatitude() : Double.parseDouble(projectStation.getStationLatitude());
-//                longitude = "".equals(projectStation.getStationLongitude()) ? location.getLongitude() : Double.parseDouble(projectStation.getStationLongitude());
-                if(projectStation == null){
-                    MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
-                    mBaiduMap.animateMapStatus(update);
-                    update = MapStatusUpdateFactory.zoomTo(14f);
-                    mBaiduMap.animateMapStatus(update);
-                    isFirstLocate = false;
-                    return;
-                }
-                if(!"".equals(projectStation.getStationLatitude()) && !"".equals(projectStation.getStationLongitude())){
-                    latitude = Double.parseDouble(projectStation.getStationLatitude());
-                    longitude = Double.parseDouble(projectStation.getStationLongitude());
-                    LatLng sourcePoint = new LatLng(latitude, longitude);
-                    CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
-                    ll = converter.convert();
+
+//                ProjectResponse.ProjectListBean.StationListBean projectStation = projectStationList.get(0);
+//                if(projectStation == null){
+//                    MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
+//                    mBaiduMap.animateMapStatus(update);
+//                    update = MapStatusUpdateFactory.zoomTo(16f);
+//                    mBaiduMap.animateMapStatus(update);
+//                    isFirstLocate = false;
+//                    return;
+//                }
+//                if(!"".equals(projectStation.getStationLatitude()) && !"".equals(projectStation.getStationLongitude())){
+//                    latitude = Double.parseDouble(projectStation.getStationLatitude());
+//                    longitude = Double.parseDouble(projectStation.getStationLongitude());
+//                    LatLng sourcePoint = new LatLng(latitude, longitude);
+//                    CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
+//                    ll = converter.convert();
+//                }
+
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation : projectStationList) {
+                    if (projectStation == null) {
+                        continue;
+                    }
+                    if (!"".equals(projectStation.getStationLatitude()) && !"".equals(projectStation.getStationLongitude())) {
+                        latitude = Double.parseDouble(projectStation.getStationLatitude());
+                        longitude = Double.parseDouble(projectStation.getStationLongitude());
+                        LatLng sourcePoint = new LatLng(latitude, longitude);
+                        CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
+                        ll = converter.convert();
+                        break;
+                    }
                 }
             }
             MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
             mBaiduMap.animateMapStatus(update);
-            update = MapStatusUpdateFactory.zoomTo(14f);
+            update = MapStatusUpdateFactory.zoomTo(16f);
             mBaiduMap.animateMapStatus(update);
             isFirstLocate = false;
         } else {
@@ -574,10 +585,10 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             case R.id.btn_online:
                 mPointList.clear();
                 isOnline = !isOnline;
-                if(isOnline){
+                if (isOnline) {
 //                    mBtnOnline.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_online_selected_bg));
                     mBtnOnline.setBackground(getResources().getDrawable(R.drawable.btn_online_selected_bg));
-                }else{
+                } else {
                     mBtnOnline.setBackground(getResources().getDrawable(R.drawable.btn_online_bg));
                 }
                 refreshPointList();
@@ -585,9 +596,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             case R.id.btn_warning:
                 mPointList.clear();
                 isWarning = !isWarning;
-                if(isWarning){
+                if (isWarning) {
                     mBtnWarning.setBackground(getResources().getDrawable(R.drawable.btn_warning_selected_bg));
-                }else{
+                } else {
                     mBtnWarning.setBackground(getResources().getDrawable(R.drawable.btn_warning_bg));
                 }
                 refreshPointList();
@@ -595,9 +606,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             case R.id.btn_error:
                 mPointList.clear();
                 isError = !isError;
-                if(isError){
+                if (isError) {
                     mBtnError.setBackground(getResources().getDrawable(R.drawable.btn_error_selected_bg));
-                }else{
+                } else {
                     mBtnError.setBackground(getResources().getDrawable(R.drawable.btn_error_bg));
                 }
                 refreshPointList();
@@ -605,9 +616,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             case R.id.btn_offline:
                 mPointList.clear();
                 isOffline = !isOffline;
-                if(isOffline){
+                if (isOffline) {
                     mBtnOffline.setBackground(getResources().getDrawable(R.drawable.btn_offline_selected_bg));
-                }else{
+                } else {
                     mBtnOffline.setBackground(getResources().getDrawable(R.drawable.btn_offline_bg));
                 }
                 refreshPointList();
@@ -621,8 +632,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         }
     }
 
-    private void refreshPointList(){
-        if(isOnline){
+    private void refreshPointList() {
+        if (isOnline) {
             for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                     projectStationList) {
                 int statusCode = Integer.parseInt(projectStation.getStationStatus());
@@ -631,7 +642,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
             }
         }
-        if(isWarning){
+        if (isWarning) {
             for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                     projectStationList) {
                 int statusCode = Integer.parseInt(projectStation.getStationStatus());
@@ -640,7 +651,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
             }
         }
-        if(isError){
+        if (isError) {
             for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                     projectStationList) {
                 int statusCode = Integer.parseInt(projectStation.getStationStatus());
@@ -649,7 +660,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
             }
         }
-        if(isOffline){
+        if (isOffline) {
             for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                     projectStationList) {
                 int statusCode = Integer.parseInt(projectStation.getStationStatus());
@@ -700,7 +711,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     }
 
     public void switchFragment(String projectName, ArrayList<String> stationNameList, int position, ArrayList<String> stationUUIDList) {
-        //Fragment chartFragment = new ChartFragment();
+
         ChartFragment chartFragment = ChartFragment.newInstance(projectName, stationNameList, position, stationUUIDList);
         MainActivity activity = (MainActivity) getActivity();
         activity.setChartFragment(chartFragment);
@@ -726,7 +737,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
     @Override
     public void onDestroy() {
-        if(mLocationClient != null){
+        if (mLocationClient != null) {
             mLocationClient.stop();
         }
         mBaiduMap.setMyLocationEnabled(false);

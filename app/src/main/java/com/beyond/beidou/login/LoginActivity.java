@@ -134,8 +134,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         imgVisible.setOnClickListener(this);
         btnLogin.setOnClickListener(this);
 
-        etLoginAccount.setText("qazXSW0");
-        etLoginCheck.setText("qazxswEDCVFR0*");
+//        etLoginAccount.setText("qazXSW0");
+//        etLoginCheck.setText("qazxswEDCVFR0*");
+        etLoginAccount.setText("qwerASD5");
+        etLoginCheck.setText("qwertyuiiopASDFG5*");
 
         etLoginAccount.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override

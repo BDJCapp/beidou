@@ -6,12 +6,11 @@
     android:id="@+id/header"
     android:orientation="vertical">
     <Spinner
-        android:layout_width="200dp"
+        android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:id="@+id/spinner_projectName"
         android:layout_gravity="center"
         android:dropDownVerticalOffset="50dp"
-        android:dropDownWidth="200dp"
         android:theme="@style/spinner_style"
         />
     <View

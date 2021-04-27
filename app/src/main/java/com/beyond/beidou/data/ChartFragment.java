@@ -1,31 +1,17 @@
 package com.beyond.beidou.data;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -40,27 +26,16 @@ import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.GNSSFilterInfoResponse;
-import com.beyond.beidou.entites.LoginResponse;
-import com.beyond.beidou.login.StartActivity;
 import com.beyond.beidou.util.DateUtil;
 import com.beyond.beidou.util.FileUtil;
 import com.beyond.beidou.util.LogUtil;
-import com.beyond.beidou.util.LoginUtil;
 import com.google.gson.Gson;
-import com.zyao89.view.zloading.ZLoadingDialog;
-import com.zyao89.view.zloading.Z_TYPE;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import lecho.lib.hellocharts.gesture.ContainerScrollType;
@@ -76,7 +51,7 @@ import okhttp3.FormBody;
 
 public class ChartFragment extends BaseFragment implements View.OnClickListener {
     private Spinner spDevice, spTime;
-    private LineChartView xChart, yChart, HChart,deltaDChart,deltaHChart,heartChart;
+    private LineChartView xChart, yChart, hChart,deltaDChart,deltaHChart,heartChart;
     private TextView xChartName, yChartName, hChartName,deltaDChartName,deltaHChartName,heartChartName;
     private TextView xChartCoo, yChartCoo, hChartCoo,deltaDChartCoo,deltaHChartCoo,heartChartCoo;
     private TextView xChartTime, yChartTime, hChartTime,deltaDChartTime,deltaHChartTime,heartChartTime;
@@ -104,6 +79,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private LinearLayout chartXLayout;
     private String startTime = null;
     private String endTime = null;
+    private boolean hasData = true;
 
     public static ChartFragment newInstance(String projectName, ArrayList<String> stationNameList, int position,ArrayList<String> stationUUIDList) {
         ChartFragment chartFragment = new ChartFragment();
@@ -125,15 +101,20 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chart, container, false);
         initView(view);
-        getData("GNSSFilterInfo", "6159529a-6bc3-4c73-84d1-e59f6f60ece6", "2021-03-09 00:00:00", "2021-03-09 23:59:59");
-//        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        getData("GNSSFilterInfo", stationUUIDList.get(selectedDevicePosition), df.format(DateUtil.getDayBegin()), df.format(DateUtil.getDayEnd()));
 
-        startTime = "2021-03-09 00:00:00";  //当前只有该天的数据，默认展示本日的数据
-        endTime = "2021-03-09 23:59:59";
-        drawXYHChart("本日");
-        drawDeltaChart("本日");
-        drawHeartChart("本日");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        startTime = df.format(DateUtil.getDayBegin());
+        endTime = df.format(DateUtil.getDayEnd());
+        getData("GNSSFilterInfo", stationUUIDList.get(selectedDevicePosition),startTime,endTime);
+
+//        if (hasData)
+//        {
+//            drawXYHChart("本日");
+//            drawDeltaChart("本日");
+//            drawHeartChart("本日");
+//        }
+        drawChart();
+
         return view;
     }
 
@@ -161,7 +142,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
         xChart = view.findViewById(R.id.chart_X);
         yChart = view.findViewById(R.id.chart_Y);
-        HChart = view.findViewById(R.id.chart_H);
+        hChart = view.findViewById(R.id.chart_H);
         deltaDChart = view.findViewById(R.id.chart_DeltaD);
         deltaHChart = view.findViewById(R.id.chart_DeltaH);
         heartChart = view.findViewById(R.id.chart_Heart);
@@ -211,6 +192,18 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         });
 
+        spDevice.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                refresh();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         mDownLoadExcel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -231,7 +224,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
         xChart.setOnTouchListener(touchListener);
         yChart.setOnTouchListener(touchListener);
-        HChart.setOnTouchListener(touchListener);
+        hChart.setOnTouchListener(touchListener);
 
 //        chartX.setViewportChangeListener(new ViewportChangeListener() {
 //            @Override
@@ -292,64 +285,15 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 //        });
     }
 
-    public List<PointValue> monitorDataWeek(List<PointValue> values) {
-        List<PointValue> temp = new ArrayList<>();
-        for (int i = 0; i < values.size(); i++) {
-            temp.add(new PointValue(values.get(i).getX() * 7, values.get(i).getY()));
-        }
-
-        return temp;
-    }
-
-    public List<PointValue> monitorDataMonth(List<PointValue> values) {
-        //模拟数据模块
-        int size = values.size();
-//        for (int i = 0; i < 11; i++) {
-//            values.add(new PointValue(values.get(values.size() - 1).getX() + 1f, values.get(size-1).getY()));
+//    public List<PointValue> monitorDataWeek(List<PointValue> values) {
+//        List<PointValue> temp = new ArrayList<>();
+//        for (int i = 0; i < values.size(); i++) {
+//            temp.add(new PointValue(values.get(i).getX() * 7, values.get(i).getY()));
 //        }
+//
+//        return temp;
+//    }
 
-        List<PointValue> temp = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd", Locale.CHINA);
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, 1);
-        Date date = calendar.getTime();
-        calendar.add(Calendar.MONTH, -1);
-
-        Date dateBefore = calendar.getTime();
-        int days = DateUtil.calcDayOffset(dateBefore, date);
-        for (int i = 0; i < values.size(); i++) {
-//            Log.e("original", values.get(i).getX() + "");
-//            Log.e("monthX", values.get(i).getX() * 30 + "");
-
-            temp.add(new PointValue(values.get(i).getX() * days, values.get(i).getY()));
-        }
-//        temp.add(new PointValue(1440 * 30, values.get(size - 1).getY()));
-        return temp;
-    }
-
-    public List<PointValue> monitorDataYear(List<PointValue> values) {
-        //模拟数据模块
-        int size = values.size();
-//        for (int i = 0; i < 11; i++) {
-//            values.add(new PointValue(values.get(values.size() - 1).getX() + 1f, values.get(size - 1).getY()));
-//        }
-        List<PointValue> temp = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd", Locale.CHINA);
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, 1);
-        Date date = calendar.getTime();
-        calendar.add(Calendar.YEAR, -1);
-        calendar.add(Calendar.DATE, -1);
-        Date dateBefore = calendar.getTime();
-        int days = DateUtil.calcDayOffset(dateBefore, date);
-
-        for (int i = 0; i < values.size(); i++) {
-            temp.add(new PointValue(values.get(i).getX() * days, values.get(i).getY()));
-
-        }
-
-        return temp;
-    }
 
     /**
      * 解决图表与ScrollView滑动冲突
@@ -417,7 +361,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         xAxisValues = setXAxisValues(selectedTime);
         yLabel = setAxisYLabel(minResponse.get(3).toString(), hConvertData);
         convertLines(hConvertData);
-        setChart(HChart, hConvertData, xAxisValues, yLabel);
+        setChart(hChart, hConvertData, xAxisValues, yLabel);
 
     }
 
@@ -463,7 +407,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     }
 
     public void setHeartChart(LineChartView chartView, List<PointValue> values, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues) {
-        String selectedTime = spTime.getSelectedItem().toString();
         Line line = new Line(values).setColor(Color.parseColor("#2196F3")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
         List<Line> lines = new ArrayList<>();
         lines.add(line);
@@ -488,6 +431,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         chartView.setInteractive(true);
         chartView.setMaxZoom(20f);
         chartView.setZoomType(ZoomType.HORIZONTAL_AND_VERTICAL);
+        heartChart.setVisibility(View.VISIBLE);
 
         Viewport viewport = chartView.getMaximumViewport();
         viewport.top = viewport.top + 0.02f;
@@ -501,21 +445,43 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
     public void convertHeartChartData(List<List<Object>> contentList, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, List<PointValue> pointValues) {
 //        Log.wtf("WTF", "XMax: " + maxResponse.get(1).toString()+ " XMin:  "+ minResponse.get(1).toString() + " YMax:" + maxResponse.get(2).toString() + " YMin" + minResponse.get(2).toString());
-        double convertYMin, convertYMax, convertXMin, convertXMax;
+        double convertXMin, convertXMax, convertYMin, convertYMax;
         DecimalFormat df = new DecimalFormat("#.00");
         String space = "0.01";
         BigDecimal bSpace = new BigDecimal(space);
-        BigDecimal bResponseYMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
-        BigDecimal bResponseYMax = new BigDecimal(df.format(Double.parseDouble(maxResponse.get(2).toString())));
+        BigDecimal bResponseXmin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
+        BigDecimal bResponseXMax = new BigDecimal(df.format(Double.parseDouble(maxResponse.get(2).toString())));
+
+        bResponseXmin = bResponseXmin.subtract(new BigDecimal("0.02"));
+        bResponseXMax = bResponseXMax.add(new BigDecimal("0.02"));
+
+        convertXMin = Double.parseDouble(String.valueOf(bResponseXmin));
+        convertXMax = Double.parseDouble(String.valueOf(bResponseXMax));
+        double tempDouble = Double.parseDouble(String.valueOf(bResponseXmin));
+        String tempString = String.valueOf(convertXMin);
+        BigDecimal strXMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
+        strXMin = strXMin.subtract(new BigDecimal("0.02"));
+        while (tempDouble <= convertXMax) {
+            AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertXMin)));
+            axisValue.setLabel(tempString);
+            xAxisValues.add(axisValue);
+            bResponseXmin = bResponseXmin.add(bSpace);
+            strXMin = strXMin.add(bSpace);
+            tempString = String.valueOf(strXMin);
+            tempDouble = Double.parseDouble(String.valueOf(bResponseXmin));
+        }
+
+        BigDecimal bResponseYMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
+        BigDecimal bResponseYMax = new BigDecimal(df.format(Double.parseDouble(maxResponse.get(1).toString())));
 
         bResponseYMin = bResponseYMin.subtract(new BigDecimal("0.02"));
         bResponseYMax = bResponseYMax.add(new BigDecimal("0.02"));
 
         convertYMin = Double.parseDouble(String.valueOf(bResponseYMin));
         convertYMax = Double.parseDouble(String.valueOf(bResponseYMax));
-        double tempDouble = Double.parseDouble(String.valueOf(bResponseYMin));
-        String tempString = String.valueOf(convertYMin);
-        BigDecimal strYMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
+        tempDouble = Double.parseDouble(String.valueOf(bResponseYMin));
+        tempString = String.valueOf(convertYMin);
+        BigDecimal strYMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
         strYMin = strYMin.subtract(new BigDecimal("0.02"));
         while (tempDouble <= convertYMax) {
             AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertYMin)));
@@ -527,37 +493,15 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             tempDouble = Double.parseDouble(String.valueOf(bResponseYMin));
         }
 
-        BigDecimal bResponseXMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
-        BigDecimal bResponseXMax = new BigDecimal(df.format(Double.parseDouble(maxResponse.get(1).toString())));
-
-        bResponseXMin = bResponseXMin.subtract(new BigDecimal("0.02"));
-        bResponseXMax = bResponseXMax.add(new BigDecimal("0.02"));
-
-        convertXMin = Double.parseDouble(String.valueOf(bResponseXMin));
-        convertXMax = Double.parseDouble(String.valueOf(bResponseXMax));
-        tempDouble = Double.parseDouble(String.valueOf(bResponseXMin));
-        tempString = String.valueOf(convertXMin);
-        BigDecimal strXMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
-        strXMin = strXMin.subtract(new BigDecimal("0.02"));
-        while (tempDouble <= convertXMax) {
-            AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertXMin)));
-            axisValue.setLabel(tempString);
-            xAxisValues.add(axisValue);
-            bResponseXMin = bResponseXMin.add(bSpace);
-            strXMin = strXMin.add(bSpace);
-            tempString = String.valueOf(strXMin);
-            tempDouble = Double.parseDouble(String.valueOf(bResponseXMin));
-        }
-
 
         double tempX, tempY;
-        BigDecimal minuendX = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
-        minuendX = minuendX.subtract(new BigDecimal("0.02"));
-        BigDecimal minuendY = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
-        minuendY = minuendY.subtract(new BigDecimal("0.02"));
+        BigDecimal minuendY1 = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
+        minuendY1 = minuendY1.subtract(new BigDecimal("0.02"));
+        BigDecimal minuendX1 = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
+        minuendX1 = minuendX1.subtract(new BigDecimal("0.02"));
         for (List<Object> content : contentList) {
-            tempX = Double.parseDouble(content.get(1).toString()) - Double.parseDouble(minuendX.toString());
-            tempY = Double.parseDouble(content.get(2).toString()) - Double.parseDouble(minuendY.toString());
+            tempY = Double.parseDouble(content.get(1).toString()) - Double.parseDouble(minuendY1.toString());
+            tempX = Double.parseDouble(content.get(2).toString()) - Double.parseDouble(minuendX1.toString());
             pointValues.add(new PointValue(Float.parseFloat(String.valueOf(tempX)), Float.parseFloat(String.valueOf(tempY))));
         }
     }
@@ -579,6 +523,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         }
 
+        //错误原因：传回的最小值和实际最小值不一样
+
+//        LogUtil.e("setYLable valueYMax",valueYMax + "");
+//        LogUtil.e("setYLable valueYMin",valueYMin + "");
+//        LogUtil.e("setYLable 传入的最小值VS返回的最小值",yMin + "" + minResponse.get(1));
+
         String space = "0.01";     //每格大小为0.01m
         convertYMax = valueYMax + 0.1f;
         convertYMin = valueYMin - 0.1f;
@@ -592,15 +542,17 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         tempYmin = tempYmin.subtract(new BigDecimal("0.1"));
         BigDecimal s_yMin = new BigDecimal(df.format(tempYmin));  //传入格式化后的最小值
 
+//        LogUtil.e("convertYMin + tempYmin",convertYMin + "  " + tempYmin);
+
         while (chartValue <= convertYMax) {
             b_ymin = b_ymin.add(b_space);
             s_yMin = s_yMin.add(b_space);
             tempString = String.valueOf(s_yMin);
             chartValue = Float.parseFloat(String.valueOf(b_ymin));
-            //LogUtil.e("value lable", String.valueOf(chartValue) + "  " + tempString);
             AxisValue axisValue = new AxisValue(chartValue);
             axisValue.setLabel(tempString);
             axisValues.add(axisValue);
+//            LogUtil.e("value lable", String.valueOf(chartValue) + "  " + tempString);
         }
         return axisValues;
     }
@@ -706,20 +658,38 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         currentWindow.bottom = convertAverage - 0.05f;
         currentWindow.top = convertAverage + 0.04f;
 
-        if("一年".equals(spTime.getSelectedItem().toString())){
-            maxWindow.right = maxWindow.right + (float) (xConvertData.size() * 365 / 24);
-        }else if("一月".equals(spTime.getSelectedItem().toString())){
-            maxWindow.right = maxWindow.right + (float) (xConvertData.size() * 30 / 24);
-        }else if("一周".equals(spTime.getSelectedItem().toString())){
-            maxWindow.right = maxWindow.right + (float) (xConvertData.size() * 7/ 24);
-        }else{
-            maxWindow.right = maxWindow.right + (float) (xConvertData.size() / 24);
+
+        switch (spTime.getSelectedItem().toString()) {
+            case "最近1小时":
+                maxWindow.right = 60 + (float) (60 / 24);
+                break;
+            case "最近6小时":
+                maxWindow.right = 360 + (float) (360 / 24);
+                break;
+            case "最近12小时":
+                maxWindow.right = 720 + (float) (720 / 24);
+                break;
+            case "本日":
+                maxWindow.right = 1440 + (float) (1440 / 24);
+                break;
+            case "一周":
+                maxWindow.right = 1440*7 + (float) (1440*7 / 24);
+                break;
+            case "一月":
+                maxWindow.right = 1440*30 + (float) (1440*30 / 24);
+                break;
+            case "一年":
+                maxWindow.right = 1440*365 + (float) (1440*365 / 24);
+                break;
         }
+
+
         maxWindow.left = 0f;
         currentWindow.left = maxWindow.left;
         currentWindow.right = (float) (maxWindow.right * 0.5);
         chartView.setMaximumViewport(maxWindow);
         chartView.setCurrentViewport(currentWindow);
+
     }
 
     @Override
@@ -755,10 +725,22 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         Api.config(ApiConfig.GET_GRAPHIC_DATA).postRequestFormBodySync(getActivity(),getChartDataBody,new ApiCallback() {
             @Override
             public void onSuccess(String res) {
+
                 LogUtil.e("请求点数据结束时间", sdfTwo.format(System.currentTimeMillis()));
                 Gson gson = new Gson();
                 GNSSFilterInfoResponse gnssFilterInfoResponse = gson.fromJson(res, GNSSFilterInfoResponse.class);
                 contentResponse = gnssFilterInfoResponse.getContent();
+                if (contentResponse.size() == 0)
+                {
+                    hasData = false;
+                    xChart.setVisibility(View.GONE);
+                    yChart.setVisibility(View.GONE);
+                    hChart.setVisibility(View.GONE);
+                    deltaDChart.setVisibility(View.GONE);
+                    deltaHChart.setVisibility(View.GONE);
+                    heartChart.setVisibility(View.GONE);
+                    return;
+                }
                 maxResponse = gnssFilterInfoResponse.getMax();
                 minResponse = gnssFilterInfoResponse.getMin();
                 averageResponse = gnssFilterInfoResponse.getAverage();
@@ -801,6 +783,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 deltaDConvertData = convertData(deltaDResponseData, minResponse.get(4).toString(), startTime, averageResponse.get(4).toString());
                 deltaHConvertData = convertData(deltaHResponseData, minResponse.get(5).toString(), startTime, averageResponse.get(5).toString());
                 LogUtil.e("getData执行结束", "*********");
+                hasData = true;
             }
 
             @Override
@@ -823,13 +806,25 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Long axisXValue = null;
         Long axisX0 = null;
-        double valueMin = Double.parseDouble(responseMin);
         float convertValue;
+        double valueMin = Double.parseDouble(responseMin);
+
+//        double valueMin = Double.parseDouble(responseMin);
+////        for (List<String> data : responseData) {
+////            if (Double.parseDouble(data.get(1)) <= valueMin)
+////            {
+////                valueMin = Double.parseDouble(data.get(1));
+////            }
+//        }
+
+//        LogUtil.e("ChartFragment  responseMin",responseMin + "");
 
         DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
         BigDecimal convertMin = new BigDecimal(df.format(valueMin));
         valueMin = Double.parseDouble(String.valueOf(convertMin));
         convertAverage = (float) (Double.parseDouble(responseAverage) - valueMin);
+//        LogUtil.e("ChartFragment  valueMin",valueMin + "");
+//        LogUtil.e("ChartFragment  convertAverage",convertAverage + "");
         try {
             axisX0 = simpleDateFormat.parse(startTime).getTime() / 1000 / 60; //获取分钟级时间戳
         } catch (ParseException e) {
@@ -840,6 +835,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             convertValue = (float) (Double.parseDouble(data.get(1)) - valueMin);
             axisXValue = Long.parseLong(time) / 60;
             convertData.add(new PointValue((float) (axisXValue - axisX0), convertValue));
+//            LogUtil.e("原始值，转换后数据",Double.parseDouble(data.get(1)) + "  " + convertValue);
         }
         return convertData;
     }
@@ -898,106 +894,82 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      */
     public void refresh()
     {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String graphicType = "GNSSFilterInfo";
-        String stationUUID = "6159529a-6bc3-4c73-84d1-e59f6f60ece6";
-//        String stationUUID = stationUUIDList.get(spDevice.getSelectedItemPosition());
+        String stationUUID = stationUUIDList.get(spDevice.getSelectedItemPosition());
 
         switch (spTime.getSelectedItemPosition()) {
             case 0:
                 //最近1小时
-                //暂时只有3.9号的数据，之后直接把"2021-03-09 "去掉即可。
-                startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(1));
-                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getHourBegin(1));
+                endTime = sdf.format(DateUtil.getHourEnd());
                 getData(graphicType, stationUUID, startTime, endTime);
-                drawXYHChart(spTime.getSelectedItem().toString());
-                drawDeltaChart(spTime.getSelectedItem().toString());
-                drawHeartChart(spTime.getSelectedItem().toString());
+                drawChart();
                 break;
             case 1:
                 //最近6小时
-                startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(6));
-                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getHourBegin(6));
+                endTime = sdf.format(DateUtil.getHourEnd());
                 getData(graphicType, stationUUID, startTime, endTime);
-                drawXYHChart(spTime.getSelectedItem().toString());
-                drawDeltaChart(spTime.getSelectedItem().toString());
-                drawHeartChart(spTime.getSelectedItem().toString());
+                drawChart();
+//                drawXYHChart(spTime.getSelectedItem().toString());
+//                drawDeltaChart(spTime.getSelectedItem().toString());
+//                drawHeartChart(spTime.getSelectedItem().toString());
                 break;
             case 2:
-                //最近12小时
-                if (DateUtil.getNowHour() < 12)
-                {
-                    //12点之前,因为当前只有9号的数据
-                    startTime = "2021-03-08 " + sdf.format(DateUtil.getHourBegin(12));
-                }
-                else {
-                    //12点之后
-                    startTime = "2021-03-09 " + sdf.format(DateUtil.getHourBegin(12));
-                }
-                endTime = "2021-03-09 " + sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getHourBegin(12));
+                endTime = sdf.format(DateUtil.getHourEnd());
                 getData(graphicType, stationUUID, startTime, endTime);
-                drawXYHChart(spTime.getSelectedItem().toString());
-                drawDeltaChart(spTime.getSelectedItem().toString());
-                drawHeartChart(spTime.getSelectedItem().toString());
+                drawChart();
+//                drawXYHChart(spTime.getSelectedItem().toString());
+//                drawDeltaChart(spTime.getSelectedItem().toString());
+//                drawHeartChart(spTime.getSelectedItem().toString());
                 break;
             case 3:
                 //本日
-                startTime = "2021-03-09 " + sdf.format(DateUtil.getDayBegin());
-                endTime = "2021-03-09 " + sdf.format(DateUtil.getDayEnd());
+                startTime = sdf.format(DateUtil.getDayBegin());
+                endTime = sdf.format(DateUtil.getDayEnd());
                 getData(graphicType, stationUUID, startTime, endTime);
-                drawXYHChart(spTime.getSelectedItem().toString());
-                drawDeltaChart(spTime.getSelectedItem().toString());
-                drawHeartChart(spTime.getSelectedItem().toString());
+                drawChart();
+//                drawXYHChart(spTime.getSelectedItem().toString());
+//                drawDeltaChart(spTime.getSelectedItem().toString());
+//                drawHeartChart(spTime.getSelectedItem().toString());
                 break;
             case 4:
                 //一周
-                //模拟数据
-                startTime = "2021-03-09 00:00:00";
-                endTime = "2021-03-09 23:59:59";
+                startTime = sdf.format(DateUtil.getBeginDayOfWeek());
+                endTime = sdf.format(DateUtil.getEndDayOfWeek());
+                LogUtil.e("starttime-week", startTime);
+                LogUtil.e("endtime-week", endTime);
                 getData(graphicType, stationUUID, startTime, endTime);
-
-                //模拟数据模块
-                xConvertData = monitorDataWeek(xConvertData);
-                yConvertData = monitorDataWeek(yConvertData);
-                hConvertData = monitorDataWeek(hConvertData);
-                deltaDConvertData = monitorDataWeek(deltaDConvertData);
-                deltaHConvertData = monitorDataWeek(deltaHConvertData);
-                drawXYHChart(spTime.getSelectedItem().toString());
-                drawDeltaChart(spTime.getSelectedItem().toString());
-                drawHeartChart(spTime.getSelectedItem().toString());
+                drawChart();
+//                drawXYHChart(spTime.getSelectedItem().toString());
+//                drawDeltaChart(spTime.getSelectedItem().toString());
+//                drawHeartChart(spTime.getSelectedItem().toString());
                 break;
             case 5:
                 //一月
-                //模拟数据
-                startTime = "2021-03-09 00:00:00";
-                endTime = "2021-03-09 23:59:59";
+                startTime = sdf.format(DateUtil.getBeginDayOfMonth());
+                endTime = sdf.format(DateUtil.getEndDayOfMonth());
+                LogUtil.e("starttime-month", startTime);
+                LogUtil.e("endtime-month", endTime);
                 getData(graphicType, stationUUID, startTime, endTime);
-                //模拟数据模块
-                xConvertData = monitorDataMonth(xConvertData);
-                yConvertData = monitorDataMonth(yConvertData);
-                hConvertData = monitorDataMonth(hConvertData);
-                deltaDConvertData = monitorDataMonth(deltaDConvertData);
-                deltaHConvertData = monitorDataMonth(deltaHConvertData);
-                drawXYHChart(spTime.getSelectedItem().toString());
-                drawDeltaChart(spTime.getSelectedItem().toString());
-                drawHeartChart(spTime.getSelectedItem().toString());
+                drawChart();
+//                drawXYHChart(spTime.getSelectedItem().toString());
+//                drawDeltaChart(spTime.getSelectedItem().toString());
+//                drawHeartChart(spTime.getSelectedItem().toString());
                 break;
             case 6:
                 //一年
-                //模拟数据
-                startTime = "2021-03-09 00:00:00";
-                endTime = "2021-03-09 23:59:59";
+                startTime = sdf.format(DateUtil.getBeginDayOfYear());
+                endTime = sdf.format(DateUtil.getEndDayOfYear());
+                LogUtil.e("starttime-year", startTime);
+                LogUtil.e("endtime-year", endTime);
                 getData(graphicType, stationUUID, startTime, endTime);
-
-                //模拟数据模块
-                xConvertData = monitorDataYear(xConvertData);
-                yConvertData = monitorDataYear(yConvertData);
-                hConvertData = monitorDataYear(hConvertData);
-                deltaDConvertData = monitorDataYear(deltaDConvertData);
-                deltaHConvertData = monitorDataYear(deltaHConvertData);
-                drawXYHChart(spTime.getSelectedItem().toString());
-                drawDeltaChart(spTime.getSelectedItem().toString());
-                drawHeartChart(spTime.getSelectedItem().toString());
+                drawChart();
+//                drawXYHChart(spTime.getSelectedItem().toString());
+//                drawDeltaChart(spTime.getSelectedItem().toString());
+//                drawHeartChart(spTime.getSelectedItem().toString());
                 break;
         }
     }
@@ -1039,6 +1011,16 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         });
 
+    }
+
+    public void drawChart()
+    {
+        if (hasData)
+        {
+            drawXYHChart(spTime.getSelectedItem().toString());
+            drawDeltaChart(spTime.getSelectedItem().toString());
+            drawHeartChart(spTime.getSelectedItem().toString());
+        }
     }
 
     public void test() {

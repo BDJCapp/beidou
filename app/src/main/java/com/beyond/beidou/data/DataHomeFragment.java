@@ -103,8 +103,8 @@ public class DataHomeFragment extends BaseFragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, projectNameList);
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.item_select, projectNameList);
+                        adapter.setDropDownViewResource(R.layout.item_drop);
                         spProjectName.setAdapter(adapter);
 
                         //读取SP上次退出时选中的工程名，若没有。默认展示第一个工程

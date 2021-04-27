@@ -198,7 +198,7 @@ public class DateUtil {
     }
 
     public static String getTimeInterval(String selectedTime) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String time = null;
         String startTime = null;
         String endTime = null;
