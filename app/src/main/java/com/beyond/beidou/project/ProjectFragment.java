@@ -1,8 +1,13 @@
 package com.beyond.beidou.project;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -54,10 +59,13 @@ import com.beyond.beidou.data.ChartFragment;
 import com.beyond.beidou.entites.MonitoringPoint;
 import com.beyond.beidou.entites.ProjectResponse;
 import com.beyond.beidou.login.LoginActivity;
+import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.beyond.beidou.util.ScreenUtil;
 import com.google.gson.Gson;
 import com.yinglan.scrolllayout.ScrollLayout;
+import com.zyao89.view.zloading.ZLoadingDialog;
+import com.zyao89.view.zloading.Z_TYPE;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -113,6 +121,32 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private boolean isWarning = false;
     private boolean isError = false;
     private boolean isOffline = false;
+//    private ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), R.layout.item_select, projectNameList);
+    private static volatile boolean isFinishLoading = false;
+    private static final int LOADING = 1;
+    private ZLoadingDialog dialog;
+    public Handler handler = new  Handler(Looper.getMainLooper()){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            switch (msg.what)
+            {
+                case LOADING:
+                    getData();
+                    while(!isFinishLoading){}
+                    dialog.dismiss();
+                    break;
+            }
+        }
+    };
+
+    private void doLoadingDialog(){
+        handler.sendEmptyMessageDelayed(LOADING, 50);
+        dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
+                .setLoadingColor(Color.BLACK)//颜色
+                .setHintText("Loading...")
+                .setCancelable(false)
+                .show();
+    }
 
     @Nullable
     @Override
@@ -138,16 +172,17 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             MainActivity mMainActivity = (MainActivity) getActivity();
             if (!presentProject.equals(mMainActivity.getPresentProject())) {
                 isFirstLocate = true;
+//                getData();
+                doLoadingDialog();
             }
-            presentProject = mMainActivity.getPresentProject();
-            return;
         }
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getData();
+//        getData();
+        doLoadingDialog();
     }
 
     public static ProjectFragment newInstance() {
@@ -204,7 +239,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     isFirstBindListener = false;
                     return;
                 }
-                getData();
+//                getData();
+                doLoadingDialog();
             }
 
             @Override
@@ -233,10 +269,12 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
         });
         mBaiduMap.setMyLocationEnabled(true);
+        dialog = new ZLoadingDialog(getActivity());
     }
 
     private void getData() {
         Log.wtf("getData", "================Begin================");
+        isFinishLoading = false;
         projectNameList.clear();
         if (isReLogin) {
             isFirstLogin = true;
@@ -378,6 +416,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     startActivity(intent);
                     getActivity().finish();
                 }
+                isFinishLoading = true;
             }
 
             @Override
@@ -624,10 +663,12 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 refreshPointList();
                 break;
             case R.id.iv_refresh:
-                getData();
+                doLoadingDialog();
+//                getData();
                 break;
             case R.id.tv_refresh:
-                getData();
+                doLoadingDialog();
+//                getData();
                 break;
         }
     }

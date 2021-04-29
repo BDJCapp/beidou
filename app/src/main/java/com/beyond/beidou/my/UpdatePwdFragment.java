@@ -128,8 +128,8 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                 } else {
                     mParams.put("AccessToken", ApiConfig.getAccessToken());
                     mParams.put("SessionUUID", ApiConfig.getSessionUUID());
-                    mParams.put("OldPassword", originalPwd);
-                    mParams.put("NewPassword", newPwd);
+                    mParams.put("OldPassword", LoginUtil.DES3Encode(originalPwd,ApiConfig.getSessionUUID()));
+                    mParams.put("NewPassword", LoginUtil.DES3Encode(newPwd,ApiConfig.getSessionUUID()));
                     Api.config(ApiConfig.SET_PASSWORD, mParams).postRequest(getContext(), new ApiCallback() {
                         @Override
                         public void onSuccess(String res) {

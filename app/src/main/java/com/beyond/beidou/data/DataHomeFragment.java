@@ -2,6 +2,9 @@ package com.beyond.beidou.data;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,8 +48,48 @@ public class DataHomeFragment extends BaseFragment {
 
     private Spinner spProjectName;
     private RecyclerView deviceList;
-    ZLoadingDialog dialog;
     MainActivity activity;
+    private static final int LOADING = 1;
+    private static final int DEVICE_LIST = 2;
+    private ZLoadingDialog dialog;
+    private static volatile boolean isFinishLoading = false;
+    private ArrayList<String> stationNameList = new ArrayList<>();
+    public Handler handler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            switch (msg.what) {
+                case LOADING:
+                    LogUtil.e("LOADING", "Loading===========");
+                    setViews();
+                    while (!isFinishLoading) {
+                    }
+                    dialog.dismiss();
+                    break;
+                case DEVICE_LIST:
+                    LogUtil.e("DEVICE_LIST", "DEVICE_LIST===========");
+//                    setDeviceList(((MainActivity)getActivity()).getPresentProject());
+                    setDeviceList(spProjectName.getSelectedItem().toString());
+                    while (!isFinishLoading) {
+                    }
+                    dialog.dismiss();
+                    break;
+            }
+        }
+    };
+
+    private void doLoadingDialog(int type) {
+        if(type == 1){
+            handler.sendEmptyMessageDelayed(LOADING, 150);
+        }else{
+            handler.sendEmptyMessageDelayed(DEVICE_LIST, 150);
+        }
+
+        dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
+                .setLoadingColor(Color.BLACK)//颜色
+                .setHintText("Loading...")
+                .setCancelable(false)
+                .show();
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,31 +109,35 @@ public class DataHomeFragment extends BaseFragment {
         activity = (MainActivity) getActivity();
         spProjectName = view.findViewById(R.id.spinner_projectName);
         deviceList = view.findViewById(R.id.rv_device);
-        setViews();
+        dialog = new ZLoadingDialog(getActivity());
+        doLoadingDialog(1);
+//        setViews();
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (activity.getNowFragment() == activity.getDataFragment())
-        {
-            setViews();
+        if (activity.getNowFragment() == activity.getDataFragment() && !spProjectName.getSelectedItem().toString().equals(((MainActivity)getActivity()).getPresentProject())) {
+            spProjectName.setSelection(stationNameList.indexOf(((MainActivity)getActivity()).getPresentProject()), true);
+            //设置spinner选中项
+            doLoadingDialog(2);
+//            setViews();
         }
     }
 
-    public void setViews()
-    {
+    public void setViews() {
+        isFinishLoading = false;
         //设置Spinner
-        final HashMap<String,Object> requestParams = new HashMap<>();
+        final HashMap<String, Object> requestParams = new HashMap<>();
         requestParams.put("AccessToken", ApiConfig.getAccessToken());
-        requestParams.put("SessionUUID",ApiConfig.getSessionUUID());
+        requestParams.put("SessionUUID", ApiConfig.getSessionUUID());
 
 //        dialog.setLoadingBuilder( Z_TYPE.ROTATE_CIRCLE)//设置类型
 //                .setLoadingColor(Color.BLACK)//颜色
 //                .setHintText("Loading...")
 //                .show();
 
-        Api.config(ApiConfig.GET_PROJECTS,requestParams).postRequest(getActivity(), new ApiCallback() {
+        Api.config(ApiConfig.GET_PROJECTS, requestParams).postRequest(getActivity(), new ApiCallback() {
             @Override
             public void onSuccess(String res) {
                 Gson gson = new Gson();
@@ -110,27 +157,26 @@ public class DataHomeFragment extends BaseFragment {
                         //读取SP上次退出时选中的工程名，若没有。默认展示第一个工程
                         final MainActivity activity = (MainActivity) getActivity();
                         String presentProject = activity.getPresentProject();
-                        if (!TextUtils.isEmpty(presentProject))
-                        {
+                        if (!TextUtils.isEmpty(presentProject)) {
                             for (int i = 0; i < projectNameList.size(); i++) {
-                                if (presentProject.equals(projectNameList.get(i)))
-                                {
-                                    spProjectName.setSelection(i,true);
+                                stationNameList.add(projectNameList.get(i));
+                                if (presentProject.equals(projectNameList.get(i))) {
+                                    spProjectName.setSelection(i, true);
+                                    LogUtil.e("posotion", "11111");
                                     setDeviceList(presentProject);
+                                    LogUtil.e("posotion", "2222222");
                                 }
                             }
                         }
 
 
-
                         spProjectName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                                SimpleDateFormat sdfTwo =new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
-//                                LogUtil.e("Spinner切换工程的时间",sdfTwo.format(System.currentTimeMillis()));
-                                setDeviceList(spProjectName.getSelectedItem().toString());  //设置设备列表
-                                activity.setPresentProject(spProjectName.getSelectedItem().toString());
+                                ((MainActivity)getActivity()).setPresentProject(spProjectName.getSelectedItem().toString());
+                                doLoadingDialog(2);
                             }
+
                             @Override
                             public void onNothingSelected(AdapterView<?> parent) {
 
@@ -138,36 +184,37 @@ public class DataHomeFragment extends BaseFragment {
                         });
                     }
                 });
+                isFinishLoading = true;
             }
+
             @Override
             public void onFailure(Exception e) {
-                LogUtil.e("获取工程网络请求失败",e.getMessage());
+                LogUtil.e("获取工程网络请求失败", e.getMessage());
             }
         });
 
     }
 
-    public void setDeviceList(String selectedProject)
-    {
-        HashMap<String,Object> requestParams = new HashMap<>();
+    public void setDeviceList(String selectedProject) {
+        isFinishLoading = false;
+        HashMap<String, Object> requestParams = new HashMap<>();
         List<String> requestProjectList = new ArrayList<>();
         requestProjectList.add(selectedProject);
         requestParams.put("AccessToken", ApiConfig.getAccessToken());
-        requestParams.put("SessionUUID",ApiConfig.getSessionUUID());
-        requestParams.put("ProjectName",requestProjectList);
+        requestParams.put("SessionUUID", ApiConfig.getSessionUUID());
+        requestParams.put("ProjectName", requestProjectList);
 
-        SimpleDateFormat sdfTwo =new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
-        LogUtil.e("请求工程数据开始时间",sdfTwo.format(System.currentTimeMillis()));
+        SimpleDateFormat sdfTwo = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
+        LogUtil.e("请求工程数据开始时间", sdfTwo.format(System.currentTimeMillis()));
 
 
-
-        Api.config(ApiConfig.GET_PROJECTS,requestParams)
+        Api.config(ApiConfig.GET_PROJECTS, requestParams)
                 .postRequest(getActivity(), new ApiCallback() {
                     @Override
                     public void onSuccess(String res) {
 
-                        SimpleDateFormat sdfTwo =new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
-                        LogUtil.e("请求工程数据结束时间",sdfTwo.format(System.currentTimeMillis()));
+                        SimpleDateFormat sdfTwo = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
+                        LogUtil.e("请求工程数据结束时间", sdfTwo.format(System.currentTimeMillis()));
 
                         Gson gson = new Gson();
                         ProjectResponse projectResponse = gson.fromJson(res, ProjectResponse.class);
@@ -192,7 +239,7 @@ public class DataHomeFragment extends BaseFragment {
                                     @Override
                                     public void onItemClick(View view, int position) {
                                         // LogUtil.e("查看的监测点", deviceNames.get(position));
-                                        switchFragment(spProjectName.getSelectedItem().toString(), deviceNames,position,stationUUIDList);
+                                        switchFragment(spProjectName.getSelectedItem().toString(), deviceNames, position, stationUUIDList);
                                     }
                                 });
                                 deviceList.setAdapter(adapter);
@@ -201,7 +248,10 @@ public class DataHomeFragment extends BaseFragment {
                                 deviceList.setLayoutManager(manager);
                             }
                         });
+                        LogUtil.e("isFIni:  ", "isFinish" + isFinishLoading);
+                        isFinishLoading = true;
                     }
+
                     @Override
                     public void onFailure(Exception e) {
 
@@ -209,10 +259,8 @@ public class DataHomeFragment extends BaseFragment {
                 });
     }
 
-    public String getStationType(String stationType)
-    {
-        switch (stationType)
-        {
+    public String getStationType(String stationType) {
+        switch (stationType) {
             case "0":
                 return "未知";
             case "1":
@@ -224,9 +272,9 @@ public class DataHomeFragment extends BaseFragment {
         }
     }
 
-    public void switchFragment(String projectName,ArrayList<String> stationNameList,int devicePosition,ArrayList<String> stationUUIDList) {
+    public void switchFragment(String projectName, ArrayList<String> stationNameList, int devicePosition, ArrayList<String> stationUUIDList) {
         //Fragment chartFragment = new ChartFragment();
-        ChartFragment chartFragment = ChartFragment.newInstance(projectName,stationNameList,devicePosition,stationUUIDList);
+        ChartFragment chartFragment = ChartFragment.newInstance(projectName, stationNameList, devicePosition, stationUUIDList);
         MainActivity activity = (MainActivity) getActivity();
         activity.setChartFragment(chartFragment);
         activity.setNowFragment(chartFragment);
@@ -240,20 +288,20 @@ public class DataHomeFragment extends BaseFragment {
     public void test() {
 
         SimpleDateFormat secondFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        LogUtil.e("1小时开始时间",secondFormat.format(DateUtil.getHourBegin(1)));
-        LogUtil.e("1小时结束时间",secondFormat.format(DateUtil.getHourEnd()));
-        LogUtil.e("6小时开始时间",secondFormat.format(DateUtil.getHourBegin(6)));
-        LogUtil.e("6小时结束时间",secondFormat.format(DateUtil.getHourEnd()));
-        LogUtil.e("12小时开始时间",secondFormat.format(DateUtil.getHourBegin(12)));
-        LogUtil.e("12小时结束时间",secondFormat.format(DateUtil.getHourEnd()));
-        LogUtil.e("本天开始时间",secondFormat.format(DateUtil.getDayBegin()));
-        LogUtil.e("本天结束时间",secondFormat.format(DateUtil.getDayEnd()));
-        LogUtil.e("本周开始时间",secondFormat.format(DateUtil.getBeginDayOfWeek()));
-        LogUtil.e("本周结束时间",secondFormat.format(DateUtil.getEndDayOfWeek()));
-        LogUtil.e("本月开始时间",secondFormat.format(DateUtil.getBeginDayOfMonth()));
-        LogUtil.e("本月结束时间",secondFormat.format(DateUtil.getEndDayOfMonth()));
-        LogUtil.e("本年开始时间",secondFormat.format(DateUtil.getBeginDayOfYear()));
-        LogUtil.e("本年结束时间",secondFormat.format(DateUtil.getEndDayOfYear()));
+        LogUtil.e("1小时开始时间", secondFormat.format(DateUtil.getHourBegin(1)));
+        LogUtil.e("1小时结束时间", secondFormat.format(DateUtil.getHourEnd()));
+        LogUtil.e("6小时开始时间", secondFormat.format(DateUtil.getHourBegin(6)));
+        LogUtil.e("6小时结束时间", secondFormat.format(DateUtil.getHourEnd()));
+        LogUtil.e("12小时开始时间", secondFormat.format(DateUtil.getHourBegin(12)));
+        LogUtil.e("12小时结束时间", secondFormat.format(DateUtil.getHourEnd()));
+        LogUtil.e("本天开始时间", secondFormat.format(DateUtil.getDayBegin()));
+        LogUtil.e("本天结束时间", secondFormat.format(DateUtil.getDayEnd()));
+        LogUtil.e("本周开始时间", secondFormat.format(DateUtil.getBeginDayOfWeek()));
+        LogUtil.e("本周结束时间", secondFormat.format(DateUtil.getEndDayOfWeek()));
+        LogUtil.e("本月开始时间", secondFormat.format(DateUtil.getBeginDayOfMonth()));
+        LogUtil.e("本月结束时间", secondFormat.format(DateUtil.getEndDayOfMonth()));
+        LogUtil.e("本年开始时间", secondFormat.format(DateUtil.getBeginDayOfYear()));
+        LogUtil.e("本年结束时间", secondFormat.format(DateUtil.getEndDayOfYear()));
 //        List<String> timeLabel = DateUtil.getHourXLabel(1);
 //        for (String s : timeLabel) {
 //            LogUtil.e("111", s);

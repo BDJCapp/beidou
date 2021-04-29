@@ -28,6 +28,7 @@ import java.nio.charset.Charset;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
@@ -269,31 +270,68 @@ public class LoginUtil {
      * @param secretKey 密钥
      * @throws Exception
      */
-    public static void DES3Encode(String Plaintext, String secretKey) throws Exception {
-        // 密钥 长度不得小于24
-//        String secretKey = "123456789012345678901234" ;
-        // 向量 可有可无 终端后台也要约定
-//        String iv = "01234567";
-        // 加解密统一使用的编码方式
+    public static String DES3Encode(String Plaintext, String secretKey) {
+
+        String keyIv = MD5Encode(secretKey).toLowerCase();
+        String iv = keyIv.substring(keyIv.length() - 8);
         String encoding = "utf-8";
-
-        LogUtil.e("加密前,Plaintext，secretKey",Plaintext + "  " + secretKey);
+        DESedeKeySpec spec;
+        SecretKeyFactory keyfactory;
         Key deskey = null;
+        Cipher cipher;
+        IvParameterSpec ips;
+        byte[] encryptData = new byte[0];
 
-        DESedeKeySpec spec = new DESedeKeySpec(secretKey.getBytes());
+//        LogUtil.e("MD5加密后",keyIv);
+//        LogUtil.e("截取的后8位",iv);
+//        LogUtil.e("加密前,Plaintext，secretKey",Plaintext + "  " + keyIv);
 
-        SecretKeyFactory keyfactory = SecretKeyFactory.getInstance("DESede");
+        try {
+            spec = new DESedeKeySpec(keyIv.getBytes());
 
-        deskey = keyfactory.generateSecret(spec);
+            keyfactory = SecretKeyFactory.getInstance("DESede");
 
-        Cipher cipher = Cipher.getInstance("desede/CBC/PKCS5Padding");
+            deskey = keyfactory.generateSecret(spec);
 
-//        IvParameterSpec ips = new IvParameterSpec( iv.getBytes());
-//        cipher.init(Cipher. ENCRYPT_MODE, deskey, ips);
+            cipher = Cipher.getInstance("desede/CBC/PKCS7Padding");
 
-        cipher.init(Cipher.ENCRYPT_MODE, deskey);
-        byte[] encryptData = cipher.doFinal(Plaintext.getBytes(encoding))
-                ;
-        LogUtil.e("加密后",Base64.encodeToString(encryptData,Base64.DEFAULT));
+            ips = new IvParameterSpec(iv.getBytes());
+            cipher.init(Cipher.ENCRYPT_MODE, deskey, ips);
+
+            encryptData = cipher.doFinal(Plaintext.getBytes(encoding));
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+//        LogUtil.e("加密后",Base64.encodeToString(encryptData,Base64.DEFAULT));
+        return Base64.encodeToString(encryptData,Base64.DEFAULT);
+    }
+
+    /**
+     * 计算字符串MD5的值
+     * @param string 传入要加密的值
+     * @return 计算后的MD5值
+     */
+    public static String MD5Encode(String string) {
+        if (TextUtils.isEmpty(string)) {
+            return "";
+        }
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+            byte[] bytes = md5.digest(string.getBytes());
+            String result = "";
+            for (byte b : bytes) {
+                String temp = Integer.toHexString(b & 0xff);
+                if (temp.length() == 1) {
+                    temp = "0" + temp;
+                }
+                result += temp;
+            }
+            return result;
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

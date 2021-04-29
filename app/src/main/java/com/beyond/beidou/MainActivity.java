@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.beyond.beidou.data.DataHomeFragment;
 import com.beyond.beidou.data.DownloadService;
@@ -50,6 +51,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private String presentProject = null;
     private Intent downloadIntent;
     private CoordinatorLayout coordinatorLayout;
+    private boolean isExit = false;
 
     private DownloadService.DownloadBinder downloadBinder;
 
@@ -152,6 +154,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         {
             return false;
         }
+        isExit = false;
         changePageFragment(item.getItemId());
         return true;
     }
@@ -239,10 +242,18 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
      */
     @Override
     public void onBackPressed() {
-
+        if (nowFragment == projectFragment || nowFragment == dataFragment || nowFragment == warningFragment || nowFragment == myFragment)
+        {
+            if (!isExit)
+            {
+                Toast.makeText(getApplicationContext(),"再按一次退出程序", Toast.LENGTH_SHORT).show();
+                isExit = true;
+                return;
+            }
+        }
+        isExit = false;
         if (nowFragment == chartFragment) {
             FragmentManager fm = getProjectFragment().getFragmentManager();
-//            fm.popBackStack();
             fm.beginTransaction().remove(nowFragment);
             this.setChartFragment(null);
             LogUtil.e("nowFragment", nowFragment.toString());
