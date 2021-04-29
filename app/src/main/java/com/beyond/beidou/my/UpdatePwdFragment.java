@@ -155,7 +155,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                     @Override
                                     public void run() {
                                         AlertDialog.Builder builder;
-                                        builder = new AlertDialog.Builder(getContext()).setTitle("提示")
+                                        builder = new AlertDialog.Builder(getContext()).setTitle("提示").setCancelable(false)
                                                 .setMessage("修改成功，请重新登录！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                                     @Override
                                                     public void onClick(DialogInterface dialog, int which) {

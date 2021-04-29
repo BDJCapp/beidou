@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -10,6 +9,27 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="true" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+    <ToggleButton
+        android:id="@+id/toggleButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="200dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="5dp"
+        android:checked="true"
+        android:textSize="12sp"
+        android:textOff="卫星"
+        android:textOn="标准"
+        android:background="@drawable/tg_selector"
+        android:visibility="gone"
+        />
+
+    </RelativeLayout>
 
     <com.yinglan.scrolllayout.ScrollLayout
         android:id="@+id/scrollLayout"
@@ -37,46 +57,15 @@
                         android:layout_gravity="center_horizontal"
                         android:src="@drawable/ic_minus" />
 
-                    <RelativeLayout
-                        android:layout_width="match_parent"
+
+                    <Spinner
+                        android:id="@+id/spinner"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
                         android:layout_marginBottom="10dp"
-                        android:gravity="center_horizontal"
-                        android:padding="5dp">
+                        android:theme="@style/spinner_style" />
 
-                        <Spinner
-                            android:id="@+id/spinner"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:theme="@style/spinner_style" />
-
-                        <RelativeLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_alignParentRight="true"
-                            android:layout_marginRight="20dp"
-                            >
-
-                            <ImageView
-                                android:id="@+id/iv_refresh"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/ic_refresh"
-                                android:layout_alignParentLeft="true"
-                                />
-
-                            <TextView
-                                android:id="@+id/tv_refresh"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="刷新"
-                                android:layout_toRightOf="@+id/iv_refresh"
-                                />
-
-                        </RelativeLayout>
-
-                    </RelativeLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -85,31 +74,46 @@
                         android:orientation="horizontal"
                         android:padding="5dp">
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="监测点总数:" />
+                            android:layout_weight="14">
 
-                        <TextView
-                            android:id="@+id/tv_amount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:maxLines="1"
-                            android:text="0" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="监测点总数:" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="20dp"
-                            android:maxLines="1"
-                            android:text="更新于:" />
+                            <TextView
+                                android:id="@+id/tv_amount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:maxLines="1"
+                                android:text="0" />
 
-                        <TextView
-                            android:id="@+id/tv_time"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:maxLines="1"
-                            android:text="_????-??-??-??:??:??" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:maxLines="1"
+                                android:text="更新于:" />
+
+                            <TextView
+                                android:id="@+id/tv_time"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:maxLines="1"
+                                android:text="_????-??-??-??:??:??" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/iv_refresh"
+                            android:layout_gravity="center_vertical"
+                            android:layout_width="0dp"
+                            android:layout_height="15dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="5dp"
+                            android:src="@drawable/ic_refresh" />
 
                     </LinearLayout>
 

@@ -241,17 +241,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 downLoadExcel();
             }
         });
-//        spDevice.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                refresh();
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//
-//            }
-//        });
 
         xChart.setOnTouchListener(touchListener);
         yChart.setOnTouchListener(touchListener);
@@ -319,16 +308,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 //        });
     }
 
-//    public List<PointValue> monitorDataWeek(List<PointValue> values) {
-//        List<PointValue> temp = new ArrayList<>();
-//        for (int i = 0; i < values.size(); i++) {
-//            temp.add(new PointValue(values.get(i).getX() * 7, values.get(i).getY()));
-//        }
-//
-//        return temp;
-//    }
-
-
     /**
      * 解决图表与ScrollView滑动冲突
      * 图表可上下左右滑动，ScrollView可上下滑动
@@ -361,27 +340,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
             return false;
         }
-
-
     };
 
     /**
      * 绘制XYH图表
      */
     public void drawXYHChart(String selectedTime) {
-        String time = DateUtil.getTimeInterval(selectedTime);
-        xChartName.setText("N");
-        xChartTime.setText(time);
-        xChartCoo.setText("WGS84坐标系|");
-
-        yChartName.setText("E");
-        yChartTime.setText(time);
-        yChartCoo.setText("WGS84坐标系|");
-
-        hChartName.setText("H");
-        hChartTime.setText(time);
-        hChartCoo.setText("WGS84坐标系|");
-
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
         List<AxisValue> yLabel = setAxisYLabel(minResponse.get(1).toString(), xConvertData);
         convertLines(xConvertData);
@@ -745,6 +709,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 .add("GraphicType", graphicType)
                 .add("StartTime", startTime)
                 .add("EndTime", endTime)
+                .add("DeltaTime","60")
                 .build();
         final SimpleDateFormat sdfTwo = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         LogUtil.e("请求点数据开始时间", sdfTwo.format(System.currentTimeMillis()));
@@ -755,6 +720,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 Gson gson = new Gson();
                 GNSSFilterInfoResponse gnssFilterInfoResponse = gson.fromJson(res, GNSSFilterInfoResponse.class);
                 contentResponse = gnssFilterInfoResponse.getContent();
+                LogUtil.e("返回的Content值",contentResponse + " ");
                 if (contentResponse.size() == 0)
                 {
                     hasData = false;
@@ -767,7 +733,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             deltaDChart.setVisibility(View.GONE);
                             deltaHChart.setVisibility(View.GONE);
                             heartChart.setVisibility(View.GONE);
-                            showToast("暂无数据");
+                            showToast("监测点暂无数据");
                         }
                     });
                     return;
@@ -870,7 +836,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      * @param values      转换后的数据
      */
     public void convertLines(List<PointValue> values) {
-        float space = xConvertData.get(1).getX() - xConvertData.get(0).getX();
+        if (values.size() == 1)
+        {
+            return;
+        }
+        float space = values.get(1).getX() - values.get(0).getX();
         float maxSpace = space * 2;
         float tempSpace;
         chartLines.clear();
@@ -899,7 +869,18 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      * @param endTime     结束时间
      */
     public void getData(final String graphicType, final String stationUUID, final String startTime, final String endTime) {
+        String time = DateUtil.getTimeInterval(spTime.getSelectedItem().toString());
+        xChartName.setText("N");
+        xChartTime.setText(time);
+        xChartCoo.setText("WGS84坐标系|");
 
+        yChartName.setText("E");
+        yChartTime.setText(time);
+        yChartCoo.setText("WGS84坐标系|");
+
+        hChartName.setText("H");
+        hChartTime.setText(time);
+        hChartCoo.setText("WGS84坐标系|");
         Thread httpThread = new Thread(new Runnable() {
             @Override
             public void run() {

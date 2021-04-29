@@ -23,24 +23,27 @@
             android:layout_gravity="center_vertical"
             />
 
+        <TextView
+            android:layout_marginStart="50dp"
+            android:id="@+id/tv_type"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical" />
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
-            android:text="监测点类型:" />
-
-        <TextView
-            android:id="@+id/tv_type"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical" />
+            android:text="监测点类型:"
+            />
 
     </LinearLayout>
 
@@ -55,14 +58,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="最近活跃时间:"
+            android:visibility="gone"
             />
 
         <TextView
+            android:layout_marginStart="10dp"
             android:id="@+id/tv_activeTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_toRightOf="@+id/tv_lastActiveTime"
+            android:layout_toEndOf="@+id/tv_lastActiveTime"
             />
 
         <TextView
@@ -71,7 +76,17 @@
             android:layout_height="wrap_content"
             android:text="查看数据"
             android:textColor="#68ADFE"
-            android:layout_alignParentRight="true"
+            android:layout_toStartOf="@+id/iv_arrow"
+            android:layout_marginEnd="2dp"
+            />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_svg_right_top_arrow"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/iv_arrow"
+            android:layout_centerVertical="true"
             />
 
     </RelativeLayout>
