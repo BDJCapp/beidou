@@ -60,12 +60,14 @@ public class DateUtil {
         return cal.getTime();
     }
 
-    //获取本日的结束时间
+    //获取本日的结束时间.认为是明日的00:00:00
     public static Date getDayEnd() {
         Calendar cal = new GregorianCalendar();
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
+//        cal.set(Calendar.HOUR_OF_DAY, 23);
+//        cal.set(Calendar.MINUTE, 59);
+//        cal.set(Calendar.SECOND, 59);
+        cal.setTime(getDayBegin());
+        cal.add(Calendar.DAY_OF_MONTH, 1);
         return cal.getTime();
     }
 
@@ -172,7 +174,7 @@ public class DateUtil {
     }
 
     public static List<AxisValue> getDayXAxisLabel() {
-        String[] labels = new String[]{"00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "24:00"};
+        String[] labels = new String[]{"00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "00:00"};
 //        String[] labels = new String[]{"00", "02", "04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "24"};
         List<AxisValue> axisValues = new ArrayList<>();
         for (int i = 0; i <= 1440; i += 120) {
@@ -396,8 +398,11 @@ public class DateUtil {
         List<String> labels = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("MM-dd", Locale.CHINA);
         Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, 1);
         Date date = calendar.getTime();
-        labels.add(sdf.format(date) + " 24:00");
+        labels.add(sdf.format(date) + " 00:00");
+        calendar.add(Calendar.DATE, -1);
+        date = calendar.getTime();
         for (int i = 0; i < 14; i++) {
             if(i % 2 == 0){
                 labels.add(sdf.format(date) + " 12:00");

@@ -29,9 +29,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/tv_title"
-                    android:text="模拟工程"
+                    android:text="暂无数据"
                     android:textColor="@color/text_black"
-                    android:textSize="18sp"
+                    android:textSize="15sp"
                     android:gravity="center"
                     />
 
@@ -43,7 +43,7 @@
                     android:layout_centerVertical="true"
                     android:text="@string/loadExcel"
                     android:textColor="@color/text_black"
-                    android:textSize="15sp" />
+                    android:textSize="13sp" />
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>
 
@@ -107,7 +107,6 @@
         android:padding="5dp"
         android:orientation="vertical"
         android:id="@+id/layout_chartX"
-        android:background="@color/main_white"
         >
         <RelativeLayout
             android:layout_width="match_parent"
@@ -159,7 +158,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/chart_X"
             android:layout_marginTop="20dp"
-            android:background="@color/main_white"
             />
     </LinearLayout>
 

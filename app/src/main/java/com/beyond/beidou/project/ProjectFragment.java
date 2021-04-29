@@ -16,11 +16,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -97,7 +99,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private Button mBtnOffline;
     private TextView mTvTime;
     private ImageView mIvRefresh;
-    private TextView mTvRefresh;
+    private ToggleButton mToggleButton;
 
     private List<ProjectResponse.ProjectListBean> projectList = new ArrayList<>();
     private ProjectResponse.ProjectListBean.ProjectStationStatusBean projectStationStatus;
@@ -114,14 +116,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private static String presentProject;
     public static boolean isReLogin = false;
     private static boolean isFirstBindListener = true;
-    //    private static final double DEFAULT_LATITUDE = 39.8932725;
-//    private static final double DEFAULT_LONGITUDE = 116.3894879;
-    private boolean isAmount = true;
-    private boolean isOnline = false;
-    private boolean isWarning = false;
-    private boolean isError = false;
-    private boolean isOffline = false;
-//    private ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), R.layout.item_select, projectNameList);
     private static volatile boolean isFinishLoading = false;
     private static final int LOADING = 1;
     private ZLoadingDialog dialog;
@@ -209,7 +203,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mBtnOffline = view.findViewById(R.id.btn_offline);
         mTvTime = view.findViewById(R.id.tv_time);
         mIvRefresh = view.findViewById(R.id.iv_refresh);
-        mTvRefresh = view.findViewById(R.id.tv_refresh);
 
 //        设置 setting
         mScrollLayout.setMinOffset(200);
@@ -239,6 +232,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     isFirstBindListener = false;
                     return;
                 }
+//                mPointList.clear();
 //                getData();
                 doLoadingDialog();
             }
@@ -251,11 +245,10 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mRelativeLayout.setOnClickListener(this);
         mBtnAmount.setOnClickListener(this);
         mBtnOnline.setOnClickListener(this);
-//        mBtnWarning.setOnClickListener(this);
-//        mBtnError.setOnClickListener(this);
+        mBtnWarning.setOnClickListener(this);
+        mBtnError.setOnClickListener(this);
         mBtnOffline.setOnClickListener(this);
         mIvRefresh.setOnClickListener(this);
-        mTvRefresh.setOnClickListener(this);
 
         final int width = ScreenUtil.getScreenXRatio(getActivity());
         final int height = ScreenUtil.getScreenXRatio(getActivity());
@@ -269,13 +262,29 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
         });
         mBaiduMap.setMyLocationEnabled(true);
+        mBaiduMap.setMaxAndMinZoomLevel(4f, 21f);
+//        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
         dialog = new ZLoadingDialog(getActivity());
+        mToggleButton = view.findViewById(R.id.toggleButton);
+        mToggleButton.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener(){
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(!isChecked){
+                    mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
+                }else{
+                    mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
+                }
+            }
+        });
     }
 
     private void getData() {
         Log.wtf("getData", "================Begin================");
         isFinishLoading = false;
         projectNameList.clear();
+        stationNameList.clear();
+        stationUUIDList.clear();
         if (isReLogin) {
             isFirstLogin = true;
             isReLogin = false;
@@ -508,6 +517,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             OverlayOptions option = new MarkerOptions()
                     .position(targetPoint)
                     .icon(markerBitmap)
+                    //设置标记的锚点
+                    .anchor(0.5f,0.96875f)
                     .extraInfo(mBundle);
             mBaiduMap.addOverlay(option);
         }
@@ -557,7 +568,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
             MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
             mBaiduMap.animateMapStatus(update);
-            update = MapStatusUpdateFactory.zoomTo(16f);
+            update = MapStatusUpdateFactory.zoomTo(18f);
             mBaiduMap.animateMapStatus(update);
             isFirstLocate = false;
         } else {
@@ -592,7 +603,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         //可选，设置是否当GPS有效时按照1s/1次频率输出GPS结果，默认false
         option.setLocationNotify(true);
         //可选，定位SDK内部是一个service，并放到了独立进程
-        //设置是否在stop的时候杀死这个进程，默认（建议）不杀死，即setIgnorekillProcess(true)
+        //设置是否在stop的时候杀死这个进程，默认（建议）不杀死，即setIgnoreKillProcess(true)
         option.setIgnoreKillProcess(true);
         //可选，设置是否收集Crash信息，默认收集，即参数为false
         option.SetIgnoreCacheException(false);
@@ -603,6 +614,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         option.setEnableSimulateGps(false);
         //设置是否需要详细地址信息
         option.setIsNeedAddress(true);
+
+
         mLocationClient.setLocOption(option);
     }
 
@@ -623,95 +636,57 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 break;
             case R.id.btn_online:
                 mPointList.clear();
-                isOnline = !isOnline;
-                if (isOnline) {
-//                    mBtnOnline.setBackgroundDrawable(getResources().getDrawable(R.drawable.btn_online_selected_bg));
-                    mBtnOnline.setBackground(getResources().getDrawable(R.drawable.btn_online_selected_bg));
-                } else {
-                    mBtnOnline.setBackground(getResources().getDrawable(R.drawable.btn_online_bg));
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if (statusCode >= 10 && statusCode <= 19) {
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
                 }
-                refreshPointList();
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
                 break;
             case R.id.btn_warning:
                 mPointList.clear();
-                isWarning = !isWarning;
-                if (isWarning) {
-                    mBtnWarning.setBackground(getResources().getDrawable(R.drawable.btn_warning_selected_bg));
-                } else {
-                    mBtnWarning.setBackground(getResources().getDrawable(R.drawable.btn_warning_bg));
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if (statusCode >= 30 && statusCode <= 39) {
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
                 }
-                refreshPointList();
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
                 break;
             case R.id.btn_error:
                 mPointList.clear();
-                isError = !isError;
-                if (isError) {
-                    mBtnError.setBackground(getResources().getDrawable(R.drawable.btn_error_selected_bg));
-                } else {
-                    mBtnError.setBackground(getResources().getDrawable(R.drawable.btn_error_bg));
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if (statusCode >= 40 && statusCode <= 49) {
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
                 }
-                refreshPointList();
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
                 break;
             case R.id.btn_offline:
                 mPointList.clear();
-                isOffline = !isOffline;
-                if (isOffline) {
-                    mBtnOffline.setBackground(getResources().getDrawable(R.drawable.btn_offline_selected_bg));
-                } else {
-                    mBtnOffline.setBackground(getResources().getDrawable(R.drawable.btn_offline_bg));
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                        projectStationList) {
+                    int statusCode = Integer.parseInt(projectStation.getStationStatus());
+                    if (statusCode >= 20 && statusCode <= 29) {
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    }
                 }
-                refreshPointList();
+                mPointsAdapter.setData(mPointList);
+                mPointsAdapter.notifyDataSetChanged();
                 break;
             case R.id.iv_refresh:
                 doLoadingDialog();
 //                getData();
                 break;
-            case R.id.tv_refresh:
-                doLoadingDialog();
-//                getData();
-                break;
         }
-    }
-
-    private void refreshPointList() {
-        if (isOnline) {
-            for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                    projectStationList) {
-                int statusCode = Integer.parseInt(projectStation.getStationStatus());
-                if (statusCode >= 10 && statusCode <= 19) {
-                    mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
-                }
-            }
-        }
-        if (isWarning) {
-            for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                    projectStationList) {
-                int statusCode = Integer.parseInt(projectStation.getStationStatus());
-                if (statusCode >= 30 && statusCode <= 39) {
-                    mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
-                }
-            }
-        }
-        if (isError) {
-            for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                    projectStationList) {
-                int statusCode = Integer.parseInt(projectStation.getStationStatus());
-                if (statusCode >= 40 && statusCode <= 49) {
-                    mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
-                }
-            }
-        }
-        if (isOffline) {
-            for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                    projectStationList) {
-                int statusCode = Integer.parseInt(projectStation.getStationStatus());
-                if (statusCode >= 20 && statusCode <= 29) {
-                    mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
-                }
-            }
-        }
-        mPointsAdapter.setData(mPointList);
-        mPointsAdapter.notifyDataSetChanged();
     }
 
     private class MyLocationListener extends BDAbstractLocationListener {

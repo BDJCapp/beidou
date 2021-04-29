@@ -364,7 +364,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         }
         if (!isCorrect)
         {
-            Toast.makeText(getApplicationContext(),"账号输入有误，请重新输入",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"请输入正确的用户名密码",Toast.LENGTH_SHORT).show();
         }
         return isCorrect;
     }
