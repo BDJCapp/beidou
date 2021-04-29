@@ -134,10 +134,9 @@ public class MyFragment extends BaseFragment implements View.OnClickListener{
                         String errCode = object.getString("ResponseCode");
                         String errMsg = object.getString("ResponseMsg");
                         Log.e("退出的response",res);
-                        //获取json中的code。json是包含很多数据，这里只是单拿出其中的code吗
                         switch (errCode){
                             case "205": //退出成功
-                                ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
+//                                ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
                                 while (!LoginUtil.getAccessToken(getActivity())){}
                                 while (!LoginUtil.getSessionId(getActivity())){}
                                 Intent intent= new Intent(getActivity(),LoginActivity.class);

@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -21,6 +22,20 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public abstract class BaseFragment extends Fragment {
 
+    private Activity activity;
+
+    public Context getContext(){
+        if(activity == null){
+            return MyApplication.getContext();
+        }
+        return activity;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        activity = getActivity();
+    }
 
     public void showToast(String msg){
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();

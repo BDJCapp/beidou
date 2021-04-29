@@ -81,7 +81,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             switch (msg.what)
             {
                 case ACCOUNT_OR_PWD_ERROR:
-
+                    Toast.makeText(LoginActivity.this,"用户名或密码错误,请重新输入",Toast.LENGTH_LONG).show();
+                    dialog.dismiss();
+                    break;
                 case IIILEGAL_USER_SESSION:
 
                 case SESSION_EXPIRATION_LOGOUT:
@@ -213,7 +215,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
     public void login(String username,String password,String SessionUUID,String AccessToken)
     {
-        loginUtil.loginByPwd(LoginActivity.this,username, password, SessionUUID, AccessToken, new ApiCallback() {
+        String encodePwd = LoginUtil.DES3Encode(password,SessionUUID);
+        loginUtil.loginByPwd(LoginActivity.this,username, encodePwd, SessionUUID, AccessToken, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
                 Log.e("登录的response", String.valueOf(res));

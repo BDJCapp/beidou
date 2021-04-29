@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
+import com.beyond.beidou.util.LogUtil;
 
 import java.io.File;
 
@@ -104,7 +105,7 @@ public class DownloadService extends Service {
             }
         }
 
-        public void cancleDownload()
+        public void cancelDownload()
         {
             if (downloadTask != null){
                 downloadTask.cancelDownload();
