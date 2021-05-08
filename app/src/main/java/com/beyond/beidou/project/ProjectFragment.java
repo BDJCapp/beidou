@@ -1,6 +1,5 @@
 package com.beyond.beidou.project;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -47,7 +46,6 @@ import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.model.LatLng;
-
 import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
@@ -61,7 +59,6 @@ import com.beyond.beidou.data.ChartFragment;
 import com.beyond.beidou.entites.MonitoringPoint;
 import com.beyond.beidou.entites.ProjectResponse;
 import com.beyond.beidou.login.LoginActivity;
-import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.beyond.beidou.util.ScreenUtil;
 import com.google.gson.Gson;
@@ -119,21 +116,21 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private static volatile boolean isFinishLoading = false;
     private static final int LOADING = 1;
     private ZLoadingDialog dialog;
-    public Handler handler = new  Handler(Looper.getMainLooper()){
+    public Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
-            switch (msg.what)
-            {
+            switch (msg.what) {
                 case LOADING:
                     getData();
-                    while(!isFinishLoading){}
+                    while (!isFinishLoading) {
+                    }
                     dialog.dismiss();
                     break;
             }
         }
     };
 
-    private void doLoadingDialog(){
+    private void doLoadingDialog() {
         handler.sendEmptyMessageDelayed(LOADING, 50);
         dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                 .setLoadingColor(Color.BLACK)//颜色
@@ -266,13 +263,13 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 //        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
         dialog = new ZLoadingDialog(getActivity());
         mToggleButton = view.findViewById(R.id.toggleButton);
-        mToggleButton.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener(){
+        mToggleButton.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(!isChecked){
+                if (!isChecked) {
                     mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
-                }else{
+                } else {
                     mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
                 }
             }
@@ -518,7 +515,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     .position(targetPoint)
                     .icon(markerBitmap)
                     //设置标记的锚点
-                    .anchor(0.5f,0.96875f)
+                    .anchor(0.5f, 0.96875f)
                     .extraInfo(mBundle);
             mBaiduMap.addOverlay(option);
         }
@@ -529,12 +526,38 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mLocationClient.start();
     }
 
+    /**
+     * 初始化前台服务
+     */
+//    private void initNotification () {
+//        //设置后台定位
+//        //android8.0及以上使用NotificationUtils
+//        if ( Build.VERSION.SDK_INT >= 26) {
+//            NotificationUtils notificationUtils = new NotificationUtils(this);
+//            Notification.Builder builder = notificationUtils.getAndroidChannelNotification
+//                    ("适配android 8限制后台定位功能", "正在后台定位");
+//            mNotification = builder.build();
+//        } else {
+//            //获取一个Notification构造器
+//            Notification.Builder builder = new Notification.Builder(MainActivity.this);
+//            Intent nfIntent = new Intent(MainActivity.this, MainActivity.class);
+//
+//            builder.setContentIntent(PendingIntent.
+//                    getActivity(MainActivity.this, 0, nfIntent, 0)) // 设置PendingIntent
+//                    .setContentTitle("适配android 8限制后台定位功能") // 设置下拉列表里的标题
+//                    .setSmallIcon(R.mipmap.ic_launcher) // 设置状态栏内的小图标
+//                    .setContentText("正在后台定位") // 设置上下文内容
+//                    .setWhen(System.currentTimeMillis()); // 设置该通知发生的时间
+//
+//            mNotification = builder.build(); // 获取构建好的Notification
+//        }
+//        mNotification.defaults = Notification.DEFAULT_SOUND; //设置为默认的声音
+//    }
     private void navigateTo(BDLocation location) {
         Double latitude = location.getLatitude(), longitude = location.getLongitude();
         LatLng ll = new LatLng(latitude, longitude);
         if (isFirstLocate) {
             if (projectStationStatus.getTotal() != 0) {
-
 //                ProjectResponse.ProjectListBean.StationListBean projectStation = projectStationList.get(0);
 //                if(projectStation == null){
 //                    MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
@@ -614,7 +637,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         option.setEnableSimulateGps(false);
         //设置是否需要详细地址信息
         option.setIsNeedAddress(true);
-
 
         mLocationClient.setLocOption(option);
     }
