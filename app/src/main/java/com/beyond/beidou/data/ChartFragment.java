@@ -4,10 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentManager;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -15,14 +11,10 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
 
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
@@ -45,14 +37,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
 import lecho.lib.hellocharts.gesture.ContainerScrollType;
 import lecho.lib.hellocharts.gesture.ZoomType;
-import lecho.lib.hellocharts.model.Axis;
-import lecho.lib.hellocharts.model.AxisValue;
-import lecho.lib.hellocharts.model.Line;
-import lecho.lib.hellocharts.model.LineChartData;
-import lecho.lib.hellocharts.model.PointValue;
-import lecho.lib.hellocharts.model.Viewport;
+import lecho.lib.hellocharts.model.*;
 import lecho.lib.hellocharts.view.LineChartView;
 import okhttp3.FormBody;
 
@@ -427,7 +415,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
         chartView.setLineChartData(data);
         chartView.setInteractive(true);
-        chartView.setMaxZoom(20f);
+        chartView.setMaxZoom(5f);
+        chartView.setContainerScrollEnabled(true, ContainerScrollType.HORIZONTAL);
         chartView.setZoomType(ZoomType.HORIZONTAL_AND_VERTICAL);
         heartChart.setVisibility(View.VISIBLE);
 
@@ -437,8 +426,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         viewport.left = viewport.left - 0.02f;
         viewport.right = viewport.right + 0.02f;
         chartView.setMaximumViewport(viewport);
+        chartView.setCurrentViewport(viewport);
 
-        chartView.setZoomLevel(0f, 0f, 0f);
+//        chartView.setZoomLevel(0f, 0f, 0f);
     }
 
     public void convertHeartChartData(List<List<Object>> contentList, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, List<PointValue> pointValues) {

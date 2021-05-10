@@ -2,10 +2,12 @@ package com.beyond.beidou;
 
 import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -150,8 +152,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.nav_warning)
-        {
+        if (item.getItemId() == R.id.nav_warning) {
             return false;
         }
         isExit = false;
@@ -242,11 +243,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
      */
     @Override
     public void onBackPressed() {
-        if (nowFragment == projectFragment || nowFragment == dataFragment || nowFragment == warningFragment || nowFragment == myFragment)
-        {
-            if (!isExit)
-            {
-                Toast.makeText(getApplicationContext(),"再按一次退出程序", Toast.LENGTH_SHORT).show();
+        if (nowFragment == projectFragment || nowFragment == dataFragment || nowFragment == warningFragment || nowFragment == myFragment) {
+            if (!isExit) {
+                Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
                 isExit = true;
                 return;
             }
