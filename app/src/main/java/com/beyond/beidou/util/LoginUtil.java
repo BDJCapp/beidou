@@ -1,7 +1,10 @@
 package com.beyond.beidou.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -333,5 +336,33 @@ public class LoginUtil {
             e.printStackTrace();
         }
         return "";
+    }
+
+    public static boolean isNetworkConnected(Context context) {
+        if (context != null) {
+            ConnectivityManager mConnectivityManager = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+            if (mNetworkInfo != null) {
+                return mNetworkInfo.isAvailable();
+            }
+        }
+        return false;
+    }
+
+    public static boolean isNetworkUsable(final Context context)
+    {
+        boolean isUsable = true;
+        if (!isNetworkConnected(context))
+        {
+            isUsable = false;
+            ((Activity)context).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context,"网络不可用，请检查网络设置！",Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+        return isUsable;
     }
 }

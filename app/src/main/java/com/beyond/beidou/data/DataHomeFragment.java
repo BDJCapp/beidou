@@ -284,35 +284,4 @@ public class DataHomeFragment extends BaseFragment {
         ft.addToBackStack("DataHomeFragment");   //加入到返回栈中
         ft.commit();
     }
-
-    public void test() {
-
-        SimpleDateFormat secondFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        LogUtil.e("1小时开始时间", secondFormat.format(DateUtil.getHourBegin(1)));
-        LogUtil.e("1小时结束时间", secondFormat.format(DateUtil.getHourEnd()));
-        LogUtil.e("6小时开始时间", secondFormat.format(DateUtil.getHourBegin(6)));
-        LogUtil.e("6小时结束时间", secondFormat.format(DateUtil.getHourEnd()));
-        LogUtil.e("12小时开始时间", secondFormat.format(DateUtil.getHourBegin(12)));
-        LogUtil.e("12小时结束时间", secondFormat.format(DateUtil.getHourEnd()));
-        LogUtil.e("本天开始时间", secondFormat.format(DateUtil.getDayBegin()));
-        LogUtil.e("本天结束时间", secondFormat.format(DateUtil.getDayEnd()));
-        LogUtil.e("本周开始时间", secondFormat.format(DateUtil.getBeginDayOfWeek()));
-        LogUtil.e("本周结束时间", secondFormat.format(DateUtil.getEndDayOfWeek()));
-        LogUtil.e("本月开始时间", secondFormat.format(DateUtil.getBeginDayOfMonth()));
-        LogUtil.e("本月结束时间", secondFormat.format(DateUtil.getEndDayOfMonth()));
-        LogUtil.e("本年开始时间", secondFormat.format(DateUtil.getBeginDayOfYear()));
-        LogUtil.e("本年结束时间", secondFormat.format(DateUtil.getEndDayOfYear()));
-//        List<String> timeLabel = DateUtil.getHourXLabel(1);
-//        for (String s : timeLabel) {
-//            LogUtil.e("111", s);
-//        }
-//        timeLabel = DateUtil.getHourXLabel(6);
-//        for (String s : timeLabel) {
-//            LogUtil.e("111", s);
-//        }
-//        timeLabel = DateUtil.getHourXLabel(12);
-//        for (String s : timeLabel) {
-//            LogUtil.e("111", s);
-//        }
-    }
 }

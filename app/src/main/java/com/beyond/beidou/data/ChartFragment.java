@@ -35,8 +35,10 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import lecho.lib.hellocharts.gesture.ContainerScrollType;
 import lecho.lib.hellocharts.gesture.ZoomType;
@@ -46,7 +48,7 @@ import okhttp3.FormBody;
 
 public class ChartFragment extends BaseFragment implements View.OnClickListener {
     private Spinner spDevice, spTime;
-    private LineChartView xChart, yChart, hChart,deltaDChart,deltaHChart,heartChart;
+    private LineChartView nChart, eChart, hChart,deltaDChart,deltaHChart,heartChart;
     private TextView xChartName, yChartName, hChartName,deltaDChartName,deltaHChartName,heartChartName;
     private TextView xChartCoo, yChartCoo, hChartCoo,deltaDChartCoo,deltaHChartCoo,heartChartCoo;
     private TextView xChartTime, yChartTime, hChartTime,deltaDChartTime,deltaHChartTime,heartChartTime;
@@ -60,8 +62,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private List<Object> averageResponse = new ArrayList<>();
     private ScrollView svCharts;
     private ImageView imgBack;
-    private List<PointValue> xConvertData = new ArrayList<>();
-    private List<PointValue> yConvertData = new ArrayList<>();
+    private List<PointValue> nConvertData = new ArrayList<>();
+    private List<PointValue> eConvertData = new ArrayList<>();
     private List<PointValue> hConvertData = new ArrayList<>();
     private List<PointValue> deltaDConvertData = new ArrayList<>();
     private List<PointValue> deltaHConvertData = new ArrayList<>();
@@ -75,6 +77,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private String startTime = null;
     private String endTime = null;
     private boolean hasData = true;
+    private Map<String,Integer> index = new HashMap<>();
 
     private static final int LOADING = 1;
     private ZLoadingDialog dialog;
@@ -159,8 +162,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
         chartXLayout = view.findViewById(R.id.layout_chartX);
 
-        xChart = view.findViewById(R.id.chart_X);
-        yChart = view.findViewById(R.id.chart_Y);
+        nChart = view.findViewById(R.id.chart_X);
+        eChart = view.findViewById(R.id.chart_Y);
         hChart = view.findViewById(R.id.chart_H);
         deltaDChart = view.findViewById(R.id.chart_DeltaD);
         deltaHChart = view.findViewById(R.id.chart_DeltaH);
@@ -230,8 +233,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         });
 
-        xChart.setOnTouchListener(touchListener);
-        yChart.setOnTouchListener(touchListener);
+        nChart.setOnTouchListener(touchListener);
+        eChart.setOnTouchListener(touchListener);
         hChart.setOnTouchListener(touchListener);
         deltaHChart.setOnTouchListener(touchListener);
         deltaDChart.setOnTouchListener(touchListener);
@@ -335,17 +338,17 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      */
     public void drawXYHChart(String selectedTime) {
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
-        List<AxisValue> yLabel = setAxisYLabel(minResponse.get(1).toString(), xConvertData);
-        convertLines(xConvertData);
-        setChart(xChart,  xAxisValues, yLabel, nConvertAverage);
+        List<AxisValue> yLabel = setAxisYLabel(minResponse.get(index.get("GNSSFilterInfoN")).toString(), nConvertData);
+        convertLines(nConvertData);
+        setChart(nChart,  xAxisValues, yLabel, nConvertAverage);
 
         xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setAxisYLabel(minResponse.get(2).toString(), yConvertData);
-        convertLines(yConvertData);
-        setChart(yChart,  xAxisValues, yLabel, eConvertAverage);
+        yLabel = setAxisYLabel(minResponse.get(index.get("GNSSFilterInfoE")).toString(), eConvertData);
+        convertLines(eConvertData);
+        setChart(eChart,  xAxisValues, yLabel, eConvertAverage);
 
         xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setAxisYLabel(minResponse.get(3).toString(), hConvertData);
+        yLabel = setAxisYLabel(minResponse.get(index.get("GNSSFilterInfoH")).toString(), hConvertData);
         convertLines(hConvertData);
         setChart(hChart,xAxisValues, yLabel,hConvertAverage);
 
@@ -367,12 +370,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         deltaHChartCoo.setText("WGS84坐标系|");
 
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
-        List<AxisValue> yLabel = setAxisYLabel(minResponse.get(4).toString(), deltaDConvertData);
+        List<AxisValue> yLabel = setAxisYLabel(minResponse.get(index.get("GNSSFilterInfoDeltaD")).toString(), deltaDConvertData);
         convertLines(deltaDConvertData);
         setChart(deltaDChart,xAxisValues, yLabel,deltaConvertAverage);
 
         xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setAxisYLabel(minResponse.get(5).toString(), deltaHConvertData);
+        yLabel = setAxisYLabel(minResponse.get(index.get("GNSSFilterInfoDeltaH")).toString(), deltaHConvertData);
         convertLines(deltaHConvertData);
         setChart(deltaHChart,xAxisValues, yLabel,deltaHConvertAverage);
     }
@@ -383,12 +386,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         heartChartTime.setText(time);
         heartChartCoo.setText("WGS84坐标系|");
 
-        List<AxisValue> xAxisValues = new ArrayList<>();
-        List<AxisValue> yAxisValues = new ArrayList<>();
+        List<AxisValue> nAxisValues = new ArrayList<>();
+        List<AxisValue> eAxisValues = new ArrayList<>();
         List<PointValue> pointValues = new ArrayList<>();
 
-        convertHeartChartData(contentResponse, xAxisValues, yAxisValues, pointValues);
-        setHeartChart(heartChart, pointValues, xAxisValues, yAxisValues);
+        convertHeartChartData(contentResponse, nAxisValues, eAxisValues, pointValues);
+        setHeartChart(heartChart, pointValues, nAxisValues, eAxisValues);
 
     }
 
@@ -432,64 +435,66 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     }
 
     public void convertHeartChartData(List<List<Object>> contentList, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, List<PointValue> pointValues) {
-        double convertXMin, convertXMax, convertYMin, convertYMax;
+        int nIndex = index.get("GNSSFilterInfoN");
+        int eIndex = index.get("GNSSFilterInfoE");
+        double convertEMin, convertEMax, convertNMin, convertNMax;
         DecimalFormat df = new DecimalFormat("#.00");
         String space = "0.01";
         BigDecimal bSpace = new BigDecimal(space);
-        BigDecimal bResponseXmin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
-        BigDecimal bResponseXMax = new BigDecimal(df.format(Double.parseDouble(maxResponse.get(2).toString())));
+        BigDecimal bResponseEmin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(eIndex).toString())));
+        BigDecimal bResponseEMax = new BigDecimal(df.format(Double.parseDouble(maxResponse.get(eIndex).toString())));
 
-        bResponseXmin = bResponseXmin.subtract(new BigDecimal("0.02"));
-        bResponseXMax = bResponseXMax.add(new BigDecimal("0.02"));
+        bResponseEmin = bResponseEmin.subtract(new BigDecimal("0.02"));
+        bResponseEMax = bResponseEMax.add(new BigDecimal("0.02"));
 
-        convertXMin = Double.parseDouble(String.valueOf(bResponseXmin));
-        convertXMax = Double.parseDouble(String.valueOf(bResponseXMax));
-        double tempDouble = Double.parseDouble(String.valueOf(bResponseXmin));
-        String tempString = String.valueOf(convertXMin);
-        BigDecimal strXMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
-        strXMin = strXMin.subtract(new BigDecimal("0.02"));
-        while (tempDouble <= convertXMax) {
-            AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertXMin)));
+        convertEMin = Double.parseDouble(String.valueOf(bResponseEmin));
+        convertEMax = Double.parseDouble(String.valueOf(bResponseEMax));
+        double tempDouble = Double.parseDouble(String.valueOf(bResponseEmin));
+        String tempString = String.valueOf(convertEMin);
+        BigDecimal strEMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(eIndex).toString())));
+        strEMin = strEMin.subtract(new BigDecimal("0.02"));
+        while (tempDouble <= convertEMax) {
+            AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertEMin)));
             axisValue.setLabel(tempString);
             xAxisValues.add(axisValue);
-            bResponseXmin = bResponseXmin.add(bSpace);
-            strXMin = strXMin.add(bSpace);
-            tempString = String.valueOf(strXMin);
-            tempDouble = Double.parseDouble(String.valueOf(bResponseXmin));
+            bResponseEmin = bResponseEmin.add(bSpace);
+            strEMin = strEMin.add(bSpace);
+            tempString = String.valueOf(strEMin);
+            tempDouble = Double.parseDouble(String.valueOf(bResponseEmin));
         }
 
-        BigDecimal bResponseYMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
-        BigDecimal bResponseYMax = new BigDecimal(df.format(Double.parseDouble(maxResponse.get(1).toString())));
+        BigDecimal bResponseNMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(nIndex).toString())));
+        BigDecimal bResponseNMax = new BigDecimal(df.format(Double.parseDouble(maxResponse.get(nIndex).toString())));
 
-        bResponseYMin = bResponseYMin.subtract(new BigDecimal("0.02"));
-        bResponseYMax = bResponseYMax.add(new BigDecimal("0.02"));
+        bResponseNMin = bResponseNMin.subtract(new BigDecimal("0.02"));
+        bResponseNMax = bResponseNMax.add(new BigDecimal("0.02"));
 
-        convertYMin = Double.parseDouble(String.valueOf(bResponseYMin));
-        convertYMax = Double.parseDouble(String.valueOf(bResponseYMax));
-        tempDouble = Double.parseDouble(String.valueOf(bResponseYMin));
-        tempString = String.valueOf(convertYMin);
-        BigDecimal strYMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
-        strYMin = strYMin.subtract(new BigDecimal("0.02"));
-        while (tempDouble <= convertYMax) {
-            AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertYMin)));
+        convertNMin = Double.parseDouble(String.valueOf(bResponseNMin));
+        convertNMax = Double.parseDouble(String.valueOf(bResponseNMax));
+        tempDouble = Double.parseDouble(String.valueOf(bResponseNMin));
+        tempString = String.valueOf(convertNMin);
+        BigDecimal strNMin = new BigDecimal(df.format(Double.parseDouble(minResponse.get(nIndex).toString())));
+        strNMin = strNMin.subtract(new BigDecimal("0.02"));
+        while (tempDouble <= convertNMax) {
+            AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertNMin)));
             axisValue.setLabel(tempString);
             yAxisValues.add(axisValue);
-            bResponseYMin = bResponseYMin.add(bSpace);
-            strYMin = strYMin.add(bSpace);
-            tempString = String.valueOf(strYMin);
-            tempDouble = Double.parseDouble(String.valueOf(bResponseYMin));
+            bResponseNMin = bResponseNMin.add(bSpace);
+            strNMin = strNMin.add(bSpace);
+            tempString = String.valueOf(strNMin);
+            tempDouble = Double.parseDouble(String.valueOf(bResponseNMin));
         }
 
 
-        double tempX, tempY;
-        BigDecimal minuendY1 = new BigDecimal(df.format(Double.parseDouble(minResponse.get(1).toString())));
-        minuendY1 = minuendY1.subtract(new BigDecimal("0.02"));
-        BigDecimal minuendX1 = new BigDecimal(df.format(Double.parseDouble(minResponse.get(2).toString())));
-        minuendX1 = minuendX1.subtract(new BigDecimal("0.02"));
+        double tempE, tempN;
+        BigDecimal minuendN1 = new BigDecimal(df.format(Double.parseDouble(minResponse.get(nIndex).toString())));
+        minuendN1 = minuendN1.subtract(new BigDecimal("0.02"));
+        BigDecimal minuendE1 = new BigDecimal(df.format(Double.parseDouble(minResponse.get(eIndex).toString())));
+        minuendE1 = minuendE1.subtract(new BigDecimal("0.02"));
         for (List<Object> content : contentList) {
-            tempY = Double.parseDouble(content.get(1).toString()) - Double.parseDouble(minuendY1.toString());
-            tempX = Double.parseDouble(content.get(2).toString()) - Double.parseDouble(minuendX1.toString());
-            pointValues.add(new PointValue(Float.parseFloat(String.valueOf(tempX)), Float.parseFloat(String.valueOf(tempY))));
+            tempN = Double.parseDouble(content.get(nIndex).toString()) - Double.parseDouble(minuendN1.toString());
+            tempE = Double.parseDouble(content.get(eIndex).toString()) - Double.parseDouble(minuendE1.toString());
+            pointValues.add(new PointValue(Float.parseFloat(String.valueOf(tempE)), Float.parseFloat(String.valueOf(tempN))));
         }
     }
 
@@ -510,7 +515,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         }
 
-        //错误原因：传回的最小值和实际最小值不一样
 
 //        LogUtil.e("setYLable valueYMax",valueYMax + "");
 //        LogUtil.e("setYLable valueYMin",valueYMin + "");
@@ -554,13 +558,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         List<AxisValue> xAxisValues = new ArrayList<>();
         switch (selectedTime) {
             case "最近1小时":
-                xAxisValues = DateUtil.getHourXAxisLabel(1);
+                xAxisValues = DateUtil.getHourXAxisValue(1);
                 break;
             case "最近6小时":
-                xAxisValues = DateUtil.getHourXAxisLabel(6);
+                xAxisValues = DateUtil.getHourXAxisValue(6);
                 break;
             case "最近12小时":
-                xAxisValues = DateUtil.getHourXAxisLabel(12);
+                xAxisValues = DateUtil.getHourXAxisValue(12);
                 break;
             case "本日":
                 xAxisValues = DateUtil.getDayXAxisLabel();   //本日
@@ -710,15 +714,14 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 Gson gson = new Gson();
                 GNSSFilterInfoResponse gnssFilterInfoResponse = gson.fromJson(res, GNSSFilterInfoResponse.class);
                 contentResponse = gnssFilterInfoResponse.getContent();
-                LogUtil.e("返回的Content值",contentResponse + " ");
                 if (contentResponse.size() == 0)
                 {
                     hasData = false;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            xChart.setVisibility(View.GONE);
-                            yChart.setVisibility(View.GONE);
+                            nChart.setVisibility(View.GONE);
+                            eChart.setVisibility(View.GONE);
                             hChart.setVisibility(View.GONE);
                             deltaDChart.setVisibility(View.GONE);
                             deltaHChart.setVisibility(View.GONE);
@@ -728,6 +731,39 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     });
                     return;
                 }
+
+                List<String> titleResponse = gnssFilterInfoResponse.getTitle();
+                for (int i = 0; i < titleResponse.size(); i++) {
+                    switch (titleResponse.get(i))
+                    {
+                        case "DataTimestamp":
+                            index.put("DataTimestamp",i);
+                            break;
+                        case "GNSSFilterInfoN":
+                            index.put("GNSSFilterInfoN",i);
+                            break;
+                        case "GNSSFilterInfoE":
+                            index.put("GNSSFilterInfoE",i);
+                            break;
+                        case "GNSSFilterInfoH":
+                            index.put("GNSSFilterInfoH",i);
+                            break;
+                        case "GNSSFilterInfoDeltaD":
+                            index.put("GNSSFilterInfoDeltaD",i);
+                            break;
+                        case "GNSSFilterInfoDeltaH":
+                            index.put("GNSSFilterInfoDeltaH",i);
+                            break;
+                    }
+                }
+                int timeStampIndex = index.get("DataTimestamp");
+                int nIndex = index.get("GNSSFilterInfoN");
+                int eIndex = index.get("GNSSFilterInfoE");
+                int hIndex = index.get("GNSSFilterInfoH");
+                int deltaDIndex = index.get("GNSSFilterInfoDeltaD");
+                int deltaHIndex = index.get("GNSSFilterInfoDeltaH");
+//                LogUtil.e("time N E H delta deltaH",timeStampIndex + " " + nIndex + " " + eIndex + " " + hIndex + " " + deltaDIndex + " " + deltaHIndex);
+
                 maxResponse = gnssFilterInfoResponse.getMax();
                 minResponse = gnssFilterInfoResponse.getMin();
                 averageResponse = gnssFilterInfoResponse.getAverage();
@@ -740,40 +776,40 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 List<List<String>> deltaHResponseData = new ArrayList<>();
                 //数据提取
                 for (List<Object> responseData : contentResponse) {
-                    List<String> xValue = new ArrayList<>();
-                    List<String> yValue = new ArrayList<>();
+                    List<String> nValue = new ArrayList<>();
+                    List<String> eValue = new ArrayList<>();
                     List<String> hValue = new ArrayList<>();
                     List<String> deltaDValue = new ArrayList<>();
                     List<String> deltaHValue = new ArrayList<>();
                     //时间
-                    xValue.add(String.valueOf(Math.round((double) responseData.get(0))));
-                    yValue.add(String.valueOf(Math.round((double) responseData.get(0))));
-                    hValue.add(String.valueOf(Math.round((double) responseData.get(0))));
-                    deltaDValue.add(String.valueOf(Math.round((double) responseData.get(0))));
-                    deltaHValue.add(String.valueOf(Math.round((double) responseData.get(0))));
+                    nValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+                    eValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+                    hValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+                    deltaDValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+                    deltaHValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
                     //数值
-                    xValue.add(String.valueOf(responseData.get(1)));
-                    yValue.add(String.valueOf(responseData.get(2)));
-                    hValue.add(String.valueOf(responseData.get(3)));
-                    deltaDValue.add(String.valueOf(responseData.get(4)));
-                    deltaHValue.add(String.valueOf(responseData.get(5)));
+                    nValue.add(String.valueOf(responseData.get(nIndex)));
+                    eValue.add(String.valueOf(responseData.get(eIndex)));
+                    hValue.add(String.valueOf(responseData.get(hIndex)));
+                    deltaDValue.add(String.valueOf(responseData.get(deltaDIndex)));
+                    deltaHValue.add(String.valueOf(responseData.get(deltaHIndex)));
                     //添加到各自的数据列表中
-                    xResponseData.add(xValue);
-                    yResponseData.add(yValue);
+                    xResponseData.add(nValue);
+                    yResponseData.add(eValue);
                     hResponseData.add(hValue);
                     deltaDResponseData.add(deltaDValue);
                     deltaHResponseData.add(deltaHValue);
                 }
-                xConvertData = convertData(xResponseData, minResponse.get(1).toString(), startTime, averageResponse.get(1).toString());
-                yConvertData = convertData(yResponseData, minResponse.get(2).toString(), startTime, averageResponse.get(2).toString());
-                hConvertData = convertData(hResponseData, minResponse.get(3).toString(), startTime, averageResponse.get(3).toString());
-                deltaDConvertData = convertData(deltaDResponseData, minResponse.get(4).toString(), startTime, averageResponse.get(4).toString());
-                deltaHConvertData = convertData(deltaHResponseData, minResponse.get(5).toString(), startTime, averageResponse.get(5).toString());
-                nConvertAverage = (float) (Double.parseDouble(averageResponse.get(1).toString()) - Double.parseDouble(minResponse.get(1).toString()));
-                eConvertAverage = (float) (Double.parseDouble(averageResponse.get(2).toString()) - Double.parseDouble(minResponse.get(2).toString()));
-                hConvertAverage = (float) (Double.parseDouble(averageResponse.get(3).toString()) - Double.parseDouble(minResponse.get(3).toString()));
-                deltaConvertAverage = (float) (Double.parseDouble(averageResponse.get(4).toString()) - Double.parseDouble(minResponse.get(4).toString()));
-                deltaHConvertAverage = (float) (Double.parseDouble(averageResponse.get(5).toString()) - Double.parseDouble(minResponse.get(5).toString()));
+                nConvertData = convertData(xResponseData, minResponse.get(nIndex).toString(), startTime, averageResponse.get(nIndex).toString());
+                eConvertData = convertData(yResponseData, minResponse.get(eIndex).toString(), startTime, averageResponse.get(eIndex).toString());
+                hConvertData = convertData(hResponseData, minResponse.get(hIndex).toString(), startTime, averageResponse.get(hIndex).toString());
+                deltaDConvertData = convertData(deltaDResponseData, minResponse.get(deltaDIndex).toString(), startTime, averageResponse.get(deltaDIndex).toString());
+                deltaHConvertData = convertData(deltaHResponseData, minResponse.get(deltaHIndex).toString(), startTime, averageResponse.get(deltaHIndex).toString());
+                nConvertAverage = (float) (Double.parseDouble(averageResponse.get(nIndex).toString()) - Double.parseDouble(minResponse.get(nIndex).toString()));
+                eConvertAverage = (float) (Double.parseDouble(averageResponse.get(eIndex).toString()) - Double.parseDouble(minResponse.get(eIndex).toString()));
+                hConvertAverage = (float) (Double.parseDouble(averageResponse.get(hIndex).toString()) - Double.parseDouble(minResponse.get(hIndex).toString()));
+                deltaConvertAverage = (float) (Double.parseDouble(averageResponse.get(deltaDIndex).toString()) - Double.parseDouble(minResponse.get(deltaDIndex).toString()));
+                deltaHConvertAverage = (float) (Double.parseDouble(averageResponse.get(deltaHIndex).toString()) - Double.parseDouble(minResponse.get(deltaHIndex).toString()));
                 LogUtil.e("getData执行结束", "*********");
                 hasData = true;
             }
@@ -837,7 +873,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         List<PointValue> tempLines = new ArrayList<>();
         tempLines.add(new PointValue(values.get(0).getX(), values.get(0).getY()));   //加入第一个数据
         for (int i = 1; i < values.size(); i++) {
-            tempSpace = xConvertData.get(i).getX() - xConvertData.get(i - 1).getX();
+            tempSpace = nConvertData.get(i).getX() - nConvertData.get(i - 1).getX();
             if (tempSpace > maxSpace) {
                 chartLines.add(tempLines);
                 tempLines = new ArrayList<>();  //如果用clear()方法清空，那么所有使用该列表的数据都空了。
@@ -891,30 +927,28 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     public void refresh()
     {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String graphicType = "GNSSFilterInfo";
-        String stationUUID = stationUUIDList.get(spDevice.getSelectedItemPosition());
         switch (spTime.getSelectedItemPosition()) {
             case 0:
                 //最近1小时
-                startTime = sdf.format(DateUtil.getHourBegin(1));
-                endTime = sdf.format(DateUtil.getHourEnd());
-//                getData(graphicType, stationUUID, startTime, endTime);
-//                drawChart();
+//                startTime = sdf.format(DateUtil.getHourBegin(1));
+//                endTime = sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getCurrentTimeBegin(1));
+                endTime = sdf.format(DateUtil.getCurrentTimeEnd(1));
                 doLoadingDialog();
                 break;
             case 1:
                 //最近6小时
-                startTime = sdf.format(DateUtil.getHourBegin(6));
-                endTime = sdf.format(DateUtil.getHourEnd());
-//                getData(graphicType, stationUUID, startTime, endTime);
-//                drawChart();
+//                startTime = sdf.format(DateUtil.getHourBegin(6));
+//                endTime = sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getCurrentTimeBegin(6));
+                endTime = sdf.format(DateUtil.getCurrentTimeEnd(6));
                 doLoadingDialog();
                 break;
             case 2:
-                startTime = sdf.format(DateUtil.getHourBegin(12));
-                endTime = sdf.format(DateUtil.getHourEnd());
-//                getData(graphicType, stationUUID, startTime, endTime);
-//                drawChart();
+//                startTime = sdf.format(DateUtil.getHourBegin(12));
+//                endTime = sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getCurrentTimeBegin(12));
+                endTime = sdf.format(DateUtil.getCurrentTimeEnd(12));
                 doLoadingDialog();
                 break;
             case 3:
@@ -1020,8 +1054,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                 Canvas canvas = new Canvas(bitmap);
                 chartXLayout.draw(canvas);*/
-                xChart.setDrawingCacheEnabled(true);
-                Bitmap bitmap = xChart.getDrawingCache();
+                nChart.setDrawingCacheEnabled(true);
+                Bitmap bitmap = nChart.getDrawingCache();
                 FileUtil.saveBitmap("test.jpg",bitmap,getContext());
             }
         });

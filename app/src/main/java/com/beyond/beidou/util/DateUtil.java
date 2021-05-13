@@ -1,6 +1,5 @@
 package com.beyond.beidou.util;
 
-import android.animation.FloatEvaluator;
 import android.util.Log;
 
 import java.sql.Timestamp;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Locale;
 
 import lecho.lib.hellocharts.model.AxisValue;
-import lecho.lib.hellocharts.model.PointValue;
 
 
 public class DateUtil {
@@ -31,6 +29,70 @@ public class DateUtil {
     private static List<Integer> monthList_31 = new ArrayList<>(Arrays.asList(month_31));
 
     private static Calendar cal = Calendar.getInstance();
+
+    //****************************************************************************************
+    //修改后最近1，6，12小时
+    public static Date getCurrentTimeEnd(int hour)
+    {
+        int timeInterval = 0;
+        switch (hour){
+            case 1:
+                timeInterval = 5;
+                break;
+            case 6:
+                timeInterval = 30;
+                break;
+            case 12:
+                timeInterval = 60;
+                break;
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.SECOND,0);
+        while (calendar.get(Calendar.MINUTE) % timeInterval != 0)
+        {
+            calendar.add(Calendar.MINUTE,1);
+        }
+        return calendar.getTime();
+    }
+
+    public static Date getCurrentTimeBegin(int hour)
+    {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date hourEnd = getCurrentTimeEnd(hour);
+        System.out.println("获取的结束时间" + df.format(hourEnd));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(hourEnd);
+        calendar.add(Calendar.HOUR,-hour);
+        return calendar.getTime();
+    }
+
+
+    public static List<String> getCurrentTimeXLabel(int hour)
+    {
+        int timeInterval = 0;
+        switch (hour){
+            case 1:
+                timeInterval = 5;
+                break;
+            case 6:
+                timeInterval = 30;
+                break;
+            case 12:
+                timeInterval = 60;
+                break;
+        }
+        SimpleDateFormat df = new SimpleDateFormat("HH:mm");
+        List<String> timeLabel = new ArrayList<>();
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(getCurrentTimeBegin(hour));
+        timeLabel.add(df.format(startCalendar.getTime()));
+        for (int i = 0; i < 12; i++) {
+            startCalendar.add(Calendar.MINUTE,timeInterval);
+            timeLabel.add(df.format(startCalendar.getTime()));
+        }
+        return timeLabel;
+    }
+    //****************************************************************************************
 
     //获取hour小时的开始时间
     public static Date getHourBegin(int hour) {
@@ -118,7 +180,6 @@ public class DateUtil {
         return getDayTime(cal.getTime());
     }
 
-
     public static Timestamp getDayTime(Date d) {
         Calendar calendar = Calendar.getInstance();
         if (null != d) calendar.setTime(d);
@@ -173,8 +234,47 @@ public class DateUtil {
         return timeLabel;
     }
 
+    public static List<String> getCustomXLabel(String startTime,String endTime)
+    {
+        SimpleDateFormat paramsFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat xLabelFormat = new SimpleDateFormat("MM-dd HH");
+        Date startDate = null;
+        Date endDate = null;
+        int timeSpace = 0;
+        try {
+            startDate = paramsFormat.parse(startTime);
+            endDate = paramsFormat.parse(endTime);
+            long interval = endDate.getTime() - startDate.getTime();
+            if (interval >= 0 && interval <= 12 * 60 * 60 *1000)
+            {
+                timeSpace = 1;
+            }else if (interval <= 24 * 60 * 60 * 1000)
+            {
+                timeSpace = 2;
+            }else if (interval <= 3 * 24 * 60 * 60 * 1000)
+            {
+                timeSpace = 6;
+            }else if (interval <= 7 * 24 * 60 * 60 * 1000)
+            {
+                timeSpace = 12;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        List<String> timeLabels = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startDate);
+        while (calendar.getTimeInMillis() <= endDate.getTime())
+        {
+            timeLabels.add(xLabelFormat.format(calendar.getTime()));
+            calendar.add(Calendar.HOUR, timeSpace);
+        }
+        return timeLabels;
+    }
+
     public static List<AxisValue> getDayXAxisLabel() {
-        String[] labels = new String[]{"00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "00:00"};
+        String[] labels = new String[]{"00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "24:00"};
 //        String[] labels = new String[]{"00", "02", "04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "24"};
         List<AxisValue> axisValues = new ArrayList<>();
         for (int i = 0; i <= 1440; i += 120) {
@@ -185,12 +285,12 @@ public class DateUtil {
         return axisValues;
     }
 
-
-    public static List<AxisValue> getHourXAxisLabel(int hour) {
+    public static List<AxisValue> getHourXAxisValue(int hour) {
         int totalPoint = 60 * hour;
         int spaceTIme = 5 * hour;
         List<AxisValue> axisValues = new ArrayList<>();
-        List<String> labelList = DateUtil.getHourXLabel(hour);
+//        List<String> labelList = DateUtil.getHourXLabel(hour);
+        List<String> labelList = DateUtil.getCurrentTimeXLabel(hour);  //修改后的标签
         for (int i = 0; i <= totalPoint; i += spaceTIme) {
             AxisValue axisValue = new AxisValue(i);
             axisValue.setLabel(labelList.get(i / spaceTIme));
@@ -206,19 +306,24 @@ public class DateUtil {
         String endTime = null;
         switch (selectedTime) {
             case "最近1小时":
-                //暂时只有3.9号的数据，之后直接把"2021-03-09 "去掉即可。
-                startTime = sdf.format(DateUtil.getHourBegin(1));
-                endTime = sdf.format(DateUtil.getHourEnd());
+//                startTime = sdf.format(DateUtil.getHourBegin(1));
+//                endTime = sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getCurrentTimeBegin(1));
+                endTime = sdf.format(DateUtil.getCurrentTimeEnd(1));
                 time = startTime + "~" + endTime;
                 break;
             case "最近6小时":
-                startTime = sdf.format(DateUtil.getHourBegin(6));
-                endTime = sdf.format(DateUtil.getHourEnd());
+//                startTime = sdf.format(DateUtil.getHourBegin(6));
+//                endTime = sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getCurrentTimeBegin(6));
+                endTime = sdf.format(DateUtil.getCurrentTimeEnd(6));
                 time = startTime + "~" + endTime;
                 break;
             case "最近12小时":
-                startTime = sdf.format(DateUtil.getHourBegin(12));
-                endTime = sdf.format(DateUtil.getHourEnd());
+//                startTime = sdf.format(DateUtil.getHourBegin(12));
+//                endTime = sdf.format(DateUtil.getHourEnd());
+                startTime = sdf.format(DateUtil.getCurrentTimeBegin(12));
+                endTime = sdf.format(DateUtil.getCurrentTimeEnd(12));
                 time = startTime + "~" + endTime;
                 break;
             case "本日":

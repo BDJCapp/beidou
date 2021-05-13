@@ -1,5 +1,7 @@
 package com.beyond.beidou.test;
 
+import org.jetbrains.annotations.TestOnly;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -24,4 +26,6 @@ public class BeanTest {
         public void removePropertyChangeListener(PropertyChangeListener l) {
             changeSupport.removePropertyChangeListener(l);
         }
+
+
 }

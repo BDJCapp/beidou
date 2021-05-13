@@ -5,9 +5,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.widget.Toast;
 
 import com.beyond.beidou.login.StartActivity;
-import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 
 import org.jetbrains.annotations.NotNull;

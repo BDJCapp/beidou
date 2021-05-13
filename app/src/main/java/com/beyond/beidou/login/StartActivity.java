@@ -1,6 +1,9 @@
 package com.beyond.beidou.login;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -61,6 +64,7 @@ public class StartActivity extends BaseActivity {
                 }
                 LoginUtil.upDateToken(getApplicationContext());
                 LogUtil.e("StartActivity 成功获取Token", ApiConfig.getAccessToken());
+                LogUtil.e("StartActivity getToken Thread", Thread.currentThread().toString());
             }
         });
         getTokenThread.start();
@@ -80,6 +84,7 @@ public class StartActivity extends BaseActivity {
             }
         });
         getSessionThread.start();
+
         try {
             getSessionThread.join();
         } catch (InterruptedException e) {
@@ -104,6 +109,15 @@ public class StartActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
         init();
-        initData();
+        if (LoginUtil.isNetworkUsable(this))
+        {
+            new Thread(new Runnable()
+            {
+                @Override
+                public void run() {
+                    initData();
+                }
+            }).start();
+        }
     }
 }
