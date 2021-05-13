@@ -299,6 +299,7 @@ public class DateUtil {
         return axisValues;
     }
 
+
     public static String getTimeInterval(String selectedTime) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String time = null;
