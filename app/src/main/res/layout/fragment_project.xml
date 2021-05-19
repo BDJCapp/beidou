@@ -26,7 +26,6 @@
         android:textOff="卫星"
         android:textOn="标准"
         android:background="@drawable/tg_selector"
-        android:visibility="gone"
         />
 
     </RelativeLayout>

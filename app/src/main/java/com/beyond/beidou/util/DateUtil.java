@@ -2,6 +2,8 @@ package com.beyond.beidou.util;
 
 import android.util.Log;
 
+import com.baidu.mapapi.search.route.MassTransitRouteLine;
+
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,6 +31,11 @@ public class DateUtil {
     private static List<Integer> monthList_31 = new ArrayList<>(Arrays.asList(month_31));
 
     private static Calendar cal = Calendar.getInstance();
+    private static String labelEndTime;
+
+    public static String getLabelEndTime() {
+        return labelEndTime;
+    }
 
     //****************************************************************************************
     //修改后最近1，6，12小时
@@ -57,9 +64,7 @@ public class DateUtil {
 
     public static Date getCurrentTimeBegin(int hour)
     {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date hourEnd = getCurrentTimeEnd(hour);
-        System.out.println("获取的结束时间" + df.format(hourEnd));
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(hourEnd);
         calendar.add(Calendar.HOUR,-hour);
@@ -234,13 +239,32 @@ public class DateUtil {
         return timeLabel;
     }
 
-    public static List<String> getCustomXLabel(String startTime,String endTime)
+    //获取不大于7天的X轴标签
+    public static List<String> getCustomNGT7DayXLabel(Date startTime, Date endTime,int timeSpace)
+    {
+        SimpleDateFormat xLabelFormat = new SimpleDateFormat("MM-dd HH");
+        SimpleDateFormat paramsFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        List<String> timeLabels = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startTime);
+        while (calendar.getTimeInMillis() < endTime.getTime())
+        {
+            timeLabels.add(xLabelFormat.format(calendar.getTime()));
+            calendar.add(Calendar.HOUR, timeSpace);
+        }
+        timeLabels.add(xLabelFormat.format(calendar.getTime()));
+        labelEndTime = paramsFormat.format(calendar.getTime());
+        return timeLabels;
+    }
+
+    public static List<AxisValue> getCustomNGT7DayAxisValue(String startTime, String endTime)
     {
         SimpleDateFormat paramsFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        SimpleDateFormat xLabelFormat = new SimpleDateFormat("MM-dd HH");
         Date startDate = null;
         Date endDate = null;
         int timeSpace = 0;
+        int totalPoint = 0;
+        int spaceTime = 0;
         try {
             startDate = paramsFormat.parse(startTime);
             endDate = paramsFormat.parse(endTime);
@@ -258,19 +282,23 @@ public class DateUtil {
             {
                 timeSpace = 12;
             }
+            spaceTime = timeSpace * 60;
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
-        List<String> timeLabels = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(startDate);
-        while (calendar.getTimeInMillis() <= endDate.getTime())
-        {
-            timeLabels.add(xLabelFormat.format(calendar.getTime()));
-            calendar.add(Calendar.HOUR, timeSpace);
+        List<String> xLabel = getCustomNGT7DayXLabel(startDate, endDate, timeSpace);
+        try {
+            totalPoint = (int) (paramsFormat.parse(labelEndTime).getTime() - startDate.getTime()) / 60 / 1000;
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
-        return timeLabels;
+        List<AxisValue> axisValues = new ArrayList<>();
+        for (int i = 0; i <= totalPoint; i+=spaceTime) {
+            AxisValue axisValue = new AxisValue(i);
+            axisValue.setLabel(xLabel.get(i / spaceTime));
+            axisValues.add(axisValue);
+        }
+        return axisValues;
     }
 
     public static List<AxisValue> getDayXAxisLabel() {
@@ -299,6 +327,31 @@ public class DateUtil {
         return axisValues;
     }
 
+    public static String getCustomDeltaTime(String startTime,String endTime)
+    {
+        SimpleDateFormat paramsFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date startDate = null;
+        Date endDate = null;
+        String deltaTime = null;
+        try {
+            startDate = paramsFormat.parse(startTime);
+            endDate = paramsFormat.parse(endTime);
+            long interval = endDate.getTime() - startDate.getTime();
+            if (interval <= 24 * 60 * 60 * 1000)
+            {
+                deltaTime = "60";   //1min
+            }else if (interval <= 3 * 24 * 60 * 60 * 1000)
+            {
+                deltaTime = "180";  //3min
+            }else if (interval <= 7 * 24 * 60 * 60 * 1000)
+            {
+                deltaTime = "420";  //7min
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return deltaTime;
+    }
 
     public static String getTimeInterval(String selectedTime) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -349,6 +402,20 @@ public class DateUtil {
                 break;
         }
         return time;
+    }
+
+    //获取间隔小时数
+    public static int calcHourOffset(String startTime, String endTime)  {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar startCal = Calendar.getInstance();
+        Calendar endCal = Calendar.getInstance();
+        try {
+            startCal.setTime(df.parse(startTime));
+            endCal.setTime(df.parse(endTime));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return (int) ((endCal.getTimeInMillis()-startCal.getTimeInMillis()) /60 /1000 /60);
     }
 
 /////////////////////////////////////////////////

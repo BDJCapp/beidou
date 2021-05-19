@@ -52,4 +52,6 @@ public class LogUtil {
         }
     }
 
+    public static void e(int selectedItemPosition) {
+    }
 }

@@ -4,6 +4,7 @@ import com.beyond.beidou.util.DateUtil;
 
 import org.junit.Test;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -17,9 +18,8 @@ public class XLabelTest {
 
     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     @Test
-    public void NotBigger12HourXLabelTest()
-    {
-        List<String> xLabel = DateUtil.getCustomXLabel("2021-05-08 13:00:00", "2021-05-12 11:00:00");
+    public void CustomXLabelTest() throws ParseException {
+        List<String> xLabel = DateUtil.getCustomNGT7DayXLabel(df.parse("2021-05-18 00:00:00"), df.parse("2021-05-19 15:00:00"), 6);
         for (String s : xLabel) {
             System.out.println(s);
         }
