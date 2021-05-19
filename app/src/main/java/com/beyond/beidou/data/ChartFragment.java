@@ -216,6 +216,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     isFirstTimeSelectTime = false;
                     return;
                 }
+
                 if (parent.getSelectedItem().toString().equals("自定义时间")) {
                     timeDialog.setOnClickBottomListener(new MyDialog.OnClickBottomListener() {
                         @Override
