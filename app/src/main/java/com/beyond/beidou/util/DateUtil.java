@@ -2,18 +2,10 @@ package com.beyond.beidou.util;
 
 import android.util.Log;
 
-import com.baidu.mapapi.search.route.MassTransitRouteLine;
-
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import lecho.lib.hellocharts.model.AxisValue;
 
@@ -32,17 +24,21 @@ public class DateUtil {
 
     private static Calendar cal = Calendar.getInstance();
     private static String labelEndTime;
+    private static long offSet = 0;
 
     public static String getLabelEndTime() {
         return labelEndTime;
     }
 
+    public static long getOffSet() {
+        return offSet;
+    }
+
     //****************************************************************************************
     //修改后最近1，6，12小时
-    public static Date getCurrentTimeEnd(int hour)
-    {
+    public static Date getCurrentTimeEnd(int hour) {
         int timeInterval = 0;
-        switch (hour){
+        switch (hour) {
             case 1:
                 timeInterval = 5;
                 break;
@@ -54,28 +50,25 @@ public class DateUtil {
                 break;
         }
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.SECOND,0);
-        while (calendar.get(Calendar.MINUTE) % timeInterval != 0)
-        {
-            calendar.add(Calendar.MINUTE,1);
+        calendar.set(Calendar.SECOND, 0);
+        while (calendar.get(Calendar.MINUTE) % timeInterval != 0) {
+            calendar.add(Calendar.MINUTE, 1);
         }
         return calendar.getTime();
     }
 
-    public static Date getCurrentTimeBegin(int hour)
-    {
+    public static Date getCurrentTimeBegin(int hour) {
         Date hourEnd = getCurrentTimeEnd(hour);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(hourEnd);
-        calendar.add(Calendar.HOUR,-hour);
+        calendar.add(Calendar.HOUR, -hour);
         return calendar.getTime();
     }
 
 
-    public static List<String> getCurrentTimeXLabel(int hour)
-    {
+    public static List<String> getCurrentTimeXLabel(int hour) {
         int timeInterval = 0;
-        switch (hour){
+        switch (hour) {
             case 1:
                 timeInterval = 5;
                 break;
@@ -92,7 +85,7 @@ public class DateUtil {
         startCalendar.setTime(getCurrentTimeBegin(hour));
         timeLabel.add(df.format(startCalendar.getTime()));
         for (int i = 0; i < 12; i++) {
-            startCalendar.add(Calendar.MINUTE,timeInterval);
+            startCalendar.add(Calendar.MINUTE, timeInterval);
             timeLabel.add(df.format(startCalendar.getTime()));
         }
         return timeLabel;
@@ -240,15 +233,13 @@ public class DateUtil {
     }
 
     //获取不大于7天的X轴标签
-    public static List<String> getCustomNGT7DayXLabel(Date startTime, Date endTime,int timeSpace)
-    {
+    public static List<String> getCustomNGT7DayXLabel(Date startTime, Date endTime, int timeSpace) {
         SimpleDateFormat xLabelFormat = new SimpleDateFormat("MM-dd HH");
         SimpleDateFormat paramsFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         List<String> timeLabels = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(startTime);
-        while (calendar.getTimeInMillis() < endTime.getTime())
-        {
+        while (calendar.getTimeInMillis() < endTime.getTime()) {
             timeLabels.add(xLabelFormat.format(calendar.getTime()));
             calendar.add(Calendar.HOUR, timeSpace);
         }
@@ -257,8 +248,7 @@ public class DateUtil {
         return timeLabels;
     }
 
-    public static List<AxisValue> getCustomNGT7DayAxisValue(String startTime, String endTime)
-    {
+    public static List<AxisValue> getCustomNGT7DayAxisValue(String startTime, String endTime) {
         SimpleDateFormat paramsFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date startDate = null;
         Date endDate = null;
@@ -269,18 +259,20 @@ public class DateUtil {
             startDate = paramsFormat.parse(startTime);
             endDate = paramsFormat.parse(endTime);
             long interval = endDate.getTime() - startDate.getTime();
-            if (interval >= 0 && interval <= 12 * 60 * 60 *1000)
-            {
+            if (interval >= 0 && interval <= 12 * 60 * 60 * 1000) {
                 timeSpace = 1;
-            }else if (interval <= 24 * 60 * 60 * 1000)
-            {
+            } else if (interval <= 24 * 60 * 60 * 1000) {
                 timeSpace = 2;
-            }else if (interval <= 3 * 24 * 60 * 60 * 1000)
-            {
+            } else if (interval <= 3 * 24 * 60 * 60 * 1000) {
                 timeSpace = 6;
-            }else if (interval <= 7 * 24 * 60 * 60 * 1000)
-            {
+            } else if (interval <= 7 * 24 * 60 * 60 * 1000) {
                 timeSpace = 12;
+            } else if (interval / (60 * 60 * 1000) <= 30 * 24) {
+                return getCustomGTWeekXAxis(startDate, endDate);
+            } else if (interval / (60 * 60 * 1000) <= 180 * 24) {
+                return getCustomGTMonthXAxis(startDate, endDate);
+            } else if (interval / (60 * 60 * 1000) <= 730 * 24) {
+                return getCustomGT6MonthXAxis(startDate, endDate);
             }
             spaceTime = timeSpace * 60;
         } catch (ParseException e) {
@@ -293,7 +285,7 @@ public class DateUtil {
             e.printStackTrace();
         }
         List<AxisValue> axisValues = new ArrayList<>();
-        for (int i = 0; i <= totalPoint; i+=spaceTime) {
+        for (int i = 0; i <= totalPoint; i += spaceTime) {
             AxisValue axisValue = new AxisValue(i);
             axisValue.setLabel(xLabel.get(i / spaceTime));
             axisValues.add(axisValue);
@@ -327,8 +319,7 @@ public class DateUtil {
         return axisValues;
     }
 
-    public static String getCustomDeltaTime(String startTime,String endTime)
-    {
+    public static String getCustomDeltaTime(String startTime, String endTime) {
         SimpleDateFormat paramsFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date startDate = null;
         Date endDate = null;
@@ -336,16 +327,21 @@ public class DateUtil {
         try {
             startDate = paramsFormat.parse(startTime);
             endDate = paramsFormat.parse(endTime);
-            long interval = endDate.getTime() - startDate.getTime();
-            if (interval <= 24 * 60 * 60 * 1000)
-            {
+            long interval = (endDate.getTime() - startDate.getTime()) / (60 * 60 * 1000);
+            if (interval <= 24) {
                 deltaTime = "60";   //1min
-            }else if (interval <= 3 * 24 * 60 * 60 * 1000)
-            {
+            } else if (interval <= 3 * 24) {
                 deltaTime = "180";  //3min
-            }else if (interval <= 7 * 24 * 60 * 60 * 1000)
-            {
+            } else if (interval <= 7 * 24) {
                 deltaTime = "420";  //7min
+            } else if (interval <= 30 * 24) {
+                deltaTime = "1800";
+            } else if (interval <= 180 * 24) {
+                deltaTime = "10800";
+            } else if (interval <= 365 * 24) {
+                deltaTime = "21900";
+            } else if (interval <= 730 * 24) {
+                deltaTime = "43800";
             }
         } catch (ParseException e) {
             e.printStackTrace();
@@ -405,17 +401,18 @@ public class DateUtil {
     }
 
     //获取间隔小时数
-    public static int calcHourOffset(String startTime, String endTime)  {
+    public static int calcHourOffset(String startTime, String endTime) {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Calendar startCal = Calendar.getInstance();
         Calendar endCal = Calendar.getInstance();
+        LogUtil.e("calOffset", "startTime ：" + startTime + ", endTime: " + endTime);
         try {
             startCal.setTime(df.parse(startTime));
             endCal.setTime(df.parse(endTime));
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return (int) ((endCal.getTimeInMillis()-startCal.getTimeInMillis()) /60 /1000 /60);
+        return (int) ((endCal.getTimeInMillis() - startCal.getTimeInMillis()) / 60 / 1000 / 60);
     }
 
 /////////////////////////////////////////////////
@@ -577,9 +574,9 @@ public class DateUtil {
         calendar.add(Calendar.DATE, -1);
         date = calendar.getTime();
         for (int i = 0; i < 14; i++) {
-            if(i % 2 == 0){
+            if (i % 2 == 0) {
                 labels.add(sdf.format(date) + " 12:00");
-            }else{
+            } else {
                 labels.add(sdf.format(date) + " 00:00");
                 calendar.add(Calendar.DATE, -1);
             }
@@ -630,20 +627,167 @@ public class DateUtil {
         Date present = calendar.getTime();
         for (int i = 0; i <= 12; i++) {
             labels.add(sdf.format(present));
+//            LogUtil.e("生成的标签", labels.get(i));
             calendar.add(Calendar.MONTH, -1);
             intervals.add(calcDayOffset(calendar.getTime(), present));
             present = calendar.getTime();
         }
-
-        int totalXCount = isLeapYear(getYear() - 1) ? 366 * 1440 : 365 * 1440;
-        for (int i = 0, j = 12; i <= totalXCount; i += 1440 * interval) {
-            if (j >= 0) {
-                interval = intervals.get(12 - j);
-                AxisValue axisValue = new AxisValue(i);
-                axisValue.setLabel(labels.get(j--));
-                xAxis.add(axisValue);
-            }
+        for (Integer integer : intervals) {
+//            LogUtil.e("生成的间隔值", "=========" + integer + "============");
         }
+        Calendar cal2 = Calendar.getInstance();
+        cal2.add(Calendar.MONTH, 1);
+        cal2.set(Calendar.DAY_OF_MONTH, 1);
+        Date date2 = cal2.getTime();
+        cal2.add(Calendar.YEAR, -1);
+        Date date1 = cal2.getTime();
+        int totalXCount = calcDayOffset(date1, date2) * 1440;
+        int tick = 12;
+        for (long i = 0; i <= totalXCount; i += 1440 * interval) {
+//            LogUtil.e("值和标签", "value : " + i + ", labels: " + labels.get(tick) + " , tick=" + tick);
+            interval = (tick == 0) ? 1 : intervals.get(tick - 1);
+//            LogUtil.e("interval", "" + interval);
+            AxisValue axisValue = new AxisValue(i);
+            axisValue.setLabel(labels.get(tick--));
+            xAxis.add(axisValue);
+        }
+        return xAxis;
+    }
+
+    public static List<AxisValue> getCustomGTWeekXAxis(Date start, Date end) {
+        List<AxisValue> xAxis = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH", Locale.CHINA);
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTime(start);
+        Date date1 = cal1.getTime();
+        cal2.setTime(end);
+        if (cal1.get(Calendar.HOUR_OF_DAY) != cal2.get(Calendar.HOUR_OF_DAY)) {
+            end.setTime(end.getTime() + 1000 * 60 * 60 * 24);
+            cal2.setTime(end);
+            cal2.set(Calendar.HOUR_OF_DAY, cal1.get(Calendar.HOUR_OF_DAY));
+        }
+        Date date2 = cal2.getTime();
+        int dayGap = calcDayOffset(date1, date2);
+        for (int i = 0; i <= dayGap; i++) {
+            labels.add(sdf.format(date2));
+            cal2.add(Calendar.DAY_OF_YEAR, -1);
+            date2 = cal2.getTime();
+        }
+        cal2.setTime(end);
+        cal2.set(Calendar.HOUR_OF_DAY, cal1.get(Calendar.HOUR_OF_DAY));
+        int totalXCount = calcDayOffset(date1, cal2.getTime()) * 1440;
+        for (int i = 0, j = dayGap; i <= totalXCount; i += 1440) {
+            LogUtil.e("值和标签", "value : " + i + ", labels: " + labels.get(j) + " , j=" + j);
+            AxisValue axisValue = new AxisValue(i);
+            axisValue.setLabel(labels.get(j--));
+            xAxis.add(axisValue);
+        }
+        offSet = 0;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+        labelEndTime = df.format(cal2.getTime());
+        return xAxis;
+    }
+
+    public static List<AxisValue> getCustomGTMonthXAxis(Date start, Date end) {
+        int interval = 0;
+        List<AxisValue> xAxis = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        List<Integer> intervals = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTime(start);
+        cal1.set(Calendar.DAY_OF_MONTH, 1);
+        cal1.set(Calendar.HOUR_OF_DAY, 0);
+        Date date1 = cal1.getTime();
+        cal2.setTime(end);
+        cal2.add(Calendar.MONTH, 1);
+        cal2.set(Calendar.DAY_OF_MONTH, 1);
+        cal2.set(Calendar.HOUR_OF_DAY, 0);
+        Date date2 = cal2.getTime();
+
+        int monthGap = (cal2.get(Calendar.YEAR) - cal1.get(Calendar.YEAR)) * 12 + (cal2.get(Calendar.MONTH) - cal1.get(Calendar.MONTH));
+
+        for (int i = 0; i <= monthGap * 2; i++) {
+            labels.add(sdf.format(date2));
+//            LogUtil.e("生成的标签", labels.get(i));
+            if (i % 2 == 0) {
+                cal2.add(Calendar.MONTH, -1);
+                cal2.set(Calendar.DAY_OF_MONTH, 15);
+            } else {
+                cal2.set(Calendar.DAY_OF_MONTH, 1);
+            }
+            intervals.add(calcDayOffset(cal2.getTime(), date2));
+            date2 = cal2.getTime();
+        }
+        cal2.setTime(end);
+        cal2.add(Calendar.MONTH, 1);
+        cal2.set(Calendar.DAY_OF_MONTH, 1);
+        cal2.set(Calendar.HOUR_OF_DAY, 0);
+        int totalXCount = calcDayOffset(date1, cal2.getTime()) * 1440;
+//        LogUtil.e("总点数", totalXCount + "");
+//        for (Integer integer : intervals) {
+//            LogUtil.e("生成的间隔值", "========="+integer+"============");
+//        }
+//        LogUtil.e("Timeeeeee", "startTime" + start + ", cal1Time: " + cal1.getTime());
+        offSet = -(start.getTime() - cal1.getTimeInMillis()) / (1000 * 60);
+        int tick = monthGap * 2;
+        for (long i = offSet; i <= totalXCount + offSet; i += 1440 * interval) {
+//            LogUtil.e("值和标签", "value : " + i + ", labels: " + labels.get(tick) + " , tick=" + tick);
+            interval = (tick == 0) ? 1 : intervals.get(tick - 1);
+//            LogUtil.e("interval","" + interval);
+            AxisValue axisValue = new AxisValue(i);
+            axisValue.setLabel(labels.get(tick--));
+            xAxis.add(axisValue);
+        }
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+//        cal2.add(Calendar.DAY_OF_YEAR, 15);
+        labelEndTime = df.format(cal2.getTime());
+        return xAxis;
+    }
+
+    public static List<AxisValue> getCustomGT6MonthXAxis(Date start, Date end) {
+        int interval = 0;
+        List<AxisValue> xAxis = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        List<Integer> intervals = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTime(start);
+        cal1.set(Calendar.DAY_OF_MONTH, 1);
+        cal1.set(Calendar.HOUR_OF_DAY, 0);
+        Date date1 = cal1.getTime();
+        cal2.setTime(end);
+        cal2.add(Calendar.MONTH, 1);
+        cal2.set(Calendar.DAY_OF_MONTH, 1);
+        cal2.set(Calendar.HOUR_OF_DAY, 0);
+        Date date2 = cal2.getTime();
+
+        int monthGap = (cal2.get(Calendar.YEAR) - cal1.get(Calendar.YEAR)) * 12 + (cal2.get(Calendar.MONTH) - cal1.get(Calendar.MONTH));
+        offSet = -(start.getTime() - cal1.getTimeInMillis()) / (1000 * 60);
+        for (int i = 0; i <= monthGap; i++) {
+            labels.add(sdf.format(date2));
+            cal2.add(Calendar.MONTH, -1);
+            intervals.add(calcDayOffset(cal2.getTime(), date2));
+            date2 = cal2.getTime();
+        }
+        cal2.setTime(end);
+        cal2.add(Calendar.MONTH, 1);
+        cal2.set(Calendar.DAY_OF_MONTH, 1);
+        cal2.set(Calendar.HOUR_OF_DAY, 0);
+        int totalXCount = calcDayOffset(date1, cal2.getTime()) * 1440;
+        int tick = monthGap;
+        for (long i = offSet; i <= totalXCount + offSet; i += 1440 * interval) {
+            interval = (tick == 0) ? 1 : intervals.get(tick - 1);
+            AxisValue axisValue = new AxisValue(i);
+            axisValue.setLabel(labels.get(tick--));
+            xAxis.add(axisValue);
+        }
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+        labelEndTime = df.format(cal2.getTime());
         return xAxis;
     }
 
@@ -664,7 +808,7 @@ public class DateUtil {
         if (year1 != year2) {
             int timeDistance = 0;
             for (int i = year1; i < year2; i++) {
-                if (isLeapYear(getYear() - 1)) {  //闰年
+                if (isLeapYear(i)) {  //闰年
                     timeDistance += 366;
                 } else {
                     timeDistance += 365;

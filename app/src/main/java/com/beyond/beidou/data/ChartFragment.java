@@ -91,6 +91,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private boolean hasData = true;
     private Map<String, Integer> index = new HashMap<>();
     private MyDialog timeDialog;
+    private int lastSelectedTimePosition;
 
     private static final int LOADING = 1;
     private ZLoadingDialog dialog;
@@ -171,8 +172,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         spTime.setAdapter(timeAdapter);
         spTime.setSelection(3);
 
-        chartXLayout = view.findViewById(R.id.layout_chartX);
+        lastSelectedTimePosition = 3;
 
+        chartXLayout = view.findViewById(R.id.layout_chartX);
         nChart = view.findViewById(R.id.chart_X);
         eChart = view.findViewById(R.id.chart_Y);
         hChart = view.findViewById(R.id.chart_H);
@@ -211,7 +213,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
         spTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemSelected(AdapterView<?> parent, View view, final int position, long id) {
                 if (isFirstTimeSelectTime) {
                     isFirstTimeSelectTime = false;
                     return;
@@ -230,12 +232,17 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             else {
                                 timeDialog.dismiss();
                                 refresh();
+                                lastSelectedTimePosition = position;
                             }
                         }
 
                         @Override
                         public void onNegativeClick() {
                             timeDialog.dismiss();
+                            if (lastSelectedTimePosition != 7)
+                            {
+                                spTime.setSelection(lastSelectedTimePosition);
+                            }
                         }
                     });
                     timeDialog.setOnClickTextViewListener(new MyDialog.OnClickTextViewListener() {
@@ -252,6 +259,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     timeDialog.show();
                 }else {
                     refresh();
+                    lastSelectedTimePosition = position;
                 }
             }
 
@@ -707,30 +715,45 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         switch (spTime.getSelectedItem().toString()) {
             case "最近1小时":
                 maxWindow.right = 60 + (float) (60 / 24);
+                maxWindow.left = 0f;
                 break;
             case "最近6小时":
                 maxWindow.right = 360 + (float) (360 / 24);
+                maxWindow.left = 0f;
                 break;
             case "最近12小时":
                 maxWindow.right = 720 + (float) (720 / 24);
+                maxWindow.left = 0f;
                 break;
             case "本日":
                 maxWindow.right = 1440 + (float) (1440 / 24);
+                maxWindow.left = 0f;
                 break;
             case "一周":
                 maxWindow.right = 1440 * 7 + (float) (1440 * 7 / 24);
+                maxWindow.left = 0f;
                 break;
             case "一月":
                 maxWindow.right = 1440 * 30 + (float) (1440 * 30 / 24);
+                maxWindow.left = 0f;
                 break;
             case "一年":
                 maxWindow.right = 1440 * 365 + (float) (1440 * 365 / 24);
+                maxWindow.left = 0f;
                 break;
             case "自定义时间":
-                maxWindow.right = 60 * DateUtil.calcHourOffset(startTime,DateUtil.getLabelEndTime()) + (float)(60 * DateUtil.calcHourOffset(startTime,DateUtil.getLabelEndTime()) / 24);
+                int hourOffSet = DateUtil.calcHourOffset(startTime, DateUtil.getLabelEndTime());
+                maxWindow.right = 60 * hourOffSet + (float)(60 * hourOffSet / 24);
+                if(hourOffSet > 7 * 24){
+                    maxWindow.left = DateUtil.getOffSet();
+                }else{
+                    maxWindow.left = 0f;
+                }
+                LogUtil.e("DateUtil.getOffSet()", "" + DateUtil.getOffSet());
+                LogUtil.e("left", "" + maxWindow.left);
+                LogUtil.e("right", "" + maxWindow.right);
         }
 
-        maxWindow.left = 0f;
         currentWindow.left = maxWindow.left;
         currentWindow.right = (float) (maxWindow.right * 0.5);
         chartView.setMaximumViewport(maxWindow);

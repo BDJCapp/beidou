@@ -4,13 +4,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 
 import com.beyond.beidou.R;
 import com.beyond.beidou.entites.MonitoringPoint;
@@ -83,7 +81,7 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
         }
         holder.mTv_activeTime.setText(point.getActiveTime());
         if(mOnItemClickListener == null){
-            Log.e("123", "mOnItemClickListener is null");
+            Log.e("pointAdapter", "mOnItemClickListener is null");
         }
         holder.mTv_data.setOnClickListener(new View.OnClickListener() {
             @Override

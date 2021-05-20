@@ -54,4 +54,5 @@ public class NotificationUtils extends ContextWrapper {
                 .setSmallIcon(android.R.drawable.stat_notify_more)
                 .setAutoCancel(true);
     }
+
 }

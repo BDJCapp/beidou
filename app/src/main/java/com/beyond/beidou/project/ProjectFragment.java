@@ -179,6 +179,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     public static ProjectFragment newInstance() {
         ProjectFragment fragment = new ProjectFragment();
         return fragment;
+        
     }
 
     public int initLayout() {
@@ -264,7 +265,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         dialog = new ZLoadingDialog(getActivity());
         mToggleButton = view.findViewById(R.id.toggleButton);
         mToggleButton.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
-
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (!isChecked) {
@@ -734,7 +734,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
             currentPosition.append("getLocType: ").append(bdLocation.getLocType());
             Log.i("onReceiveLocation", currentPosition.toString());
-
 //            //mapView 销毁后不在处理新接收的位置
 //            if (bdLocation == null || mMapView == null) {
 //                return;
@@ -778,9 +777,14 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         if (mLocationClient != null) {
             mLocationClient.stop();
         }
-        mBaiduMap.setMyLocationEnabled(false);
-        mMapView.onDestroy();
-        mMapView = null;
+        if(mBaiduMap != null){
+            mBaiduMap.setMyLocationEnabled(false);
+            mBaiduMap.clear();
+        }
+        if(mMapView != null){
+            mMapView.onDestroy();
+            mMapView = null;
+        }
         super.onDestroy();
     }
 }
