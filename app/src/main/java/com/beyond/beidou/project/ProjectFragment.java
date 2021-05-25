@@ -115,6 +115,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private static boolean isFirstBindListener = true;
     private static volatile boolean isFinishLoading = false;
     private static final int LOADING = 1;
+    private static final int LOADING_FINISH = 200;
     private ZLoadingDialog dialog;
     public Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -126,7 +127,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 //                    }
 //                    dialog.dismiss();
                     break;
-                case 200:
+                case LOADING_FINISH:
                     dialog.dismiss();
                     break;
             }
@@ -426,7 +427,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     getActivity().finish();
                 }
 //                isFinishLoading = true;
-                handler.sendEmptyMessageDelayed(200,0);
+                handler.sendEmptyMessageDelayed(LOADING_FINISH,0);
             }
 
             @Override
