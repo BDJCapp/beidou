@@ -7,6 +7,7 @@
     tools:context=".data.ChartFragment"
     android:id="@+id/header"
     >
+
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"

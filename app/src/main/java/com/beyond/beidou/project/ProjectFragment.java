@@ -113,7 +113,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private static String presentProject;
     public static boolean isReLogin = false;
     private static boolean isFirstBindListener = true;
-    private static volatile boolean isFinishLoading = false;
     private static final int LOADING = 1;
     private ZLoadingDialog dialog;
     public Handler handler = new Handler(Looper.getMainLooper()) {
@@ -281,7 +280,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
     private void getData() {
         Log.wtf("getData", "================Begin================");
-        isFinishLoading = false;
         projectNameList.clear();
         stationNameList.clear();
         stationUUIDList.clear();

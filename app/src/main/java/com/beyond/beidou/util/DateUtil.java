@@ -415,7 +415,7 @@ public class DateUtil {
         return (int) ((endCal.getTimeInMillis() - startCal.getTimeInMillis()) / 60 / 1000 / 60);
     }
 
-/////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 
     public static int getYear() {
         return cal.get(Calendar.YEAR);
@@ -679,11 +679,12 @@ public class DateUtil {
         cal2.set(Calendar.HOUR_OF_DAY, cal1.get(Calendar.HOUR_OF_DAY));
         int totalXCount = calcDayOffset(date1, cal2.getTime()) * 1440;
         for (int i = 0, j = dayGap; i <= totalXCount; i += 1440) {
-            LogUtil.e("值和标签", "value : " + i + ", labels: " + labels.get(j) + " , j=" + j);
+//            LogUtil.e("值和标签", "value : " + i + ", labels: " + labels.get(j) + " , j=" + j);
             AxisValue axisValue = new AxisValue(i);
             axisValue.setLabel(labels.get(j--));
             xAxis.add(axisValue);
         }
+
         offSet = 0;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         labelEndTime = df.format(cal2.getTime());
@@ -731,7 +732,7 @@ public class DateUtil {
 //        for (Integer integer : intervals) {
 //            LogUtil.e("生成的间隔值", "========="+integer+"============");
 //        }
-//        LogUtil.e("Timeeeeee", "startTime" + start + ", cal1Time: " + cal1.getTime());
+        LogUtil.e("Time", "startTime" + start + ", cal1Time: " + cal1.getTime());
         offSet = -(start.getTime() - cal1.getTimeInMillis()) / (1000 * 60);
         int tick = monthGap * 2;
         for (long i = offSet; i <= totalXCount + offSet; i += 1440 * interval) {
