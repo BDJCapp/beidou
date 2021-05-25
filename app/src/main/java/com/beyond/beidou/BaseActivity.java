@@ -13,8 +13,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
-import com.xuexiang.xui.XUI;
-import com.xuexiang.xui.utils.StatusBarUtils;
+
 
 import java.util.Timer;
 import java.util.TimerTask;
