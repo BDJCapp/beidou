@@ -51,6 +51,7 @@ public class DataHomeFragment extends BaseFragment {
     MainActivity activity;
     private static final int LOADING = 1;
     private static final int DEVICE_LIST = 2;
+    private static final int LOADING_FINISH = 200;
     private ZLoadingDialog dialog;
 //    private static volatile boolean isFinishLoading = false;
     private ArrayList<String> stationNameList = new ArrayList<>();
@@ -73,7 +74,7 @@ public class DataHomeFragment extends BaseFragment {
 //                    }
 //                    dialog.dismiss();
                     break;
-                case 200:
+                case LOADING_FINISH:
                     dialog.dismiss();
                     break;
             }
@@ -245,8 +246,7 @@ public class DataHomeFragment extends BaseFragment {
                                 deviceList.setLayoutManager(manager);
                             }
                         });
-//                        LogUtil.e("isFIni:  ", "isFinish" + isFinishLoading);
-                        handler.sendEmptyMessageDelayed(200,0);
+                        handler.sendEmptyMessageDelayed(LOADING_FINISH,0);
 //                        isFinishLoading = true;
                     }
 

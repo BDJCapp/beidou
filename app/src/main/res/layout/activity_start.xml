@@ -33,16 +33,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0">
 
-        <com.xuexiang.xui.widget.imageview.RadiusImageView
+        <ImageView
             android:layout_toStartOf="@id/lin1"
             android:layout_centerVertical="true"
             android:id="@+id/iv_logo_start"
             android:src="@drawable/ic_startlogo"
             android:layout_width="65dp"
             android:layout_height="65dp"
-            app:riv_corner_radius="10dp"
-            app:riv_border_width="1dp"
-            app:riv_border_color="@color/color_link"
+            android:background="@drawable/bg_border"
             android:layout_toLeftOf="@id/lin1" />
 
         <LinearLayout
@@ -65,11 +63,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:text="准确高效"
+                android:text="实时查看"
                 android:textColor="@color/text_main"
                 android:textSize="14sp" />
         </LinearLayout>
-
 
     </RelativeLayout>
 
