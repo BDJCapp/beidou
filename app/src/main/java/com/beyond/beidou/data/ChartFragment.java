@@ -110,6 +110,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         }
     };
 
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
