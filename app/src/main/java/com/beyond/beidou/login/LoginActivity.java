@@ -55,11 +55,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private Button btnSendCode;
     private ImageView imgVisible;
     private Button btnLogin;
-    private TextView tvRegister;
     private TextView tvForgetPwd;
-    private TextView tvPictureCode;
-    private EditText etPictureCode;
-    private ImageView imgPictureCode;
 
     private final int QUITAPP = 0;
     private final int LOGIN = 1;
@@ -69,6 +65,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private final int IIILEGAL_USER_SESSION = 400110;
     private final int SESSION_EXPIRATION_LOGOUT = 204;
     private final int CODE_NULL = 423;
+    private final int SUCCESS = 200;
     private static boolean isExit = false;
     ZLoadingDialog dialog = new ZLoadingDialog(LoginActivity.this);
 
@@ -94,10 +91,21 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     break;
                 case LOGIN:
                     //加载动画之后登录
-                    login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
+                        }
+                    }).start();
                     break;
                 case QUITAPP://判断是否连续点击两次
                     isExit = false;
+                    break;
+                case SUCCESS:
+                    intent.setClass(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    dialog.dismiss();
+                    finish();
                     break;
             }
         }
@@ -125,7 +133,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
     @Override
     public void initView() {
-
         tvLoginByPwd = findViewById(R.id.tv_loginByPwd);
         tvAccount = findViewById(R.id.tv_account);
         etLoginAccount = findViewById(R.id.et_loginAccount);
@@ -186,7 +193,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                         .setLoadingColor(Color.BLACK)//颜色
                         .setHintText("Loading...")
                         .show();
-                handler.sendEmptyMessageDelayed(LOGIN,150);
+                handler.sendEmptyMessageDelayed(LOGIN,0);
                 break;
         }
     }
@@ -219,7 +226,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         loginUtil.loginByPwd(LoginActivity.this,username, encodePwd, SessionUUID, AccessToken, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-                Log.e("登录的response", String.valueOf(res));
                 if (!TextUtils.isEmpty(res)) {
                     try {
                         Message message = new Message();
@@ -228,10 +234,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                         String errMsg = object.getString("ResponseMsg");
                         switch (errCode) {
                             case "200": //登录成功
-                                intent.setClass(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                dialog.dismiss();
-                                finish();
+                                handler.sendEmptyMessageDelayed(200,1000);
                                 break;
                             case "400"://操作失败/参数非法
                                 message.obj = errMsg;
@@ -337,7 +340,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         boolean isCorrect = true;
         if ("".equals(account))
         {
-            Toast.makeText(getApplicationContext(),"用户名输入为空,请重新输入",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"请输入账号",Toast.LENGTH_SHORT).show();
         }else if (Character.isLetter(account.charAt(0)))
         {
             //用户名
@@ -376,7 +379,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         if ("".equals(password))
         {
             isCorrect = false;
-            Toast.makeText(getApplicationContext(),"密码输入空,请重新输入",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"请输入密码",Toast.LENGTH_SHORT).show();
         } else if (!LoginUtil.checkPwd(password))
         {
             isCorrect = false;

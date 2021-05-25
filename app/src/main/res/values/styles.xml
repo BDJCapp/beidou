@@ -28,7 +28,7 @@
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
-    <style name="dialogStyle" parent="@android:style/Animation.Dialog">
+    <style name="timePickerStyle" parent="@android:style/Animation.Dialog">
         <!-- 进入时的动画 -->
         <item name="android:windowEnterAnimation">@anim/pickerview_slide_in_bottom</item>
     </style>

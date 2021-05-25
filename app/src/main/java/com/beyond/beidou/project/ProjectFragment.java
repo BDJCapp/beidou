@@ -122,8 +122,11 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             switch (msg.what) {
                 case LOADING:
                     getData();
-                    while (!isFinishLoading) {
-                    }
+//                    while (!isFinishLoading) {
+//                    }
+//                    dialog.dismiss();
+                    break;
+                case 200:
                     dialog.dismiss();
                     break;
             }
@@ -422,7 +425,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     startActivity(intent);
                     getActivity().finish();
                 }
-                isFinishLoading = true;
+//                isFinishLoading = true;
+                handler.sendEmptyMessageDelayed(200,0);
             }
 
             @Override

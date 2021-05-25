@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -90,18 +89,21 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private String deltaTime = null;
     private boolean hasData = true;
     private Map<String, Integer> index = new HashMap<>();
-    private MyDialog timeDialog;
+    private MyDialog timePicker;
     private int lastSelectedTimePosition;
 
+
     private static final int LOADING = 1;
-    private ZLoadingDialog dialog;
+    private static final int GET_DATA_SUCCESS = 200;
+    private ZLoadingDialog loadingDialog;
     public Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
                 case LOADING:
-//                    LogUtil.e("请求的参数为", stationUUIDList.get(spDevice.getSelectedItemPosition()) + ",  " + startTime + ",   " + endTime);
                     getData("GNSSFilterInfo", stationUUIDList.get(spDevice.getSelectedItemPosition()), startTime, endTime, deltaTime);
+                    break;
+                case GET_DATA_SUCCESS:
                     drawChart();
                     break;
             }
@@ -111,15 +113,15 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        dialog = new ZLoadingDialog((MainActivity) context);
+        loadingDialog = new ZLoadingDialog(context);
     }
 
     private void doLoadingDialog() {
-        handler.sendEmptyMessageDelayed(LOADING, 0);
-        dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
+        loadingDialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                 .setLoadingColor(Color.BLACK)//颜色
                 .setHintText("Loading...")
                 .show();
+        handler.sendEmptyMessageDelayed(LOADING, 0);
     }
 
     public static ChartFragment newInstance(String projectName, ArrayList<String> stationNameList, int position, ArrayList<String> stationUUIDList) {
@@ -155,7 +157,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         spDevice = view.findViewById(R.id.sp_device);
         spTime = view.findViewById(R.id.sp_chart_time);
         mDownLoadExcel = view.findViewById(R.id.tv_load_excel);
-        timeDialog = new MyDialog(getActivity());
+        timePicker = new MyDialog(getActivity());
         if (getArguments() != null) {
             mTitle.setText(getArguments().getString("projectName"));
             ArrayAdapter<String> deviceAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, getArguments().getStringArrayList("stationNameList"));
@@ -220,17 +222,21 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 }
 
                 if (parent.getSelectedItem().toString().equals("自定义时间")) {
-                    timeDialog.setOnClickBottomListener(new MyDialog.OnClickBottomListener() {
+                    timePicker.setOnClickBottomListener(new MyDialog.OnClickBottomListener() {
                         @Override
                         public void onPositiveClick() {
-                            startTime = timeDialog.getStartTime();
-                            endTime = timeDialog.getEndTime();
-                            if (DateUtil.calcHourOffset(startTime,endTime) <= 0)
+                            startTime = timePicker.getStartTime();
+                            endTime = timePicker.getEndTime();
+                            if (startTime.equals("") | endTime.equals("") | DateUtil.calcHourOffset(startTime,endTime) <= 0)
                             {
                                 showToast("请选择正确的时间区间！");
                             }
+                            else if (DateUtil.calcHourOffset(startTime,endTime) >= 8784)
+                            {
+                                showToast("最大查询间隔为两年，请重新选择");
+                            }
                             else {
-                                timeDialog.dismiss();
+                                timePicker.dismiss();
                                 refresh();
                                 lastSelectedTimePosition = position;
                             }
@@ -238,14 +244,14 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
                         @Override
                         public void onNegativeClick() {
-                            timeDialog.dismiss();
+                            timePicker.dismiss();
                             if (lastSelectedTimePosition != 7)
                             {
                                 spTime.setSelection(lastSelectedTimePosition);
                             }
                         }
                     });
-                    timeDialog.setOnClickTextViewListener(new MyDialog.OnClickTextViewListener() {
+                    timePicker.setOnClickTextViewListener(new MyDialog.OnClickTextViewListener() {
                         @Override
                         public void onStartTimeClick(View v) {
                             timePicker((TextView) v);
@@ -256,7 +262,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             timePicker((TextView) v);
                         }
                     });
-                    timeDialog.show();
+                    timePicker.show();
                 }else {
                     refresh();
                     lastSelectedTimePosition = position;
@@ -749,16 +755,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 }else{
                     maxWindow.left = 0f;
                 }
-                LogUtil.e("DateUtil.getOffSet()", "" + DateUtil.getOffSet());
-                LogUtil.e("left", "" + maxWindow.left);
-                LogUtil.e("right", "" + maxWindow.right);
         }
 
         currentWindow.left = maxWindow.left;
         currentWindow.right = (float) (maxWindow.right * 0.5);
         chartView.setMaximumViewport(maxWindow);
         chartView.setCurrentViewport(currentWindow);
-
     }
 
     @Override
@@ -781,6 +783,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     }
 
     public void requestChartDataSync(final String graphicType, String stationUUID, final String startTime, String endTime, String deltaTime) {
+        LogUtil.e("deltaTime", deltaTime);
         FormBody getChartDataBody = new FormBody.Builder()
                 .add("AccessToken", ApiConfig.getAccessToken())
                 .add("SessionUUID", ApiConfig.getSessionUUID())
@@ -796,6 +799,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             @Override
             public void onSuccess(String res) {
                 LogUtil.e("请求点数据结束时间", sdfTwo.format(System.currentTimeMillis()));
+                LogUtil.e("请求数据的返回值",res);
                 Gson gson = new Gson();
                 GNSSFilterInfoResponse gnssFilterInfoResponse = gson.fromJson(res, GNSSFilterInfoResponse.class);
                 contentResponse = gnssFilterInfoResponse.getContent();
@@ -966,7 +970,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             tempLines.add(new PointValue(values.get(i).getX(), values.get(i).getY()));
         }
         chartLines.add(tempLines);   //将最后一段数据加入
-
     }
 
     /**
@@ -982,14 +985,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             @Override
             public void run() {
                 requestChartDataSync(graphicType, stationUUID, startTime, endTime, deltaTime);
+                handler.sendEmptyMessageDelayed(200,0);
             }
         });
         httpThread.start();
-        try {
-            httpThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -1005,7 +1004,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 startTime = sdf.format(DateUtil.getCurrentTimeBegin(1));
                 endTime = sdf.format(DateUtil.getCurrentTimeEnd(1));
                 deltaTime = "60";
-                doLoadingDialog();
+//                doLoadingDialog();
                 break;
             case 1:
                 //最近6小时
@@ -1014,7 +1013,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 startTime = sdf.format(DateUtil.getCurrentTimeBegin(6));
                 endTime = sdf.format(DateUtil.getCurrentTimeEnd(6));
                 deltaTime = "60";
-                doLoadingDialog();
+//                doLoadingDialog();
                 break;
             case 2:
 //                startTime = sdf.format(DateUtil.getHourBegin(12));
@@ -1022,53 +1021,37 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 startTime = sdf.format(DateUtil.getCurrentTimeBegin(12));
                 endTime = sdf.format(DateUtil.getCurrentTimeEnd(12));
                 deltaTime = "60";
-                doLoadingDialog();
                 break;
             case 3:
                 //本日
                 startTime = sdf.format(DateUtil.getDayBegin());
                 endTime = sdf.format(DateUtil.getDayEnd());
                 deltaTime = "60";
-//                getData(graphicType, stationUUID, startTime, endTime);
-//                drawChart();
-                doLoadingDialog();
                 break;
             case 4:
                 //一周
                 startTime = sdf.format(DateUtil.getBeginDayOfWeek());
                 endTime = sdf.format(DateUtil.getEndDayOfWeek());
                 deltaTime = "420";  //7min
-//                getData(graphicType, stationUUID, startTime, endTime);
-//                drawChart();
-                doLoadingDialog();
                 break;
             case 5:
                 //一月
                 startTime = sdf.format(DateUtil.getBeginDayOfMonth());
                 endTime = sdf.format(DateUtil.getEndDayOfMonth());
                 deltaTime = "1800";  //30min
-//                getData(graphicType, stationUUID, startTime, endTime);
-//                drawChart();
-                doLoadingDialog();
                 break;
             case 6:
                 //一年
                 startTime = sdf.format(DateUtil.getBeginDayOfYear());
                 endTime = sdf.format(DateUtil.getEndDayOfYear());
                 deltaTime = "21900";  //365min
-//                getData(graphicType, stationUUID, startTime, endTime);
-//                drawChart();
-                doLoadingDialog();
                 break;
             case 7:
                 //自定义
                 deltaTime = DateUtil.getCustomDeltaTime(startTime,endTime);
-                LogUtil.e("选择的开始时间", startTime);
-                LogUtil.e("选择的结束时间", endTime);
-                LogUtil.e("自定义deltaTime", deltaTime);
-                doLoadingDialog();
                 break;
         }
+        doLoadingDialog();
     }
 
     public void downLoadExcel() {
@@ -1111,7 +1094,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             drawDeltaChart(spTime.getSelectedItem().toString());
             drawHeartChart(spTime.getSelectedItem().toString());
         }
-        dialog.dismiss();
+        if (loadingDialog != null)
+        {
+            loadingDialog.cancel();
+        }
     }
 
 
@@ -1123,7 +1109,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             public void onTimeSelect(Date date, View v) {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:00:00");
                 textView.setText(format.format(date));
-                Log.e("选择时间为", format.format(date));
             }
 //        }).setType(new boolean[]{true, true, true, true, true, true})// 默认全部显示
         }).setType(new boolean[]{true, true, true, true, false, false})// 年月日时
@@ -1149,7 +1134,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 attributes.height = WindowManager.LayoutParams.WRAP_CONTENT;
                 attributes.gravity = Gravity.BOTTOM;
                 dialogWindow.setAttributes(attributes);
-                dialogWindow.setWindowAnimations(R.style.dialogStyle);
+                dialogWindow.setWindowAnimations(R.style.timePickerStyle);
             }
         }
     }

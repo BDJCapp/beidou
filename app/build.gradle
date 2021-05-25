@@ -48,7 +48,7 @@ dependencies {
     implementation 'com.yinglan.scrolllayout:scrolllayout:1.0.2'
 
     /*加载动画*/
-    compile 'com.zyao89:zloading:1.0.11'
+    implementation 'com.zyao89:zloading:1.2.0'
 
     /*时间选择器*/
     implementation 'com.contrarywind:Android-PickerView:4.1.9'

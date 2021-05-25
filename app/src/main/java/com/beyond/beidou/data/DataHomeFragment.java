@@ -52,7 +52,7 @@ public class DataHomeFragment extends BaseFragment {
     private static final int LOADING = 1;
     private static final int DEVICE_LIST = 2;
     private ZLoadingDialog dialog;
-    private static volatile boolean isFinishLoading = false;
+//    private static volatile boolean isFinishLoading = false;
     private ArrayList<String> stationNameList = new ArrayList<>();
     public Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -61,16 +61,19 @@ public class DataHomeFragment extends BaseFragment {
                 case LOADING:
                     LogUtil.e("LOADING", "Loading===========");
                     setViews();
-                    while (!isFinishLoading) {
-                    }
-                    dialog.dismiss();
+//                    while (!isFinishLoading) {
+//                    }
+//                    dialog.dismiss();
                     break;
                 case DEVICE_LIST:
                     LogUtil.e("DEVICE_LIST", "DEVICE_LIST===========");
 //                    setDeviceList(((MainActivity)getActivity()).getPresentProject());
                     setDeviceList(spProjectName.getSelectedItem().toString());
-                    while (!isFinishLoading) {
-                    }
+//                    while (!isFinishLoading) {
+//                    }
+//                    dialog.dismiss();
+                    break;
+                case 200:
                     dialog.dismiss();
                     break;
             }
@@ -126,16 +129,11 @@ public class DataHomeFragment extends BaseFragment {
     }
 
     public void setViews() {
-        isFinishLoading = false;
+//        isFinishLoading = false;
         //设置Spinner
         final HashMap<String, Object> requestParams = new HashMap<>();
         requestParams.put("AccessToken", ApiConfig.getAccessToken());
         requestParams.put("SessionUUID", ApiConfig.getSessionUUID());
-
-//        dialog.setLoadingBuilder( Z_TYPE.ROTATE_CIRCLE)//设置类型
-//                .setLoadingColor(Color.BLACK)//颜色
-//                .setHintText("Loading...")
-//                .show();
 
         Api.config(ApiConfig.GET_PROJECTS, requestParams).postRequest(getActivity(), new ApiCallback() {
             @Override
@@ -162,9 +160,7 @@ public class DataHomeFragment extends BaseFragment {
                                 stationNameList.add(projectNameList.get(i));
                                 if (presentProject.equals(projectNameList.get(i))) {
                                     spProjectName.setSelection(i, true);
-                                    LogUtil.e("posotion", "11111");
                                     setDeviceList(presentProject);
-                                    LogUtil.e("posotion", "2222222");
                                 }
                             }
                         }
@@ -184,7 +180,8 @@ public class DataHomeFragment extends BaseFragment {
                         });
                     }
                 });
-                isFinishLoading = true;
+                handler.sendEmptyMessageDelayed(200,0);
+//                isFinishLoading = true;
             }
 
             @Override
@@ -196,7 +193,7 @@ public class DataHomeFragment extends BaseFragment {
     }
 
     public void setDeviceList(String selectedProject) {
-        isFinishLoading = false;
+//        isFinishLoading = false;
         HashMap<String, Object> requestParams = new HashMap<>();
         List<String> requestProjectList = new ArrayList<>();
         requestProjectList.add(selectedProject);
@@ -248,8 +245,9 @@ public class DataHomeFragment extends BaseFragment {
                                 deviceList.setLayoutManager(manager);
                             }
                         });
-                        LogUtil.e("isFIni:  ", "isFinish" + isFinishLoading);
-                        isFinishLoading = true;
+//                        LogUtil.e("isFIni:  ", "isFinish" + isFinishLoading);
+                        handler.sendEmptyMessageDelayed(200,0);
+//                        isFinishLoading = true;
                     }
 
                     @Override
