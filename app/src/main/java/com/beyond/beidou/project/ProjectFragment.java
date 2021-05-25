@@ -10,18 +10,10 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.ToggleButton;
+import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,17 +26,7 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.SDKInitializer;
-import com.baidu.mapapi.map.BaiduMap;
-import com.baidu.mapapi.map.BitmapDescriptor;
-import com.baidu.mapapi.map.BitmapDescriptorFactory;
-import com.baidu.mapapi.map.InfoWindow;
-import com.baidu.mapapi.map.MapStatusUpdate;
-import com.baidu.mapapi.map.MapStatusUpdateFactory;
-import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.Marker;
-import com.baidu.mapapi.map.MarkerOptions;
-import com.baidu.mapapi.map.MyLocationData;
-import com.baidu.mapapi.map.OverlayOptions;
+import com.baidu.mapapi.map.*;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beyond.beidou.BaseFragment;
@@ -70,12 +52,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class ProjectFragment extends BaseFragment implements View.OnClickListener {
 
@@ -83,7 +60,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private BaiduMap mBaiduMap;
     private MapView mMapView;
     private ScrollLayout mScrollLayout;
-    private RelativeLayout mRelativeLayout;
     private Spinner mSpinner;
     private List<MonitoringPoint> mPointList = new ArrayList<>();
     private MyRecycleView mRecyclerView;
@@ -193,7 +169,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     public void initView(View view) {
         mMapView = view.findViewById(R.id.bdmapView);
         mScrollLayout = view.findViewById(R.id.scrollLayout);
-        mRelativeLayout = view.findViewById(R.id.relativeLayout);
         mSpinner = view.findViewById(R.id.spinner);
         mRecyclerView = view.findViewById(R.id.recycle_view);
         mTvAmount = view.findViewById(R.id.tv_amount);
@@ -206,7 +181,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mIvRefresh = view.findViewById(R.id.iv_refresh);
 
 //        设置 setting
-        mScrollLayout.setMinOffset(200);
+        mScrollLayout.setMinOffset(300);
         mScrollLayout.setMaxOffset(800);
         mScrollLayout.setExitOffset(400);
         mScrollLayout.setIsSupportExit(true);
@@ -243,7 +218,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 showToast("没有选中任何工程");
             }
         });
-        mRelativeLayout.setOnClickListener(this);
         mBtnAmount.setOnClickListener(this);
         mBtnOnline.setOnClickListener(this);
         mBtnWarning.setOnClickListener(this);
@@ -262,6 +236,15 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 mMapView.setZoomControlsPosition(new Point((int) (width * 0.88 + 0.5f), (int) (height * 0.73 + 0.5f)));
             }
         });
+        mBaiduMap.setOnMapTouchListener(new BaiduMap.OnMapTouchListener() {
+            @Override
+            public void onTouch(MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP){
+                    mScrollLayout.scrollToExit();
+                }
+            }
+        });
+
         mBaiduMap.setMyLocationEnabled(true);
         mBaiduMap.setMaxAndMinZoomLevel(4f, 21f);
 //        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
@@ -647,9 +630,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.relativeLayout:
-                mScrollLayout.scrollToExit();
-                break;
             case R.id.btn_amount:
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
@@ -658,6 +638,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 mPointsAdapter.setData(mPointList);
                 mPointsAdapter.notifyDataSetChanged();
+                mScrollLayout.scrollToClose();
                 break;
             case R.id.btn_online:
                 mPointList.clear();
@@ -670,6 +651,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 mPointsAdapter.setData(mPointList);
                 mPointsAdapter.notifyDataSetChanged();
+                mScrollLayout.scrollToClose();
                 break;
             case R.id.btn_warning:
                 mPointList.clear();
@@ -682,6 +664,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 mPointsAdapter.setData(mPointList);
                 mPointsAdapter.notifyDataSetChanged();
+                mScrollLayout.scrollToClose();
                 break;
             case R.id.btn_error:
                 mPointList.clear();
@@ -694,6 +677,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 mPointsAdapter.setData(mPointList);
                 mPointsAdapter.notifyDataSetChanged();
+                mScrollLayout.scrollToClose();
                 break;
             case R.id.btn_offline:
                 mPointList.clear();
@@ -706,6 +690,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 mPointsAdapter.setData(mPointList);
                 mPointsAdapter.notifyDataSetChanged();
+                mScrollLayout.scrollToClose();
                 break;
             case R.id.iv_refresh:
                 doLoadingDialog();

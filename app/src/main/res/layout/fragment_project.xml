@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -9,25 +8,25 @@
         android:id="@+id/bdmapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true" />
+        />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
-    <ToggleButton
-        android:id="@+id/toggleButton"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="200dp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="5dp"
-        android:checked="true"
-        android:textSize="12sp"
-        android:textOff="卫星"
-        android:textOn="标准"
-        android:background="@drawable/tg_selector"
-        />
+        <ToggleButton
+            android:id="@+id/toggleButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="200dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="5dp"
+            android:checked="true"
+            android:textSize="12sp"
+            android:textOff="卫星"
+            android:textOn="标准"
+            android:background="@drawable/tg_selector"
+            />
 
     </RelativeLayout>
 
@@ -36,12 +35,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <androidx.cardview.widget.CardView
-        android:layout_margin="5dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:cardCornerRadius="20dp"
-        >
+        <androidx.cardview.widget.CardView
+            android:layout_margin="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardCornerRadius="20dp"
+            >
 
             <com.yinglan.scrolllayout.content.ContentScrollView
                 android:layout_width="match_parent"
@@ -194,7 +193,7 @@
 
             </com.yinglan.scrolllayout.content.ContentScrollView>
 
-    </androidx.cardview.widget.CardView>>
+        </androidx.cardview.widget.CardView>>
 
     </com.yinglan.scrolllayout.ScrollLayout>
 
