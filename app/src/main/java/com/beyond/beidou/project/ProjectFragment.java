@@ -109,6 +109,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         }
     };
 
+
     private void doLoadingDialog() {
         handler.sendEmptyMessageDelayed(LOADING, 50);
         dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
