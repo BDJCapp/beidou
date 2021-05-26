@@ -35,6 +35,7 @@ public class Api {
     public static Api api = new Api();
     public Api(){}
 
+
     public static Api config(String url, HashMap<String, Object> params){
         client = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS) //连接超时
