@@ -66,7 +66,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             service.setDownLoadExcelSuccess(new DownloadService.DownLoadExcelSuccess() {
                 @Override
                 public void showSnackBar() {
-                    Snackbar snackbar = Snackbar.make(coordinatorLayout, "导出报表成功，是否打开报表", Snackbar.LENGTH_LONG)
+                    final Snackbar snackbar = Snackbar.make(coordinatorLayout, "导出报表成功，是否打开报表", Snackbar.LENGTH_LONG)
                             .setAction("是", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {

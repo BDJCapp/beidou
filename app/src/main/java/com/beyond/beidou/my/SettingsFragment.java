@@ -1,13 +1,8 @@
 package com.beyond.beidou.my;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-
-import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-
-import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
@@ -24,6 +23,8 @@ import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.login.LoginActivity;
 import com.beyond.beidou.project.ProjectFragment;
 import com.beyond.beidou.util.LoginUtil;
+import com.zyao89.view.zloading.ZLoadingDialog;
+import com.zyao89.view.zloading.Z_TYPE;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,6 +34,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     private Button mBtnQuit;
     private ImageView mImageBack;
     private CardView mCardViewSettings;
+    private ZLoadingDialog dialog;
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -69,6 +71,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         mBtnQuit.setOnClickListener(this);
         mImageBack.setOnClickListener(this);
         mCardViewSettings.setOnClickListener(this);
+        dialog = new ZLoadingDialog(getActivity());
     }
 
     @Override
@@ -96,6 +99,11 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                     showToast("用户名未加载出来");
                     return;
                 }
+                dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
+                        .setLoadingColor(Color.BLACK)//颜色
+                        .setHintText("Loading...")
+                        .setCancelable(false)
+                        .show();
                 logout(MyFragment.userName, ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
                 break;
         }
@@ -103,7 +111,6 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
 
     public void logout(String Username, final String SessionUUID, String AccessToken)
     {
-
         LoginUtil.logout(getActivity(),Username,  SessionUUID, AccessToken, new ApiCallback() {
 
             @Override
@@ -120,6 +127,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                                 while (!LoginUtil.getAccessToken(getActivity())){}
                                 while (!LoginUtil.getSessionId(getActivity())){}
                                 Intent intent= new Intent(getActivity(), LoginActivity.class);
+                                dialog.dismiss();
                                 startActivity(intent);
                                 getActivity().finish();
                                 break;

@@ -115,6 +115,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 .setLoadingColor(Color.BLACK)//颜色
                 .setHintText("Loading...")
                 .setCancelable(false)
+                .setCanceledOnTouchOutside(false)
                 .show();
     }
 
@@ -358,6 +359,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(View view, int position) {
+                                    if(!LoginUtil.isNetworkUsable(getContext())){
+                                        return;
+                                    }
                                     switchFragment(presentProject, stationNameList, position, stationUUIDList);
                                     Log.e("project", "you click " + position);
                                     MainActivity activity = (MainActivity) getActivity();
@@ -413,7 +417,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
             @Override
             public void onFailure(Exception e) {
-
+                dialog.dismiss();
+                showToastSync("网络请求失败，请检查网络连接，稍后再试");
             }
         });
         Log.wtf("getData", "================End================");
@@ -694,7 +699,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 break;
             case R.id.iv_refresh:
                 doLoadingDialog();
-//                getData();
+//               getData();
                 break;
         }
     }

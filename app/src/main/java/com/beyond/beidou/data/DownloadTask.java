@@ -140,7 +140,7 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
             case TYPE_CANCELED:
                 listener.onCanceled();
             case TYPE_FAILED_NO_DATA:
-                listener.onFailed("当前时间段暂无报表,导出失败");
+                listener.onFailed("当前时间段暂未生成报表");
             default:
                 break;
         }

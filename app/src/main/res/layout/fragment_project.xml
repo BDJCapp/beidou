@@ -181,19 +181,13 @@
                         android:id="@+id/recycle_view"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="54dp" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="20dp"
-                        android:background="@null" />
-
+                        android:layout_marginBottom="120dp"
+                        />
                 </LinearLayout>
-
 
             </com.yinglan.scrolllayout.content.ContentScrollView>
 
-        </androidx.cardview.widget.CardView>>
+        </androidx.cardview.widget.CardView>
 
     </com.yinglan.scrolllayout.ScrollLayout>
 

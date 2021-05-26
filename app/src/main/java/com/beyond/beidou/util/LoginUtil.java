@@ -202,6 +202,7 @@ public class LoginUtil {
             public void onSuccess(String res) {
                 if (!TextUtils.isEmpty(res)) {
                     try {
+                        LogUtil.e("Token返回值",res);
                         JSONObject object = new JSONObject(res);
                         ApiConfig.setAccessToken(object.getString("AccessToken"));
                         responseCode[0] = object.getString("ResponseCode");

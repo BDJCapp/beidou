@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -36,6 +37,7 @@ public class Api {
 
     public static Api config(String url, HashMap<String, Object> params){
         client = new OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS) //连接超时
                 .build();
         requestUrl = ApiConfig.BASE_URL + url;
         mParams = params;
@@ -160,7 +162,6 @@ public class Api {
         }
         return returnValue;
     }
-
 
     public static boolean responseCodeHandling(final Context context,String responseCode)
     {

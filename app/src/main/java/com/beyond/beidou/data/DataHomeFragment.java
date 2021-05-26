@@ -30,6 +30,7 @@ import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.ProjectResponse;
 import com.beyond.beidou.util.DateUtil;
 import com.beyond.beidou.util.LogUtil;
+import com.beyond.beidou.util.LoginUtil;
 import com.google.gson.Gson;
 import com.zyao89.view.zloading.ZLoadingDialog;
 import com.zyao89.view.zloading.Z_TYPE;
@@ -52,6 +53,7 @@ public class DataHomeFragment extends BaseFragment {
     private static final int LOADING = 1;
     private static final int DEVICE_LIST = 2;
     private static final int LOADING_FINISH = 200;
+    private static final int REQUEST_FAILED = 400;
     private ZLoadingDialog dialog;
 //    private static volatile boolean isFinishLoading = false;
     private ArrayList<String> stationNameList = new ArrayList<>();
@@ -62,20 +64,17 @@ public class DataHomeFragment extends BaseFragment {
                 case LOADING:
                     LogUtil.e("LOADING", "Loading===========");
                     setViews();
-//                    while (!isFinishLoading) {
-//                    }
-//                    dialog.dismiss();
                     break;
                 case DEVICE_LIST:
                     LogUtil.e("DEVICE_LIST", "DEVICE_LIST===========");
-//                    setDeviceList(((MainActivity)getActivity()).getPresentProject());
                     setDeviceList(spProjectName.getSelectedItem().toString());
-//                    while (!isFinishLoading) {
-//                    }
-//                    dialog.dismiss();
                     break;
                 case LOADING_FINISH:
                     dialog.dismiss();
+                    break;
+                case REQUEST_FAILED:
+                    dialog.dismiss();
+                    showToast("网络请求失败，请检查网络连接，稍后再试");
                     break;
             }
         }
@@ -92,6 +91,7 @@ public class DataHomeFragment extends BaseFragment {
                 .setLoadingColor(Color.BLACK)//颜色
                 .setHintText("Loading...")
                 .setCancelable(false)
+                .setCanceledOnTouchOutside(false)
                 .show();
     }
 
@@ -121,11 +121,14 @@ public class DataHomeFragment extends BaseFragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (activity.getNowFragment() == activity.getDataFragment() && !spProjectName.getSelectedItem().toString().equals(((MainActivity)getActivity()).getPresentProject())) {
-            spProjectName.setSelection(stationNameList.indexOf(((MainActivity)getActivity()).getPresentProject()), true);
-            //设置spinner选中项
-            doLoadingDialog(2);
+        if (spProjectName.getSelectedItem() != null)
+        {
+            if (activity.getNowFragment() == activity.getDataFragment() && !spProjectName.getSelectedItem().toString().equals(((MainActivity)getActivity()).getPresentProject())) {
+                spProjectName.setSelection(stationNameList.indexOf(((MainActivity)getActivity()).getPresentProject()), true);
+                //设置spinner选中项
+                doLoadingDialog(2);
 //            setViews();
+            }
         }
     }
 
@@ -188,6 +191,7 @@ public class DataHomeFragment extends BaseFragment {
             @Override
             public void onFailure(Exception e) {
                 LogUtil.e("获取工程网络请求失败", e.getMessage());
+                handler.sendEmptyMessageDelayed(REQUEST_FAILED,0);
             }
         });
 
@@ -237,7 +241,10 @@ public class DataHomeFragment extends BaseFragment {
                                     @Override
                                     public void onItemClick(View view, int position) {
                                         // LogUtil.e("查看的监测点", deviceNames.get(position));
-                                        switchFragment(spProjectName.getSelectedItem().toString(), deviceNames, position, stationUUIDList);
+                                        if (LoginUtil.isNetworkUsable(getActivity()))
+                                        {
+                                            switchFragment(spProjectName.getSelectedItem().toString(), deviceNames, position, stationUUIDList);
+                                        }
                                     }
                                 });
                                 deviceList.setAdapter(adapter);
@@ -252,7 +259,7 @@ public class DataHomeFragment extends BaseFragment {
 
                     @Override
                     public void onFailure(Exception e) {
-
+                        handler.sendEmptyMessageDelayed(REQUEST_FAILED,0);
                     }
                 });
     }

@@ -30,6 +30,7 @@ import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.GNSSFilterInfoResponse;
 import com.beyond.beidou.util.DateUtil;
 import com.beyond.beidou.util.LogUtil;
+import com.beyond.beidou.util.LoginUtil;
 import com.bigkoo.pickerview.builder.TimePickerBuilder;
 import com.bigkoo.pickerview.listener.OnTimeSelectListener;
 import com.bigkoo.pickerview.view.TimePickerView;
@@ -92,7 +93,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private MyDialog timePicker;
     private int lastSelectedTimePosition;
 
-
     private static final int LOADING = 1;
     private static final int GET_DATA_SUCCESS = 200;
     private ZLoadingDialog loadingDialog;
@@ -120,6 +120,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         loadingDialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                 .setLoadingColor(Color.BLACK)//颜色
                 .setHintText("Loading...")
+                .setCanceledOnTouchOutside(false)
                 .show();
         handler.sendEmptyMessageDelayed(LOADING, 0);
     }
@@ -216,56 +217,59 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         spTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, final int position, long id) {
-                if (isFirstTimeSelectTime) {
-                    isFirstTimeSelectTime = false;
-                    return;
-                }
+                if (LoginUtil.isNetworkUsable(getActivity()))
+                {
+                    if (isFirstTimeSelectTime) {
+                        isFirstTimeSelectTime = false;
+                        return;
+                    }
 
-                if (parent.getSelectedItem().toString().equals("自定义时间")) {
-                    timePicker.setOnClickBottomListener(new MyDialog.OnClickBottomListener() {
-                        @Override
-                        public void onPositiveClick() {
-                            startTime = timePicker.getStartTime();
-                            endTime = timePicker.getEndTime();
-                            if (startTime.equals("") | endTime.equals("") | DateUtil.calcHourOffset(startTime,endTime) <= 0)
-                            {
-                                showToast("请选择正确的时间区间！");
+                    if (parent.getSelectedItem().toString().equals("自定义时间")) {
+                        timePicker.setOnClickBottomListener(new MyDialog.OnClickBottomListener() {
+                            @Override
+                            public void onPositiveClick() {
+                                startTime = timePicker.getStartTime();
+                                endTime = timePicker.getEndTime();
+                                if (startTime.equals("") | endTime.equals("") | DateUtil.calcHourOffset(startTime,endTime) <= 0)
+                                {
+                                    showToast("请选择正确的时间区间！");
+                                }
+                                else if (DateUtil.calcHourOffset(startTime,endTime) >= 8784)
+                                {
+                                    showToast("最大查询间隔为两年，请重新选择");
+                                }
+                                else {
+                                    timePicker.dismiss();
+                                    refresh();
+                                    lastSelectedTimePosition = position;
+                                }
                             }
-                            else if (DateUtil.calcHourOffset(startTime,endTime) >= 8784)
-                            {
-                                showToast("最大查询间隔为两年，请重新选择");
-                            }
-                            else {
+
+                            @Override
+                            public void onNegativeClick() {
                                 timePicker.dismiss();
-                                refresh();
-                                lastSelectedTimePosition = position;
+                                if (lastSelectedTimePosition != 7)
+                                {
+                                    spTime.setSelection(lastSelectedTimePosition);
+                                }
                             }
-                        }
-
-                        @Override
-                        public void onNegativeClick() {
-                            timePicker.dismiss();
-                            if (lastSelectedTimePosition != 7)
-                            {
-                                spTime.setSelection(lastSelectedTimePosition);
+                        });
+                        timePicker.setOnClickTextViewListener(new MyDialog.OnClickTextViewListener() {
+                            @Override
+                            public void onStartTimeClick(View v) {
+                                timePicker((TextView) v);
                             }
-                        }
-                    });
-                    timePicker.setOnClickTextViewListener(new MyDialog.OnClickTextViewListener() {
-                        @Override
-                        public void onStartTimeClick(View v) {
-                            timePicker((TextView) v);
-                        }
 
-                        @Override
-                        public void onEndTimeClick(View v) {
-                            timePicker((TextView) v);
-                        }
-                    });
-                    timePicker.show();
-                }else {
-                    refresh();
-                    lastSelectedTimePosition = position;
+                            @Override
+                            public void onEndTimeClick(View v) {
+                                timePicker((TextView) v);
+                            }
+                        });
+                        timePicker.show();
+                    }else {
+                        refresh();
+                        lastSelectedTimePosition = position;
+                    }
                 }
             }
 
@@ -278,7 +282,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         spDevice.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                refresh();
+                if (LoginUtil.isNetworkUsable(getActivity()))
+                {
+                    refresh();
+                }
             }
 
             @Override
@@ -290,7 +297,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mDownLoadExcel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                downLoadExcel();
+                if (LoginUtil.isNetworkUsable(getActivity()))
+                {
+                    downLoadExcel();
+                }
+
             }
         });
 
@@ -1056,8 +1067,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
     public void downLoadExcel() {
         //获取URL
-        LogUtil.e("导出报表开始时间", startTime);
-        LogUtil.e("导出报表结束时间", endTime);
         FormBody body = new FormBody.Builder()
                 .add("AccessToken", ApiConfig.getAccessToken())
                 .add("SessionUUID", ApiConfig.getSessionUUID())

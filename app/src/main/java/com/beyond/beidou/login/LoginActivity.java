@@ -192,6 +192,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                         .setLoadingColor(Color.BLACK)//颜色
                         .setHintText("Loading...")
+                        .setCanceledOnTouchOutside(false)
                         .show();
                 handler.sendEmptyMessageDelayed(LOGIN,0);
                 break;
