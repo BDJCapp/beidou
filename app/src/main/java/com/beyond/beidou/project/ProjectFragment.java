@@ -73,6 +73,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private TextView mTvTime;
     private ImageView mIvRefresh;
     private ToggleButton mToggleButton;
+    private ImageView mIvSign;
 
     private List<ProjectResponse.ProjectListBean> projectList = new ArrayList<>();
     private ProjectResponse.ProjectListBean.ProjectStationStatusBean projectStationStatus;
@@ -181,14 +182,30 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mBtnOffline = view.findViewById(R.id.btn_offline);
         mTvTime = view.findViewById(R.id.tv_time);
         mIvRefresh = view.findViewById(R.id.iv_refresh);
+        mIvSign = view.findViewById(R.id.iv_minus);
 
 //        设置 setting
         mScrollLayout.setMinOffset(300);
         mScrollLayout.setMaxOffset(800);
         mScrollLayout.setExitOffset(400);
         mScrollLayout.setIsSupportExit(true);
-        mScrollLayout.setAllowHorizontalScroll(true);
         mScrollLayout.setToOpen();
+//        mScrollLayout.setDuplicateParentStateEnabled(true);
+//        mScrollLayout.setHasTransientState(true);
+//        mScrollLayout.setActivated(true);
+
+        mScrollLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if(oldScrollY > scrollY && mScrollLayout.getScrollY() == 800 - ScreenUtil.getScreenHeight(getActivity()) || oldScrollY < scrollY && mScrollLayout.getScrollY() == 800 - ScreenUtil.getScreenHeight(getActivity())){
+                    mIvSign.setImageResource(R.drawable.ic_minus);
+                }else if(oldScrollY > scrollY && mScrollLayout.getScrollY() == 400 - ScreenUtil.getScreenHeight(getActivity())){
+                    mIvSign.setImageResource(R.drawable.ic_more);
+                }else if(oldScrollY < scrollY && mScrollLayout.getScrollY() == -300){
+                    mIvSign.setImageResource(R.drawable.ic_less);
+                }
+            }
+        });
 
         mSpinner.setDropDownVerticalOffset(ScreenUtil.dip2px(getContext(), 30f));
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -243,6 +260,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             public void onTouch(MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_UP){
                     mScrollLayout.scrollToExit();
+                    mIvSign.setImageResource(R.drawable.ic_more);
                 }
             }
         });

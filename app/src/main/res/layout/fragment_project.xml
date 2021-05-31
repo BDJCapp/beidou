@@ -89,8 +89,7 @@
                                 android:id="@+id/tv_amount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:maxLines="1"
-                                android:text="0" />
+                                android:maxLines="1" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -103,8 +102,7 @@
                                 android:id="@+id/tv_time"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:maxLines="1"
-                                android:text="_????-??-??-??:??:??" />
+                                android:maxLines="1" />
                         </LinearLayout>
 
                         <ImageView
@@ -133,7 +131,7 @@
                             android:layout_weight="1"
                             android:background="@drawable/btn_amount_selector"
                             android:gravity="center"
-                            android:text="总数：\n?" />
+                            android:text="总数：\n" />
 
                         <Button
                             android:id="@+id/btn_online"
@@ -143,7 +141,7 @@
                             android:layout_weight="1"
                             android:background="@drawable/btn_online_selector"
                             android:gravity="center"
-                            android:text="在线：\n?" />
+                            android:text="在线：\n" />
 
                         <Button
                             android:id="@+id/btn_warning"
@@ -153,7 +151,7 @@
                             android:layout_weight="1"
                             android:background="@drawable/btn_warning_selector"
                             android:gravity="center"
-                            android:text="警告：\n?" />
+                            android:text="警告：\n" />
 
                         <Button
                             android:id="@+id/btn_error"
@@ -163,7 +161,7 @@
                             android:layout_weight="1"
                             android:background="@drawable/btn_error_selector"
                             android:gravity="center"
-                            android:text="故障：\n?" />
+                            android:text="故障：\n" />
 
                         <Button
                             android:id="@+id/btn_offline"
@@ -173,7 +171,7 @@
                             android:layout_weight="1"
                             android:background="@drawable/btn_offline_selector"
                             android:gravity="center"
-                            android:text="离线：\n?" />
+                            android:text="离线：\n" />
 
                     </LinearLayout>
 

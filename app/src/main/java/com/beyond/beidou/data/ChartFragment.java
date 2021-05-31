@@ -794,7 +794,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     }
 
     public void requestChartDataSync(final String graphicType, String stationUUID, final String startTime, String endTime, String deltaTime) {
-        LogUtil.e("deltaTime", deltaTime);
         FormBody getChartDataBody = new FormBody.Builder()
                 .add("AccessToken", ApiConfig.getAccessToken())
                 .add("SessionUUID", ApiConfig.getSessionUUID())

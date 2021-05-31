@@ -9,14 +9,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
-import com.beyond.beidou.util.LogUtil;
-import com.beyond.beidou.util.LoginUtil;
-
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * @author: 李垚
