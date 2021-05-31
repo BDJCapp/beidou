@@ -243,6 +243,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
      */
     @Override
     public void onBackPressed() {
+        if (isExit)
+        {
+            finish();
+            return;
+        }
         if (nowFragment == projectFragment || nowFragment == dataFragment || nowFragment == warningFragment || nowFragment == myFragment) {
             if (!isExit) {
                 Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
