@@ -31,7 +31,7 @@
                 android:text="密码登录"
                 android:textColor="@color/main_blue"
                 android:textSize="20sp"
-                android:textStyle="bold"></TextView>
+                android:textStyle="bold"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -46,7 +46,7 @@
                     android:layout_marginLeft="20dp"
                     android:text="账号 :   "
                     android:textColor="@color/text_black"
-                    android:textSize="15sp"></TextView>
+                    android:textSize="15sp"/>
 
                 <EditText
                     android:id="@+id/et_loginAccount"
@@ -56,7 +56,7 @@
                     android:layout_marginEnd="10dp"
                     android:background="@null"
                     android:hint="请输入账号/手机号码/邮箱"
-                    android:textSize="15sp"></EditText>
+                    android:textSize="15sp"/>
 
             </LinearLayout>
 
@@ -80,7 +80,7 @@
                     android:layout_marginLeft="20dp"
                     android:text="密码 :   "
                     android:textColor="@color/text_black"
-                    android:textSize="15sp"></TextView>
+                    android:textSize="15sp"/>
 
                 <EditText
                     android:id="@+id/et_loginCheck"
@@ -109,6 +109,39 @@
                         android:src="@drawable/ic_pwd_invisible" />
                 </LinearLayout>
 
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="3px"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="2dp"
+                android:background="@color/under_line" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text="平台 :   "
+                    android:textColor="@color/text_black"
+                    android:textSize="15sp"/>
+
+                <Spinner
+                    android:id="@+id/spinner_platform"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:entries="@array/platform"
+                    android:overlapAnchor="false"
+                    android:spinnerMode="dropdown"
+                    android:theme="@style/spinner_style" />
 
             </LinearLayout>
 

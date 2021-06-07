@@ -267,7 +267,7 @@ public class DateUtil {
                 timeSpace = 6;
             } else if (interval <= 7 * 24 * 60 * 60 * 1000) {
                 timeSpace = 12;
-            } else if (interval / (60 * 60 * 1000) <= 30 * 24) {
+            } else if (interval / (60 * 60 * 1000) <= 31 * 24) {
                 return getCustomGTWeekXAxis(startDate, endDate);
             } else if (interval / (60 * 60 * 1000) <= 180 * 24) {
                 return getCustomGTMonthXAxis(startDate, endDate);

@@ -87,8 +87,7 @@ public class FileUtil {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 LogUtil.e("该文件是否存在",fileIsExist(fileUrl) + " ");
 
-                intent.setDataAndType(uri, "application/vnd.ms-excel");
-
+                intent.setDataAndType(uri, "application/vnd.ms-excel");  //.xls
                 context.startActivity(intent);
             } catch (Exception e) {
                 //没有安装第三方的软件会提示

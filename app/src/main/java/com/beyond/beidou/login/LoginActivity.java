@@ -15,9 +15,11 @@ import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +58,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private ImageView imgVisible;
     private Button btnLogin;
     private TextView tvForgetPwd;
+    private Spinner spPlatform;
 
     private final int QUITAPP = 0;
     private final int LOGIN = 1;
@@ -107,6 +110,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     dialog.dismiss();
                     finish();
                     break;
+                case 111:
+                    reload();
+                    break;
             }
         }
     };
@@ -140,6 +146,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         imgVisible = findViewById(R.id.img_visiblePwd);
         btnLogin = findViewById(R.id.btn_login);
         tvForgetPwd = findViewById(R.id.tv_forgetPwd);
+        spPlatform = findViewById(R.id.spinner_platform);
         imgVisible.setOnClickListener(this);
         btnLogin.setOnClickListener(this);
 
@@ -167,6 +174,32 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 }
             }
         });
+
+        spPlatform.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position){
+                    case 0:
+                        ApiConfig.setBaseUrl(ApiConfig.FIRST_BASE_URL);
+                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
+                        break;
+                    case 1:
+                        ApiConfig.setBaseUrl(ApiConfig.SECOND_BASE_URL);
+                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
+                        break;
+                    case 2:
+                        ApiConfig.setBaseUrl(ApiConfig.THIRD_BASE_URL);
+                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
     }
 
     @Override
@@ -186,14 +219,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 {
                     break;
                 }
-                Log.e("token为", ApiConfig.getAccessToken());
-                Log.e("SessionUUID为",  ApiConfig.getSessionUUID());
                 dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                         .setLoadingColor(Color.BLACK)//颜色
                         .setHintText("Loading...")
                         .setCanceledOnTouchOutside(false)
                         .show();
-                handler.sendEmptyMessageDelayed(LOGIN,0);
+//                handler.sendEmptyMessageDelayed(LOGIN,0);
+                handler.sendEmptyMessageDelayed(111,0);
+
                 break;
         }
     }
@@ -226,6 +259,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         loginUtil.loginByPwd(LoginActivity.this,username, encodePwd, SessionUUID, AccessToken, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
+                LogUtil.e("res",res);
                 if (!TextUtils.isEmpty(res)) {
                     try {
                         Message message = new Message();
@@ -386,5 +420,53 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             Toast.makeText(getApplicationContext(),"密码输入有误，请重新输入",Toast.LENGTH_SHORT).show();
         }
         return isCorrect;
+    }
+
+    public void reload()
+    {
+        if (LoginUtil.isNetworkUsable(this))
+        {
+            new Thread(new Runnable()
+            {
+                @Override
+                public void run() {
+                    Thread getTokenThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            while (!LoginUtil.getAccessToken(LoginActivity.this)){
+                                LogUtil.e("LoginActivity initData()","循环请求Token");
+                            }
+                            LoginUtil.upDateToken(getApplicationContext());
+                            LogUtil.e("LoginActivity 成功获取Token", ApiConfig.getAccessToken());
+                        }
+                    });
+                    getTokenThread.start();
+
+                    try {
+                        getTokenThread.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    Thread getSessionThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            while (!LoginUtil.getSessionId(LoginActivity.this)){
+                                LogUtil.e("LoginActivity initData()","循环请求Session");
+                            }
+                            LogUtil.e("LoginActivity 成功获取Session", ApiConfig.getSessionUUID());
+                        }
+                    });
+                    getSessionThread.start();
+
+                    try {
+                        getSessionThread.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    handler.sendEmptyMessageDelayed(LOGIN,0);
+                }
+            }).start();
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.beyond.beidou.project;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -109,6 +110,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
         }
     };
+    private Activity mMainActivity = null;
+    private boolean isMatch = false;
 
 
     private void doLoadingDialog() {
@@ -124,6 +127,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        mMainActivity = getActivity();
         View view = inflater.inflate(initLayout(), container, false);
         initView(view);
         return view;
@@ -161,11 +165,11 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     public static ProjectFragment newInstance() {
         ProjectFragment fragment = new ProjectFragment();
         return fragment;
-        
+
     }
 
     public int initLayout() {
-        SDKInitializer.initialize(getContext().getApplicationContext());
+        SDKInitializer.initialize(mMainActivity.getApplicationContext());
         return R.layout.fragment_project;
     }
 
@@ -197,17 +201,17 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mScrollLayout.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
             public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                if(oldScrollY > scrollY && mScrollLayout.getScrollY() == 800 - ScreenUtil.getScreenHeight(getActivity()) || oldScrollY < scrollY && mScrollLayout.getScrollY() == 800 - ScreenUtil.getScreenHeight(getActivity())){
-                    mIvSign.setImageResource(R.drawable.ic_minus);
-                }else if(oldScrollY > scrollY && mScrollLayout.getScrollY() == 400 - ScreenUtil.getScreenHeight(getActivity())){
-                    mIvSign.setImageResource(R.drawable.ic_more);
-                }else if(oldScrollY < scrollY && mScrollLayout.getScrollY() == -300){
+                if (-300 >= scrollY && scrollY > 800 - ScreenUtil.getScreenHeight(mMainActivity)) {
                     mIvSign.setImageResource(R.drawable.ic_less);
+                } else if (400 - ScreenUtil.getScreenHeight(mMainActivity) <= scrollY && scrollY < 800 - ScreenUtil.getScreenHeight(mMainActivity)) {
+                    mIvSign.setImageResource(R.drawable.ic_more);
+                } else if (scrollY == 800 - ScreenUtil.getScreenHeight(mMainActivity)) {
+                    mIvSign.setImageResource(R.drawable.ic_minus);
                 }
             }
         });
 
-        mSpinner.setDropDownVerticalOffset(ScreenUtil.dip2px(getContext(), 30f));
+        mSpinner.setDropDownVerticalOffset(ScreenUtil.dip2px(mMainActivity, 30f));
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -244,8 +248,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mBtnOffline.setOnClickListener(this);
         mIvRefresh.setOnClickListener(this);
 
-        final int width = ScreenUtil.getScreenXRatio(getActivity());
-        final int height = ScreenUtil.getScreenXRatio(getActivity());
+        final int width = ScreenUtil.getScreenXRatio(mMainActivity);
+        final int height = ScreenUtil.getScreenXRatio(mMainActivity);
 
         mBaiduMap = mMapView.getMap();
         mBaiduMap.setOnMapLoadedCallback(new BaiduMap.OnMapLoadedCallback() {
@@ -258,9 +262,10 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mBaiduMap.setOnMapTouchListener(new BaiduMap.OnMapTouchListener() {
             @Override
             public void onTouch(MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_UP){
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     mScrollLayout.scrollToExit();
                     mIvSign.setImageResource(R.drawable.ic_more);
+                    mBaiduMap.hideInfoWindow();
                 }
             }
         });
@@ -268,7 +273,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mBaiduMap.setMyLocationEnabled(true);
         mBaiduMap.setMaxAndMinZoomLevel(4f, 21f);
 //        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
-        dialog = new ZLoadingDialog(getActivity());
+        dialog = new ZLoadingDialog(mMainActivity);
         mToggleButton = view.findViewById(R.id.toggleButton);
         mToggleButton.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
             @Override
@@ -307,13 +312,16 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         projectList.clear();
         mParams.put("AccessToken", ApiConfig.getAccessToken());
         mParams.put("SessionUUID", ApiConfig.getSessionUUID());
-        Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(getContext(), new ApiCallback() {
+        Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(mMainActivity, new ApiCallback() {
             @Override
             public void onSuccess(final String res) {
                 Gson gson = new Gson();
                 ProjectResponse response = gson.fromJson(res, ProjectResponse.class);
                 if (Integer.parseInt(response.getResponseCode()) == 200) {
                     projectList = response.getProjectList();
+                    if (projectList == null) {
+                        back2Login();
+                    }
                     for (ProjectResponse.ProjectListBean project : projectList) {
                         //项目名为空则直接跳过
                         if (project.getProjectName().equals("")) {
@@ -322,10 +330,10 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                         projectNameList.add(project.getProjectName());
                     }
                     Log.wtf("projectNameList", projectNameList.toString());
-                    getActivity().runOnUiThread(new Runnable() {
+                    mMainActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(), R.layout.item_select, projectNameList);
+                            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(mMainActivity, R.layout.item_select, projectNameList);
                             arrayAdapter.setDropDownViewResource(R.layout.item_drop);
                             mSpinner.setAdapter(arrayAdapter);
                             ProjectFragment.isFirstBindListener = true;
@@ -337,6 +345,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                 mMainActivity.setPresentProject(presentProject);
                                 for (ProjectResponse.ProjectListBean project : projectList) {
                                     if (project.getProjectName().equals(presentProject)) {
+                                        Log.e("匹配成功", "Position 11111111111");
                                         projectStationStatus = project.getProjectStationStatus();
                                         projectStationList = project.getStationList();
                                         for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
@@ -348,37 +357,62 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             } else {
                                 for (ProjectResponse.ProjectListBean project : projectList) {
                                     if (project.getProjectName().equals(presentProject)) {
+                                        Log.e("匹配成功", "Position 22222222222");
                                         projectStationStatus = project.getProjectStationStatus();
                                         projectStationList = project.getStationList();
                                         mSpinner.setSelection(projectList.indexOf(project), true);
                                         for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
                                             stationNameList.add(station.getStationName());
                                             stationUUIDList.add(station.getStationUUID());
-
+                                        }
+                                        isMatch = true;
+                                    }
+                                }
+                                if(!isMatch){
+                                    presentProject = mSpinner.getSelectedItem().toString();
+                                    MainActivity mMainActivity = (MainActivity) getActivity();
+                                    mMainActivity.setPresentProject(presentProject);
+                                    for (ProjectResponse.ProjectListBean project : projectList) {
+                                        if (project.getProjectName().equals(presentProject)) {
+                                            Log.e("匹配成功", "Position 333333333");
+                                            projectStationStatus = project.getProjectStationStatus();
+                                            projectStationList = project.getStationList();
+                                            for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
+                                                stationNameList.add(station.getStationName());
+                                                stationUUIDList.add(station.getStationUUID());
+                                            }
                                         }
                                     }
+                                    isMatch = false;
                                 }
                             }
                             Log.e("project", "present project is " + presentProject);
-                            mTvAmount.setText(String.valueOf(projectStationStatus.getTotal()));
-                            mBtnAmount.setText("总数\n" + projectStationStatus.getTotal());
-                            mBtnOnline.setText("在线\n" + projectStationStatus.getOnline());
-                            mBtnWarning.setText("警告\n" + projectStationStatus.getWarning());
-                            mBtnError.setText("故障\n" + projectStationStatus.getError());
-                            mBtnOffline.setText("离线\n" + projectStationStatus.getOffline());
 
-                            mLocationClient = new LocationClient(getContext().getApplicationContext());
+                            if (projectStationStatus == null) {
+                                back2Login();
+                                Log.e("projectStationStatus", "nullllllllll");
+                                return;
+                            } else {
+                                mTvAmount.setText(String.valueOf(projectStationStatus.getTotal()));
+                                mBtnAmount.setText("总数\n" + projectStationStatus.getTotal());
+                                mBtnOnline.setText("在线\n" + projectStationStatus.getOnline());
+                                mBtnWarning.setText("警告\n" + projectStationStatus.getWarning());
+                                mBtnError.setText("故障\n" + projectStationStatus.getError());
+                                mBtnOffline.setText("离线\n" + projectStationStatus.getOffline());
+                            }
+
+                            mLocationClient = new LocationClient(mMainActivity.getApplicationContext());
                             mLocationClient.registerLocationListener(new MyLocationListener());
                             requestLocation();    //请求百度地图位置
                             initStationList();    //初始化监测点数据
-                            layoutManager = new LinearLayoutManager(getContext());
+                            layoutManager = new LinearLayoutManager(mMainActivity);
                             mRecyclerView.setLayoutManager(layoutManager);
                             mPointsAdapter = new MonitoringPointsAdapter(mPointList);
                             mRecyclerView.setAdapter(mPointsAdapter);
                             mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(View view, int position) {
-                                    if(!LoginUtil.isNetworkUsable(getContext())){
+                                    if (!LoginUtil.isNetworkUsable(mMainActivity)) {
                                         return;
                                     }
                                     switchFragment(presentProject, stationNameList, position, stationUUIDList);
@@ -395,7 +429,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
                                 @Override
                                 public boolean onMarkerClick(Marker marker) {
-                                    View window = LayoutInflater.from(getActivity()).inflate(R.layout.popupwindow_showinfo, null, false);
+                                    View window = LayoutInflater.from(mMainActivity).inflate(R.layout.popupwindow_showinfo, null, false);
                                     TextView tv_name, tv_type;
                                     LinearLayout window_layout;
                                     window_layout = window.findViewById(R.id.window_layout);
@@ -421,17 +455,11 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 //其他返回码重新登录
                 else {
-                    showToastSync("未请求到数据，请重新登录！");
-                    isReLogin = true;
-//                    ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
-                    while (!LoginUtil.getAccessToken(getContext()) && !LoginUtil.getSessionId(getContext())) {
-                    }
-                    Intent intent = new Intent(getActivity(), LoginActivity.class);
-                    startActivity(intent);
-                    getActivity().finish();
+                    back2Login();
+//                    return;
                 }
 //                isFinishLoading = true;
-                handler.sendEmptyMessageDelayed(LOADING_FINISH,0);
+                handler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
             }
 
             @Override
@@ -440,7 +468,32 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 showToastSync("网络请求失败，请检查网络连接，稍后再试");
             }
         });
+
         Log.wtf("getData", "================End================");
+    }
+
+    private void back2Login() {
+        showToast("未请求到数据，请重新登录！");
+        isReLogin = true;
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.e("back2Login", "position1");
+                LoginUtil.getAccessToken(mMainActivity);
+                Log.e("back2Login", "position2");
+                LoginUtil.getSessionId(mMainActivity);
+                Log.e("back2Login", "position3");
+            }
+        });
+        try {
+            thread.join();
+            thread.start();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Intent intent = new Intent(mMainActivity, LoginActivity.class);
+        startActivity(intent);
+        mMainActivity.finish();
     }
 
     //获取网络时间，待定
@@ -462,7 +515,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     calendar.setTimeInMillis(ld);
                     netTime = formatter.format(calendar.getTime());
                     Log.e("project", "time ld " + netTime);
-                    getActivity().runOnUiThread(new Runnable() {
+                    mMainActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             mTvTime.setText(netTime);
@@ -789,11 +842,11 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         if (mLocationClient != null) {
             mLocationClient.stop();
         }
-        if(mBaiduMap != null){
+        if (mBaiduMap != null) {
             mBaiduMap.setMyLocationEnabled(false);
             mBaiduMap.clear();
         }
-        if(mMapView != null){
+        if (mMapView != null) {
             mMapView.onDestroy();
             mMapView = null;
         }
