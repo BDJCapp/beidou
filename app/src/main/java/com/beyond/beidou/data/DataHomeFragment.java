@@ -209,7 +209,6 @@ public class DataHomeFragment extends BaseFragment {
         SimpleDateFormat sdfTwo = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
         LogUtil.e("请求工程数据开始时间", sdfTwo.format(System.currentTimeMillis()));
 
-
         Api.config(ApiConfig.GET_PROJECTS, requestParams)
                 .postRequest(getActivity(), new ApiCallback() {
                     @Override

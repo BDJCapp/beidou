@@ -37,6 +37,7 @@ public abstract class BaseFragment extends Fragment {
         activity = getActivity();
     }
 
+
     public void showToast(String msg){
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
     }

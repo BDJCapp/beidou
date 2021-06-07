@@ -224,6 +224,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                         return;
                     }
 
+
                     if (parent.getSelectedItem().toString().equals("自定义时间")) {
                         timePicker.setOnClickBottomListener(new MyDialog.OnClickBottomListener() {
                             @Override
@@ -1132,6 +1133,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) pvTime.getDialogContainerLayout().getLayoutParams();
         layoutParams.leftMargin = 0;
         layoutParams.rightMargin = 0;
+
         pvTime.getDialogContainerLayout().setLayoutParams(layoutParams);
         if (dialog != null) {
             Window dialogWindow = dialog.getWindow();

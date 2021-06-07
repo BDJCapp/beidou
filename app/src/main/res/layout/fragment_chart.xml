@@ -38,14 +38,17 @@
 
                 <TextView
                     android:id="@+id/tv_load_excel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="60dp"
+                    android:layout_height="30dp"
                     android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
+                    android:layout_marginRight="0dp"
+                    android:background="@drawable/button_shape"
                     android:text="@string/loadExcel"
-                    android:textColor="@color/text_black"
+                    android:gravity="center"
+                    android:textColor="@color/main_white"
                     android:textSize="13sp" />
             </RelativeLayout>
+
         </androidx.appcompat.widget.Toolbar>
 
     <View

@@ -36,15 +36,15 @@
                 />
 
             <Button
+                android:id="@+id/btn_confirm"
                 android:layout_width="80dp"
                 android:layout_height="35dp"
-                android:id="@+id/btn_confirm"
                 android:layout_alignParentEnd="true"
-                android:text="完成"
-                android:textSize="18sp"
+                android:layout_marginEnd="0dp"
                 android:background="@drawable/button_shape"
+                android:text="完成"
                 android:textColor="@color/main_white"
-                />
+                android:textSize="18sp" />
 
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>

@@ -19,8 +19,12 @@ public class ApiConfig {
     public static void setSessionUUID(String sessionUUID) {
         SessionUUID = sessionUUID;
     }
-//    public static final String BASE_URL = "http://172.18.7.86/dist/API/";
-    public static final String BASE_URL = "http://39.96.80.62/bdjc/API/";
+
+    public static final String FIRST_BASE_URL = "http://39.107.99.169/bdjc/API/";  //第一平台，南京
+    public static final String SECOND_BASE_URL = "http://39.96.80.62/bdjc/API/";   //第二平台，北京和平里，实验室
+    public static final String THIRD_BASE_URL = "http://172.18.7.86/dist/API/";    //第三平台，测试
+    public static String BASE_URL = SECOND_BASE_URL;
+
     public static String SessionUUID = "00000000-0000-0000-0000-000000000000";
     public static final String GrantType = "BDJC";
     public static final String AppID = "UzHky82L6hOKCAsI5MBQYImw";
@@ -35,4 +39,8 @@ public class ApiConfig {
     public static final String LOGOUT = "doLogout.php";
     public static final String SET_PASSWORD = "setPassword.php";
     public static final String GET_STATION_REPORT = "getStationReport.php";
+
+    public static void setBaseUrl(String baseUrl) {
+        BASE_URL = baseUrl;
+    }
 }
