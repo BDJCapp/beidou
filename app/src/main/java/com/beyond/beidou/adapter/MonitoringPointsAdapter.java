@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,6 +23,7 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
     private static OnItemClickListener mOnItemClickListener;
 
     static class ViewHolder extends RecyclerView.ViewHolder{
+        LinearLayout mLl_item;
         ImageView mIv_status;
         TextView mTv_name;
         TextView mTv_type;
@@ -29,6 +32,7 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
 
         public ViewHolder(View view){
             super(view);
+            mLl_item = view.findViewById(R.id.ll_item);
             mIv_status = view.findViewById(R.id.iv_status);
             mTv_name = view.findViewById(R.id.tv_name);
             mTv_type = view.findViewById(R.id.tv_type);
@@ -83,7 +87,7 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
         if(mOnItemClickListener == null){
             Log.e("pointAdapter", "mOnItemClickListener is null");
         }
-        holder.mTv_data.setOnClickListener(new View.OnClickListener() {
+        holder.mLl_item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mOnItemClickListener == null) {

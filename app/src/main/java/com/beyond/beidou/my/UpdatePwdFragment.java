@@ -1,5 +1,6 @@
 package com.beyond.beidou.my;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -46,6 +47,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
     private EditText mEtNewPwd;
     private EditText mEtConfirmPwd;
     private HashMap<String, Object> mParams = new HashMap<String, Object>();
+    private Activity mMainActivity = null;
 
     public UpdatePwdFragment() {
     }
@@ -63,6 +65,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        mMainActivity = getActivity();
         View view = inflater.inflate(initLayout(), container, false);
         initView(view);
         return view;
@@ -86,7 +89,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        MainActivity activity = (MainActivity) getActivity();
+        final MainActivity activity = (MainActivity) getActivity();
         String originalPwd = mEtOriginalPwd.getText().toString();
         String newPwd = mEtNewPwd.getText().toString();
         String confirmPwd = mEtConfirmPwd.getText().toString();
@@ -128,15 +131,15 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                 } else {
                     mParams.put("AccessToken", ApiConfig.getAccessToken());
                     mParams.put("SessionUUID", ApiConfig.getSessionUUID());
-                    mParams.put("OldPassword", LoginUtil.DES3Encode(originalPwd,ApiConfig.getSessionUUID()));
-                    mParams.put("NewPassword", LoginUtil.DES3Encode(newPwd,ApiConfig.getSessionUUID()));
+                    mParams.put("OldPassword", LoginUtil.DES3Encode(originalPwd, ApiConfig.getSessionUUID()));
+                    mParams.put("NewPassword", LoginUtil.DES3Encode(newPwd, ApiConfig.getSessionUUID()));
                     Api.config(ApiConfig.SET_PASSWORD, mParams).postRequest(getContext(), new ApiCallback() {
                         @Override
                         public void onSuccess(String res) {
                             Gson gson = new Gson();
                             LoginResponse response = gson.fromJson(res, LoginResponse.class);
                             if (Integer.parseInt(response.getResponseCode()) == 400412) {
-                                getActivity().runOnUiThread(new Runnable() {
+                                mMainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         AlertDialog.Builder builder;
@@ -150,8 +153,8 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                         builder.create().show();
                                     }
                                 });
-                            } else if (Integer.parseInt(response.getResponseCode()) == 200) {
-                                getActivity().runOnUiThread(new Runnable() {
+                            }else if (Integer.parseInt(response.getResponseCode()) == 200) {
+                                mMainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         AlertDialog.Builder builder;
@@ -185,23 +188,22 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
 
     private void logOut(String userName, String AccessToken, String SessionUUID) {
         Log.e("logout  ", "position 2");
-        LoginUtil.logout(getActivity(),userName, SessionUUID, AccessToken, new ApiCallback() {
+        LoginUtil.logout(mMainActivity, userName, SessionUUID, AccessToken, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
                 try {
+
                     JSONObject object = new JSONObject(res);
                     String responseCode = object.getString("ResponseCode");
-                    Log.e("log out response ", "logggggggg outtttt   " + responseCode);
-                    switch (responseCode) {
-                        case "205":
-                            ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
-                            while (!LoginUtil.getAccessToken(getActivity())) {}
-                            while (!LoginUtil.getSessionId(getActivity())){}
-                            Intent intent = new Intent(getActivity(), LoginActivity.class);
-                            startActivity(intent);
-                            getActivity().finish();
-                            break;
+                    Log.e("log out response ", responseCode);
+                    ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
+                    while (!LoginUtil.getAccessToken(mMainActivity)) {
                     }
+                    while (!LoginUtil.getSessionId(mMainActivity)) {
+                    }
+                    Intent intent = new Intent(mMainActivity, LoginActivity.class);
+                    startActivity(intent);
+                    mMainActivity.finish();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -212,31 +214,6 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
 
             }
 
-/*            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                try {
-                    String responseText = response.body().string();
-                    JSONObject object = new JSONObject(responseText);
-                    String responseCode = object.getString("ResponseCode");
-                    switch (responseCode) {
-                        case "205":
-                            ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
-                            while (!LoginUtil.getAccessToken(getActivity())) {}
-                            while (!LoginUtil.getSessionId(getActivity())){}
-                            Intent intent = new Intent(getActivity(), LoginActivity.class);
-                            startActivity(intent);
-                            getActivity().finish();
-                            break;
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }*/
         });
     }
 }
