@@ -33,7 +33,6 @@ import javax.crypto.NoSuchPaddingException;
  */
 public class StartActivity extends BaseActivity {
 
-    private LoginUtil loginUtil;
     private Intent intent;
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -51,7 +50,6 @@ public class StartActivity extends BaseActivity {
     @Override
     public void init() {
         intent = new Intent();
-        loginUtil = new LoginUtil();
     }
 
     @Override

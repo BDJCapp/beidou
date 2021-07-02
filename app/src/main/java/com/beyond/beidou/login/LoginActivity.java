@@ -12,7 +12,6 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,7 +19,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -47,18 +45,12 @@ import java.util.List;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
-    private TextView tvLoginByPhone;
-    private TextView tvLoginByPwd;
-    private TextView tvLoginByEmail;
-    private TextView tvAccount;
-    private TextView tvCheckCode;
-    private EditText etLoginAccount;
-    private EditText etLoginCheck;
-    private Button btnSendCode;
+
+    private EditText mLoginAccountEt;
+    private EditText mLoginCheckEt;
     private ImageView imgVisible;
-    private Button btnLogin;
-    private TextView tvForgetPwd;
-    private Spinner spPlatform;
+    private Button mLoginBtn;
+    private Spinner mPlatformSp;
 
     private final int QUITAPP = 0;
     private final int LOGIN = 1;
@@ -70,11 +62,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private final int CODE_NULL = 423;
     private final int SUCCESS = 200;
     private static boolean isExit = false;
-    ZLoadingDialog dialog = new ZLoadingDialog(LoginActivity.this);
+    private ZLoadingDialog mLoadingDlg = new ZLoadingDialog(LoginActivity.this);
 
     private Intent intent;
     private boolean isVisible = false;
-    private LoginUtil loginUtil;
     public Handler handler = new  Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -82,7 +73,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             {
                 case ACCOUNT_OR_PWD_ERROR:
                     Toast.makeText(LoginActivity.this,"用户名或密码错误,请重新输入",Toast.LENGTH_LONG).show();
-                    dialog.dismiss();
+                    mLoadingDlg.dismiss();
                     break;
                 case IIILEGAL_USER_SESSION:
 
@@ -90,14 +81,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
                 case 400:
                     Toast.makeText(LoginActivity.this, String.valueOf(msg.obj),Toast.LENGTH_LONG).show();
-                    dialog.dismiss();
+                    mLoadingDlg.dismiss();
                     break;
                 case LOGIN:
                     //加载动画之后登录
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            login(etLoginAccount.getText().toString(),etLoginCheck.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
+                            login(mLoginAccountEt.getText().toString(), mLoginCheckEt.getText().toString(),ApiConfig.getSessionUUID(), ApiConfig.getAccessToken());
                         }
                     }).start();
                     break;
@@ -107,7 +98,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 case SUCCESS:
                     intent.setClass(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
-                    dialog.dismiss();
+                    mLoadingDlg.dismiss();
                     finish();
                     break;
                 case 111:
@@ -129,7 +120,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     @Override
     public void init() {
         intent = new Intent();
-        loginUtil = new LoginUtil();
     }
 
     @Override
@@ -139,23 +129,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
     @Override
     public void initView() {
-        tvLoginByPwd = findViewById(R.id.tv_loginByPwd);
-        tvAccount = findViewById(R.id.tv_account);
-        etLoginAccount = findViewById(R.id.et_loginAccount);
-        etLoginCheck = findViewById(R.id.et_loginCheck);
+        mLoginAccountEt = findViewById(R.id.et_loginAccount);
+        mLoginCheckEt = findViewById(R.id.et_loginCheck);
         imgVisible = findViewById(R.id.img_visiblePwd);
-        btnLogin = findViewById(R.id.btn_login);
-        tvForgetPwd = findViewById(R.id.tv_forgetPwd);
-        spPlatform = findViewById(R.id.spinner_platform);
+        mLoginBtn = findViewById(R.id.btn_login);
+        mPlatformSp = findViewById(R.id.spinner_platform);
         imgVisible.setOnClickListener(this);
-        btnLogin.setOnClickListener(this);
+        mLoginBtn.setOnClickListener(this);
 
 //        etLoginAccount.setText("qazXSW0");
 //        etLoginCheck.setText("qazxswEDCVFR0*");
-        etLoginAccount.setText("qwerASD5");
-        etLoginCheck.setText("qwertyuiiopASDFG5*");
+        mLoginAccountEt.setText("qwerASD5");
+        mLoginCheckEt.setText("qwertyuiiopASDFG5*");
 
-        etLoginAccount.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        mLoginAccountEt.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus)
@@ -165,7 +152,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             }
         });
 
-        etLoginCheck.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        mLoginCheckEt.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus)
@@ -175,21 +162,23 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             }
         });
 
-        spPlatform.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mPlatformSp.setSelection(1);    //默认为第二平台
+
+        mPlatformSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position){
                     case 0:
                         ApiConfig.setBaseUrl(ApiConfig.FIRST_BASE_URL);
-                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
+//                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
                         break;
                     case 1:
                         ApiConfig.setBaseUrl(ApiConfig.SECOND_BASE_URL);
-                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
+//                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
                         break;
                     case 2:
                         ApiConfig.setBaseUrl(ApiConfig.THIRD_BASE_URL);
-                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
+//                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
                         break;
                 }
             }
@@ -219,7 +208,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 {
                     break;
                 }
-                dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
+                mLoadingDlg.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                         .setLoadingColor(Color.BLACK)//颜色
                         .setHintText("Loading...")
                         .setCanceledOnTouchOutside(false)
@@ -236,27 +225,27 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         {
             imgVisible.setImageResource(R.drawable.ic_pwd_visible);
             //设置密码可见
-            etLoginCheck.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            mLoginCheckEt.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
             //将已输入的密码设置为可见
-            etLoginCheck.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+            mLoginCheckEt.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
 
             isVisible = true;
         }else{
             imgVisible.setImageResource(R.drawable.ic_pwd_invisible);
             //设置密码不可见
-            etLoginCheck.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            mLoginCheckEt.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
             //将已输入的密码设置为不可见
-            etLoginCheck.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            mLoginCheckEt.setTransformationMethod(PasswordTransformationMethod.getInstance());
             isVisible = false;
         }
         //设置是否可见之后，光标会移动到首位。此时需将光标移动到最后一位
-        etLoginCheck.setSelection(etLoginCheck.getText().toString().length());
+        mLoginCheckEt.setSelection(mLoginCheckEt.getText().toString().length());
     }
 
     public void login(String username,String password,String SessionUUID,String AccessToken)
     {
         String encodePwd = LoginUtil.DES3Encode(password,SessionUUID);
-        loginUtil.loginByPwd(LoginActivity.this,username, encodePwd, SessionUUID, AccessToken, new ApiCallback() {
+        LoginUtil.loginByPwd(LoginActivity.this,username, encodePwd, SessionUUID, AccessToken, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
                 LogUtil.e("res",res);
@@ -370,7 +359,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
     public boolean checkAccount()
     {
-        String account = etLoginAccount.getText().toString();
+        String account = mLoginAccountEt.getText().toString();
         boolean isCorrect = true;
         if ("".equals(account))
         {
@@ -408,7 +397,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
     public boolean checkPassword()
     {
-        String password = etLoginCheck.getText().toString();
+        String password = mLoginCheckEt.getText().toString();
         boolean isCorrect = true;
         if ("".equals(password))
         {

@@ -148,7 +148,6 @@ public class LoginUtil {
                 public void onSuccess(String res) {
                     if (!TextUtils.isEmpty(res)) {
                         try {
-                            LogUtil.e("LoginUtil 获取SessionUUID的返回值",res);
                             JSONObject object = new JSONObject(res);
                             responseCode[0] = object.getString("ResponseCode");
                             if ("201".equals(responseCode[0]))
@@ -227,7 +226,7 @@ public class LoginUtil {
     }
 
 
-    public void loginByPwd(Context context,String Username, String Password, String SessionUUID,String AccessToken, ApiCallback callback)
+    public static void loginByPwd(Context context,String Username, String Password, String SessionUUID,String AccessToken, ApiCallback callback)
     {
         FormBody body = new FormBody.Builder()
                 .add("Username",Username)

@@ -15,12 +15,12 @@ public class MyDialog extends Dialog {
 
 
     //显示的标题
-    private TextView TvTitle;
+    private TextView mTitleTv;
 
-    private TextView TvStartTime,TvEndTime;
+    private TextView mStartTimeTv, mEndTimeTv;
 
     //确认和取消按钮
-    private Button negativeBn,positiveBn;
+    private Button mNegativeBtn, mPositiveBtn;
 
 
     public MyDialog(Context context) {
@@ -44,7 +44,7 @@ public class MyDialog extends Dialog {
      */
     private void initEvent() {
         //设置确定按钮被点击后，向外界提供监听
-        positiveBn.setOnClickListener(new View.OnClickListener() {
+        mPositiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if ( onClickBottomListener!= null) {
@@ -53,7 +53,7 @@ public class MyDialog extends Dialog {
             }
         });
         //设置取消按钮被点击后，向外界提供监听
-        negativeBn.setOnClickListener(new View.OnClickListener() {
+        mNegativeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if ( onClickBottomListener!= null) {
@@ -62,7 +62,7 @@ public class MyDialog extends Dialog {
             }
         });
 
-        TvStartTime.setOnClickListener(new View.OnClickListener() {
+        mStartTimeTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (onClickTextViewListener != null)
@@ -72,7 +72,7 @@ public class MyDialog extends Dialog {
             }
         });
 
-        TvEndTime.setOnClickListener(new View.OnClickListener() {
+        mEndTimeTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (onClickTextViewListener != null)
@@ -93,11 +93,11 @@ public class MyDialog extends Dialog {
      * 初始化界面控件
      */
     private void initView() {
-        negativeBn = findViewById(R.id.negtive);
-        positiveBn = findViewById(R.id.positive);
-        TvTitle = findViewById(R.id.title);
-        TvStartTime = findViewById(R.id.tv_startTime);
-        TvEndTime = findViewById(R.id.tv_endTime);
+        mNegativeBtn = findViewById(R.id.negtive);
+        mPositiveBtn = findViewById(R.id.positive);
+        mTitleTv = findViewById(R.id.title);
+        mStartTimeTv = findViewById(R.id.tv_startTime);
+        mEndTimeTv = findViewById(R.id.tv_endTime);
     }
 
     /**
@@ -139,11 +139,11 @@ public class MyDialog extends Dialog {
     }
 
     public String getStartTime(){
-        return (String) TvStartTime.getText();
+        return (String) mStartTimeTv.getText();
     }
 
     public String getEndTime(){
-        return (String) TvEndTime.getText();
+        return (String) mEndTimeTv.getText();
     }
 
 }

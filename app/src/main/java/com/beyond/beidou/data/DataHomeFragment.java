@@ -28,7 +28,6 @@ import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.ProjectResponse;
-import com.beyond.beidou.util.DateUtil;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.google.gson.Gson;
@@ -47,16 +46,15 @@ import java.util.Locale;
  */
 public class DataHomeFragment extends BaseFragment {
 
-    private Spinner spProjectName;
-    private RecyclerView deviceList;
-    MainActivity activity;
+    private Spinner mProjectSp;
+    private RecyclerView mDevicesRv;
+    private ZLoadingDialog mLoadingDlg;
+    private ArrayList<String> mStationNameList = new ArrayList<>();
+    MainActivity mainActivity;
     private static final int LOADING = 1;
     private static final int DEVICE_LIST = 2;
     private static final int LOADING_FINISH = 200;
     private static final int REQUEST_FAILED = 400;
-    private ZLoadingDialog dialog;
-//    private static volatile boolean isFinishLoading = false;
-    private ArrayList<String> stationNameList = new ArrayList<>();
     public Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -67,13 +65,13 @@ public class DataHomeFragment extends BaseFragment {
                     break;
                 case DEVICE_LIST:
                     LogUtil.e("DEVICE_LIST", "DEVICE_LIST===========");
-                    setDeviceList(spProjectName.getSelectedItem().toString());
+                    setmDevicesRv(mProjectSp.getSelectedItem().toString());
                     break;
                 case LOADING_FINISH:
-                    dialog.dismiss();
+                    mLoadingDlg.dismiss();
                     break;
                 case REQUEST_FAILED:
-                    dialog.dismiss();
+                    mLoadingDlg.dismiss();
                     showToast("网络请求失败，请检查网络连接，稍后再试");
                     break;
             }
@@ -87,7 +85,7 @@ public class DataHomeFragment extends BaseFragment {
             handler.sendEmptyMessageDelayed(DEVICE_LIST, 150);
         }
 
-        dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
+        mLoadingDlg.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                 .setLoadingColor(Color.BLACK)//颜色
                 .setHintText("Loading...")
                 .setCancelable(false)
@@ -109,11 +107,11 @@ public class DataHomeFragment extends BaseFragment {
     }
 
     public void initView(View view) {
-        dialog = new ZLoadingDialog(getActivity());
-        activity = (MainActivity) getActivity();
-        spProjectName = view.findViewById(R.id.spinner_projectName);
-        deviceList = view.findViewById(R.id.rv_device);
-        dialog = new ZLoadingDialog(getActivity());
+        mLoadingDlg = new ZLoadingDialog(getActivity());
+        mainActivity = (MainActivity) getActivity();
+        mProjectSp = view.findViewById(R.id.spinner_projectName);
+        mDevicesRv = view.findViewById(R.id.rv_device);
+        mLoadingDlg = new ZLoadingDialog(getActivity());
         doLoadingDialog(1);
 //        setViews();
     }
@@ -121,10 +119,10 @@ public class DataHomeFragment extends BaseFragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (spProjectName.getSelectedItem() != null)
+        if (mProjectSp.getSelectedItem() != null)
         {
-            if (activity.getNowFragment() == activity.getDataFragment() && !spProjectName.getSelectedItem().toString().equals(((MainActivity)getActivity()).getPresentProject())) {
-                spProjectName.setSelection(stationNameList.indexOf(((MainActivity)getActivity()).getPresentProject()), true);
+            if (mainActivity.getNowFragment() == mainActivity.getDataFragment() && !mProjectSp.getSelectedItem().toString().equals(((MainActivity)getActivity()).getPresentProject())) {
+                mProjectSp.setSelection(mStationNameList.indexOf(((MainActivity)getActivity()).getPresentProject()), true);
                 //设置spinner选中项
                 doLoadingDialog(2);
 //            setViews();
@@ -154,26 +152,26 @@ public class DataHomeFragment extends BaseFragment {
                     public void run() {
                         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.item_select, projectNameList);
                         adapter.setDropDownViewResource(R.layout.item_drop);
-                        spProjectName.setAdapter(adapter);
+                        mProjectSp.setAdapter(adapter);
 
                         //读取SP上次退出时选中的工程名，若没有。默认展示第一个工程
                         final MainActivity activity = (MainActivity) getActivity();
                         String presentProject = activity.getPresentProject();
                         if (!TextUtils.isEmpty(presentProject)) {
                             for (int i = 0; i < projectNameList.size(); i++) {
-                                stationNameList.add(projectNameList.get(i));
+                                mStationNameList.add(projectNameList.get(i));
                                 if (presentProject.equals(projectNameList.get(i))) {
-                                    spProjectName.setSelection(i, true);
-                                    setDeviceList(presentProject);
+                                    mProjectSp.setSelection(i, true);
+                                    setmDevicesRv(presentProject);
                                 }
                             }
                         }
 
 
-                        spProjectName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        mProjectSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                ((MainActivity)getActivity()).setPresentProject(spProjectName.getSelectedItem().toString());
+                                ((MainActivity)getActivity()).setPresentProject(mProjectSp.getSelectedItem().toString());
                                 doLoadingDialog(2);
                             }
 
@@ -197,7 +195,7 @@ public class DataHomeFragment extends BaseFragment {
 
     }
 
-    public void setDeviceList(String selectedProject) {
+    public void setmDevicesRv(String selectedProject) {
 //        isFinishLoading = false;
         HashMap<String, Object> requestParams = new HashMap<>();
         List<String> requestProjectList = new ArrayList<>();
@@ -242,14 +240,14 @@ public class DataHomeFragment extends BaseFragment {
                                         // LogUtil.e("查看的监测点", deviceNames.get(position));
                                         if (LoginUtil.isNetworkUsable(getActivity()))
                                         {
-                                            switchFragment(spProjectName.getSelectedItem().toString(), deviceNames, position, stationUUIDList);
+                                            switchFragment(mProjectSp.getSelectedItem().toString(), deviceNames, position, stationUUIDList);
                                         }
                                     }
                                 });
-                                deviceList.setAdapter(adapter);
+                                mDevicesRv.setAdapter(adapter);
                                 LinearLayoutManager manager = new LinearLayoutManager(getActivity());
                                 manager.setOrientation(RecyclerView.VERTICAL);
-                                deviceList.setLayoutManager(manager);
+                                mDevicesRv.setLayoutManager(manager);
                             }
                         });
                         handler.sendEmptyMessageDelayed(LOADING_FINISH,0);

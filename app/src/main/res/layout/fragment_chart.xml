@@ -67,28 +67,28 @@
         android:id="@+id/layout_spinner"
         android:orientation="horizontal"
         >
+
         <Spinner
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:id="@+id/sp_device"
-            android:entries="@array/ProjectName"
-            android:spinnerMode="dropdown"
-            android:overlapAnchor="false"
-            android:dropDownWidth="180dp"
-            android:theme="@style/spinner_style"
-            />
-        <com.beyond.beidou.MySpinner
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:id="@+id/sp_chart_time"
-            android:entries="@array/ProjectName"
-            android:spinnerMode="dropdown"
-            android:overlapAnchor="false"
             android:dropDownWidth="180dp"
-            android:theme="@style/spinner_style"
-            />
+            android:entries="@array/ProjectName"
+            android:overlapAnchor="false"
+            android:spinnerMode="dropdown"
+            android:theme="@style/spinner_style" />
+
+        <com.beyond.beidou.MySpinner
+            android:id="@+id/sp_chart_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:dropDownWidth="180dp"
+            android:entries="@array/ProjectName"
+            android:overlapAnchor="false"
+            android:spinnerMode="dropdown"
+            android:theme="@style/spinner_style" />
     </LinearLayout>
 
     <ScrollView
