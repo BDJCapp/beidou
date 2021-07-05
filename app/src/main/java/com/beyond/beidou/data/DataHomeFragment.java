@@ -102,6 +102,7 @@ public class DataHomeFragment extends BaseFragment {
         }
     };
 
+
     private void doLoadingDialog(int type) {
         if(type == 1){
             pHandler.sendEmptyMessageDelayed(LOADING, 150);
