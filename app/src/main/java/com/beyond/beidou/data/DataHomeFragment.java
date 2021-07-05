@@ -156,6 +156,7 @@ public class DataHomeFragment extends BaseFragment {
         }
     }
 
+
     public void setViews() {
 //        isFinishLoading = false;
         //设置Spinner
