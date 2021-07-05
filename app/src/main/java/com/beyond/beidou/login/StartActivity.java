@@ -15,7 +15,6 @@ import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 
-
 /**
  * @author: 李垚
  * @date: 2020/12/22
@@ -46,8 +45,8 @@ public class StartActivity extends BaseActivity {
         Thread getTokenThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (!LoginUtil.getAccessToken(StartActivity.this)){
-                    LogUtil.e("StartActivity initData()","循环请求Token");
+                while (!LoginUtil.getAccessToken(StartActivity.this)) {
+                    LogUtil.e("StartActivity initData()", "循环请求Token");
                 }
                 LoginUtil.upDateToken(getApplicationContext());
                 LogUtil.e("StartActivity 成功获取Token", ApiConfig.getAccessToken());
@@ -65,8 +64,8 @@ public class StartActivity extends BaseActivity {
         Thread getSessionThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (!LoginUtil.getSessionId(StartActivity.this)){
-                    LogUtil.e("StartActivity initData()","循环请求Session");
+                while (!LoginUtil.getSessionId(StartActivity.this)) {
+                    LogUtil.e("StartActivity initData()", "循环请求Session");
                 }
             }
         });
@@ -96,10 +95,8 @@ public class StartActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
         init();
-        if (LoginUtil.isNetworkUsable(this))
-        {
-            new Thread(new Runnable()
-            {
+        if (LoginUtil.isNetworkUsable(this)) {
+            new Thread(new Runnable() {
                 @Override
                 public void run() {
                     initData();

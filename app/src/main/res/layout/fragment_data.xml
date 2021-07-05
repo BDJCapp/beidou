@@ -21,10 +21,16 @@
         android:layout_marginTop="10dp"
         android:layout_below="@+id/spinner_projectName"
         />
-    <androidx.recyclerview.widget.RecyclerView
+    <com.scwang.smart.refresh.layout.SmartRefreshLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/rv_device"
+        android:layout_height="match_parent"
+        android:id="@+id/layout_refresh"
         android:layout_below="@+id/line1"
-        />
+        >
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/rv_device"
+            />
+    </com.scwang.smart.refresh.layout.SmartRefreshLayout>
 </RelativeLayout>

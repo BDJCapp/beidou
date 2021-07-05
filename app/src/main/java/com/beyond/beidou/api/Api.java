@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 
 import com.beyond.beidou.login.StartActivity;
+import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 
 import org.jetbrains.annotations.NotNull;
@@ -90,7 +91,6 @@ public class Api {
             if(response.isSuccessful()){
                 String responseText = response.body().string();
                 String responseCode = parseJSONObject(responseText,"ResponseCode");
-
                 if (!responseCodeHandling(context,responseCode))
                 {
                     callback.onSuccess(responseText);
@@ -99,6 +99,33 @@ public class Api {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void postJsonString(final Context context, String jsonString, final ApiCallback callback){
+        RequestBody requestBodyJson =
+                RequestBody.create(jsonString, MediaType.parse("application/json;charset=utf-8"));
+        Request request = new Request.Builder()
+                .url(requestUrl)
+                .post(requestBodyJson)
+                .build();
+        final Call call = client.newCall(request);
+        call.enqueue(new okhttp3.Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String result = response.body().string();
+
+                String responseCode = parseJSONObject(result,"ResponseCode");
+                if (!responseCodeHandling(context,responseCode))
+                {
+                    callback.onSuccess(result);
+                }
+            }
+        });
     }
 
 

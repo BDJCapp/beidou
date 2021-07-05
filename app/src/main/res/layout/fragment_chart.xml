@@ -77,6 +77,7 @@
             android:entries="@array/ProjectName"
             android:overlapAnchor="false"
             android:spinnerMode="dropdown"
+            android:textAlignment="center"
             android:theme="@style/spinner_style" />
 
         <com.beyond.beidou.MySpinner
@@ -88,6 +89,7 @@
             android:entries="@array/ProjectName"
             android:overlapAnchor="false"
             android:spinnerMode="dropdown"
+            android:textAlignment="center"
             android:theme="@style/spinner_style" />
     </LinearLayout>
 

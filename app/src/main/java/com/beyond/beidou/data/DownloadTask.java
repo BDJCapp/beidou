@@ -52,7 +52,7 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
             }
             LogUtil.e("资源URL",downloadurl);
             long contentLength = getContentLength(downloadurl);
-            LogUtil.e("contentLength",contentLength + " ");
+//            LogUtil.e("contentLength",contentLength + " ");
             if (contentLength == 0){
                 return TYPE_FAILED_NO_DATA;
             }else if (contentLength == downloadLength){

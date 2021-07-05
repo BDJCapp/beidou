@@ -34,6 +34,7 @@ public class ApiConfig {
     public static final String GET_ACCESS_TOKEN = "getAccessToken.php";
     public static final String GET_SESSION_UUID = "doSession.php";
     public static final String GET_PROJECTS = "getProjects.php";
+    public static final String GET_STATIONS = "getStations.php";
     public static final String GET_GRAPHIC_DATA = "getGraphicData.php";
     public static final String LOGIN = "doLogin.php";
     public static final String LOGOUT = "doLogout.php";
