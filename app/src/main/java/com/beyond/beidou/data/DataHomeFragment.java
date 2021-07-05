@@ -55,7 +55,7 @@ public class DataHomeFragment extends BaseFragment {
     private static final int DEVICE_LIST = 2;
     private static final int LOADING_FINISH = 200;
     private static final int REQUEST_FAILED = 400;
-    public Handler handler = new Handler(Looper.getMainLooper()) {
+    public Handler pHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
@@ -80,9 +80,9 @@ public class DataHomeFragment extends BaseFragment {
 
     private void doLoadingDialog(int type) {
         if(type == 1){
-            handler.sendEmptyMessageDelayed(LOADING, 150);
+            pHandler.sendEmptyMessageDelayed(LOADING, 150);
         }else{
-            handler.sendEmptyMessageDelayed(DEVICE_LIST, 150);
+            pHandler.sendEmptyMessageDelayed(DEVICE_LIST, 150);
         }
 
         mLoadingDlg.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
@@ -182,14 +182,14 @@ public class DataHomeFragment extends BaseFragment {
                         });
                     }
                 });
-                handler.sendEmptyMessageDelayed(200,0);
+                pHandler.sendEmptyMessageDelayed(200,0);
 //                isFinishLoading = true;
             }
 
             @Override
             public void onFailure(Exception e) {
                 LogUtil.e("获取工程网络请求失败", e.getMessage());
-                handler.sendEmptyMessageDelayed(REQUEST_FAILED,0);
+                pHandler.sendEmptyMessageDelayed(REQUEST_FAILED,0);
             }
         });
 
@@ -250,13 +250,13 @@ public class DataHomeFragment extends BaseFragment {
                                 mDevicesRv.setLayoutManager(manager);
                             }
                         });
-                        handler.sendEmptyMessageDelayed(LOADING_FINISH,0);
+                        pHandler.sendEmptyMessageDelayed(LOADING_FINISH,0);
 //                        isFinishLoading = true;
                     }
 
                     @Override
                     public void onFailure(Exception e) {
-                        handler.sendEmptyMessageDelayed(REQUEST_FAILED,0);
+                        pHandler.sendEmptyMessageDelayed(REQUEST_FAILED,0);
                     }
                 });
     }

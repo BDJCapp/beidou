@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class MyRecycleView extends RecyclerView {
-    private float lastPosY,moveY;   //lastPosY:手指最后滑动到的y轴位置；moveY：手指总共滑动的垂直距离
+    private float mLastPosY, mMoveY;   //mLastPosY:手指最后滑动到的y轴位置；mMoveY：手指总共滑动的垂直距离
     public MyRecycleView(@NonNull Context context) {
         super(context);
     }
@@ -28,27 +28,26 @@ public class MyRecycleView extends RecyclerView {
     public boolean onTouchEvent(MotionEvent e) {
         switch (e.getAction()){
             case MotionEvent.ACTION_DOWN:
-                lastPosY=e.getY();
-                moveY=0;
-                //有待商榷
+                mLastPosY =e.getY();
+                mMoveY =0;
                 getParent().requestDisallowInterceptTouchEvent(true);
                 break;
             case MotionEvent.ACTION_MOVE:
                 //如果手指往下滑动
-                if(lastPosY<e.getY()){
+                if(mLastPosY <e.getY()){
                     if(onScroll!=null){
-                        moveY+=(e.getY()-lastPosY)/2;
-                        moveY=onScroll.scrollPullDown((int)moveY);
-                        lastPosY=e.getY();
-                        if(moveY>0)return true;
+                        mMoveY +=(e.getY()- mLastPosY)/2;
+                        mMoveY =onScroll.scrollPullDown((int) mMoveY);
+                        mLastPosY =e.getY();
+                        if(mMoveY >0)return true;
                     }
                 }
-                lastPosY=e.getY();
-                if(moveY>0)return true;
+                mLastPosY =e.getY();
+                if(mMoveY >0)return true;
                 break;
             case MotionEvent.ACTION_UP:
                 if(onScroll!=null)
-                    onScroll.eventUp((int)moveY);
+                    onScroll.eventUp((int) mMoveY);
                 break;
         }
         return super.onTouchEvent(e);

@@ -10,14 +10,14 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
-public class NotificationUtils extends ContextWrapper {
+public class NotificationUtil extends ContextWrapper {
 
     private NotificationManager mManager;
     public static final String ANDROID_CHANNEL_ID = "com.baidu.baidulocationdemo";
     public static final String ANDROID_CHANNEL_NAME = "ANDROID CHANNEL";
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public NotificationUtils(Context base) {
+    public NotificationUtil(Context base) {
         super(base);
         createChannels();
     }

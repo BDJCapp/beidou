@@ -76,25 +76,25 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private ToggleButton mToggleButton;
     private ImageView mIvSign;
 
-    private List<ProjectResponse.ProjectListBean> projectList = new ArrayList<>();
-    private ProjectResponse.ProjectListBean.ProjectStationStatusBean projectStationStatus;
-    private ArrayList<String> projectNameList = new ArrayList<>();
-    private String netTime;
-    private List<ProjectResponse.ProjectListBean.StationListBean> projectStationList = new ArrayList<>();
+    private List<ProjectResponse.ProjectListBean> mProjectList = new ArrayList<>();
+    private ProjectResponse.ProjectListBean.ProjectStationStatusBean mProjectStationStatus;
+    private ArrayList<String> mProjectNameList = new ArrayList<>();
+    private String mNetTime;
+    private List<ProjectResponse.ProjectListBean.StationListBean> mProjectStationList = new ArrayList<>();
     private MonitoringPointsAdapter mPointsAdapter;
-    private LinearLayoutManager layoutManager;
-    private ArrayList<String> stationNameList = new ArrayList<>();
-    private ArrayList<String> stationUUIDList = new ArrayList<>();
+    private LinearLayoutManager mLayoutManager;
+    private ArrayList<String> mStationNameList = new ArrayList<>();
+    private ArrayList<String> mStationUUIDList = new ArrayList<>();
 
-    private boolean isFirstLocate = true;
-    private static boolean isFirstLogin = true;
-    private static String presentProject;
-    public static boolean isReLogin = false;
-    private static boolean isFirstBindListener = true;
+    private boolean mIsFirstLocate = true;
+    private static boolean sIsFirstLogin = true;
+    private static String mPresentProject;
+    public static boolean sIsReLogin = false;
+    private static boolean sIsFirstBindListener = true;
     private static final int LOADING = 1;
     private static final int LOADING_FINISH = 200;
-    private ZLoadingDialog dialog;
-    public Handler handler = new Handler(Looper.getMainLooper()) {
+    private ZLoadingDialog mDialog;
+    public Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
@@ -105,7 +105,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 //                    dialog.dismiss();
                     break;
                 case LOADING_FINISH:
-                    dialog.dismiss();
+                    mDialog.dismiss();
                     break;
             }
         }
@@ -115,8 +115,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
 
     private void doLoadingDialog() {
-        handler.sendEmptyMessageDelayed(LOADING, 50);
-        dialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
+        mHandler.sendEmptyMessageDelayed(LOADING, 50);
+        mDialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                 .setLoadingColor(Color.BLACK)//颜色
                 .setHintText("Loading...")
                 .setCancelable(false)
@@ -147,8 +147,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         //显示才刷新
         if (!hidden) {
             MainActivity mMainActivity = (MainActivity) getActivity();
-            if (!presentProject.equals(mMainActivity.getPresentProject())) {
-                isFirstLocate = true;
+            if (!mPresentProject.equals(mMainActivity.getPresentProject())) {
+                mIsFirstLocate = true;
 //                getData();
                 doLoadingDialog();
             }
@@ -223,12 +223,12 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 //                    e.printStackTrace();
 //                }
                 Log.wtf("onItemSelected", "position:   " + position);
-                presentProject = (String) mSpinner.getItemAtPosition(position);
-                isFirstLocate = true;
+                mPresentProject = (String) mSpinner.getItemAtPosition(position);
+                mIsFirstLocate = true;
                 MainActivity mMainActivity = (MainActivity) getActivity();
-                mMainActivity.setPresentProject(presentProject);
-                if (isFirstBindListener) {
-                    isFirstBindListener = false;
+                mMainActivity.setPresentProject(mPresentProject);
+                if (sIsFirstBindListener) {
+                    sIsFirstBindListener = false;
                     return;
                 }
 //                mPointList.clear();
@@ -273,7 +273,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mBaiduMap.setMyLocationEnabled(true);
         mBaiduMap.setMaxAndMinZoomLevel(4f, 21f);
 //        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
-        dialog = new ZLoadingDialog(mMainActivity);
+        mDialog = new ZLoadingDialog(mMainActivity);
         mToggleButton = view.findViewById(R.id.toggleButton);
         mToggleButton.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
             @Override
@@ -289,27 +289,27 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
     private void getData() {
         Log.wtf("getData", "================Begin================");
-        projectNameList.clear();
-        stationNameList.clear();
-        stationUUIDList.clear();
-        if (isReLogin) {
-            isFirstLogin = true;
-            isReLogin = false;
+        mProjectNameList.clear();
+        mStationNameList.clear();
+        mStationUUIDList.clear();
+        if (sIsReLogin) {
+            sIsFirstLogin = true;
+            sIsReLogin = false;
         }
-        if (isFirstLogin) {
+        if (sIsFirstLogin) {
             String spVal = getStringFromSP("lastProjectName");
-            presentProject = spVal;
-            isFirstLogin = false;
+            mPresentProject = spVal;
+            sIsFirstLogin = false;
         } else {
             MainActivity mMainActivity = (MainActivity) getActivity();
-            presentProject = mMainActivity.getPresentProject();
-            if (presentProject == null) {
-                presentProject = "";
+            mPresentProject = mMainActivity.getPresentProject();
+            if (mPresentProject == null) {
+                mPresentProject = "";
             }
-            Log.e("presentProject", presentProject);
+            Log.e("presentProject", mPresentProject);
         }
         mParams.clear();
-        projectList.clear();
+        mProjectList.clear();
         mParams.put("AccessToken", ApiConfig.getAccessToken());
         mParams.put("SessionUUID", ApiConfig.getSessionUUID());
         Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(mMainActivity, new ApiCallback() {
@@ -318,95 +318,95 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 Gson gson = new Gson();
                 ProjectResponse response = gson.fromJson(res, ProjectResponse.class);
                 if (Integer.parseInt(response.getResponseCode()) == 200) {
-                    projectList = response.getProjectList();
-                    if (projectList == null) {
+                    mProjectList = response.getProjectList();
+                    if (mProjectList == null) {
                         back2Login();
                     }
-                    for (ProjectResponse.ProjectListBean project : projectList) {
+                    for (ProjectResponse.ProjectListBean project : mProjectList) {
                         //项目名为空则直接跳过
                         if (project.getProjectName().equals("")) {
                             continue;
                         }
-                        projectNameList.add(project.getProjectName());
+                        mProjectNameList.add(project.getProjectName());
                     }
-                    Log.wtf("projectNameList", projectNameList.toString());
+                    Log.wtf("projectNameList", mProjectNameList.toString());
                     mMainActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(mMainActivity, R.layout.item_select, projectNameList);
+                            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(mMainActivity, R.layout.item_select, mProjectNameList);
                             arrayAdapter.setDropDownViewResource(R.layout.item_drop);
                             mSpinner.setAdapter(arrayAdapter);
-                            ProjectFragment.isFirstBindListener = true;
+                            ProjectFragment.sIsFirstBindListener = true;
 
-                            if (presentProject.equals("")) {
+                            if (mPresentProject.equals("")) {
 //                                presentProject = mSpinner.getSelectedItem() == null ? "" : mSpinner.getSelectedItem() .toString();
-                                presentProject = mSpinner.getSelectedItem().toString();
+                                mPresentProject = mSpinner.getSelectedItem().toString();
                                 MainActivity mMainActivity = (MainActivity) getActivity();
-                                mMainActivity.setPresentProject(presentProject);
-                                for (ProjectResponse.ProjectListBean project : projectList) {
-                                    if (project.getProjectName().equals(presentProject)) {
+                                mMainActivity.setPresentProject(mPresentProject);
+                                for (ProjectResponse.ProjectListBean project : mProjectList) {
+                                    if (project.getProjectName().equals(mPresentProject)) {
                                         Log.e("匹配成功", "Position 11111111111");
-                                        projectStationStatus = project.getProjectStationStatus();
-                                        projectStationList = project.getStationList();
+                                        mProjectStationStatus = project.getProjectStationStatus();
+                                        mProjectStationList = project.getStationList();
                                         for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
-                                            stationNameList.add(station.getStationName());
-                                            stationUUIDList.add(station.getStationUUID());
+                                            mStationNameList.add(station.getStationName());
+                                            mStationUUIDList.add(station.getStationUUID());
                                         }
                                     }
                                 }
                             } else {
-                                for (ProjectResponse.ProjectListBean project : projectList) {
-                                    if (project.getProjectName().equals(presentProject)) {
+                                for (ProjectResponse.ProjectListBean project : mProjectList) {
+                                    if (project.getProjectName().equals(mPresentProject)) {
                                         Log.e("匹配成功", "Position 22222222222");
-                                        projectStationStatus = project.getProjectStationStatus();
-                                        projectStationList = project.getStationList();
-                                        mSpinner.setSelection(projectList.indexOf(project), true);
+                                        mProjectStationStatus = project.getProjectStationStatus();
+                                        mProjectStationList = project.getStationList();
+                                        mSpinner.setSelection(mProjectList.indexOf(project), true);
                                         for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
-                                            stationNameList.add(station.getStationName());
-                                            stationUUIDList.add(station.getStationUUID());
+                                            mStationNameList.add(station.getStationName());
+                                            mStationUUIDList.add(station.getStationUUID());
                                         }
                                         isMatch = true;
                                     }
                                 }
                                 if(!isMatch){
-                                    presentProject = mSpinner.getSelectedItem().toString();
+                                    mPresentProject = mSpinner.getSelectedItem().toString();
                                     MainActivity mMainActivity = (MainActivity) getActivity();
-                                    mMainActivity.setPresentProject(presentProject);
-                                    for (ProjectResponse.ProjectListBean project : projectList) {
-                                        if (project.getProjectName().equals(presentProject)) {
+                                    mMainActivity.setPresentProject(mPresentProject);
+                                    for (ProjectResponse.ProjectListBean project : mProjectList) {
+                                        if (project.getProjectName().equals(mPresentProject)) {
                                             Log.e("匹配成功", "Position 333333333");
-                                            projectStationStatus = project.getProjectStationStatus();
-                                            projectStationList = project.getStationList();
+                                            mProjectStationStatus = project.getProjectStationStatus();
+                                            mProjectStationList = project.getStationList();
                                             for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
-                                                stationNameList.add(station.getStationName());
-                                                stationUUIDList.add(station.getStationUUID());
+                                                mStationNameList.add(station.getStationName());
+                                                mStationUUIDList.add(station.getStationUUID());
                                             }
                                         }
                                     }
                                     isMatch = false;
                                 }
                             }
-                            Log.e("project", "present project is " + presentProject);
+                            Log.e("project", "present project is " + mPresentProject);
 
-                            if (projectStationStatus == null) {
+                            if (mProjectStationStatus == null) {
                                 back2Login();
                                 Log.e("projectStationStatus", "nullllllllll");
                                 return;
                             } else {
-                                mTvAmount.setText(String.valueOf(projectStationStatus.getTotal()));
-                                mBtnAmount.setText("总数\n" + projectStationStatus.getTotal());
-                                mBtnOnline.setText("在线\n" + projectStationStatus.getOnline());
-                                mBtnWarning.setText("警告\n" + projectStationStatus.getWarning());
-                                mBtnError.setText("故障\n" + projectStationStatus.getError());
-                                mBtnOffline.setText("离线\n" + projectStationStatus.getOffline());
+                                mTvAmount.setText(String.valueOf(mProjectStationStatus.getTotal()));
+                                mBtnAmount.setText("总数\n" + mProjectStationStatus.getTotal());
+                                mBtnOnline.setText("在线\n" + mProjectStationStatus.getOnline());
+                                mBtnWarning.setText("警告\n" + mProjectStationStatus.getWarning());
+                                mBtnError.setText("故障\n" + mProjectStationStatus.getError());
+                                mBtnOffline.setText("离线\n" + mProjectStationStatus.getOffline());
                             }
 
                             mLocationClient = new LocationClient(mMainActivity.getApplicationContext());
                             mLocationClient.registerLocationListener(new MyLocationListener());
                             requestLocation();    //请求百度地图位置
                             initStationList();    //初始化监测点数据
-                            layoutManager = new LinearLayoutManager(mMainActivity);
-                            mRecyclerView.setLayoutManager(layoutManager);
+                            mLayoutManager = new LinearLayoutManager(mMainActivity);
+                            mRecyclerView.setLayoutManager(mLayoutManager);
                             mPointsAdapter = new MonitoringPointsAdapter(mPointList);
                             mRecyclerView.setAdapter(mPointsAdapter);
                             mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
@@ -415,7 +415,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                     if (!LoginUtil.isNetworkUsable(mMainActivity)) {
                                         return;
                                     }
-                                    switchFragment(presentProject, stationNameList, position, stationUUIDList);
+                                    switchFragment(mPresentProject, mStationNameList, position, mStationUUIDList);
                                     Log.e("project", "you click " + position);
                                     MainActivity activity = (MainActivity) getActivity();
                                     activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(1).getItemId());
@@ -459,12 +459,12 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 //                    return;
                 }
 //                isFinishLoading = true;
-                handler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
+                mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
             }
 
             @Override
             public void onFailure(Exception e) {
-                dialog.dismiss();
+                mDialog.dismiss();
                 showToastSync("网络请求失败，请检查网络连接，稍后再试");
             }
         });
@@ -474,7 +474,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
     private void back2Login() {
         showToast("未请求到数据，请重新登录！");
-        isReLogin = true;
+        sIsReLogin = true;
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -513,12 +513,12 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(ld);
-                    netTime = formatter.format(calendar.getTime());
-                    Log.e("project", "time ld " + netTime);
+                    mNetTime = formatter.format(calendar.getTime());
+                    Log.e("project", "time ld " + mNetTime);
                     mMainActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mTvTime.setText(netTime);
+                            mTvTime.setText(mNetTime);
                         }
                     });
                 } catch (Exception e) {
@@ -534,7 +534,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mPointList.clear();
         LatLng sourcePoint = null;
         for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                projectStationList) {
+                mProjectStationList) {
             mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
             if (!TextUtils.isEmpty(projectStation.getStationLatitude()) && !TextUtils.isEmpty(projectStation.getStationLongitude())) {
                 sourcePoint = new LatLng(Double.parseDouble(projectStation.getStationLatitude()), Double.parseDouble(projectStation.getStationLongitude()));
@@ -619,8 +619,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private void navigateTo(BDLocation location) {
         Double latitude = location.getLatitude(), longitude = location.getLongitude();
         LatLng ll = new LatLng(latitude, longitude);
-        if (isFirstLocate) {
-            if (projectStationStatus.getTotal() != 0) {
+        if (mIsFirstLocate) {
+            if (mProjectStationStatus.getTotal() != 0) {
 //                ProjectResponse.ProjectListBean.StationListBean projectStation = projectStationList.get(0);
 //                if(projectStation == null){
 //                    MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
@@ -638,7 +638,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 //                    ll = converter.convert();
 //                }
 
-                for (ProjectResponse.ProjectListBean.StationListBean projectStation : projectStationList) {
+                for (ProjectResponse.ProjectListBean.StationListBean projectStation : mProjectStationList) {
                     if (projectStation == null) {
                         continue;
                     }
@@ -656,7 +656,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             mBaiduMap.animateMapStatus(update);
             update = MapStatusUpdateFactory.zoomTo(18f);
             mBaiduMap.animateMapStatus(update);
-            isFirstLocate = false;
+            mIsFirstLocate = false;
         } else {
             MyLocationData.Builder builder = new MyLocationData.Builder();
             builder.latitude(latitude).longitude(longitude);
@@ -710,7 +710,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             case R.id.btn_amount:
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                        projectStationList) {
+                        mProjectStationList) {
                     mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
                 }
                 mPointsAdapter.setData(mPointList);
@@ -720,7 +720,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             case R.id.btn_online:
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                        projectStationList) {
+                        mProjectStationList) {
                     int statusCode = Integer.parseInt(projectStation.getStationStatus());
                     if (statusCode >= 10 && statusCode <= 19) {
                         mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
@@ -733,7 +733,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             case R.id.btn_warning:
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                        projectStationList) {
+                        mProjectStationList) {
                     int statusCode = Integer.parseInt(projectStation.getStationStatus());
                     if (statusCode >= 30 && statusCode <= 39) {
                         mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
@@ -746,7 +746,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             case R.id.btn_error:
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                        projectStationList) {
+                        mProjectStationList) {
                     int statusCode = Integer.parseInt(projectStation.getStationStatus());
                     if (statusCode >= 40 && statusCode <= 49) {
                         mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
@@ -759,7 +759,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             case R.id.btn_offline:
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
-                        projectStationList) {
+                        mProjectStationList) {
                     int statusCode = Integer.parseInt(projectStation.getStationStatus());
                     if (statusCode >= 20 && statusCode <= 29) {
                         mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));

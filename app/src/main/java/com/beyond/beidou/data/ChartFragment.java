@@ -93,7 +93,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private static final int LOADING = 1;
     private static final int GET_DATA_SUCCESS = 200;
     private ZLoadingDialog mLoadingDlg;
-    public Handler handler = new Handler(Looper.getMainLooper()) {
+    public Handler pHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
@@ -119,7 +119,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 .setHintText("Loading...")
                 .setCanceledOnTouchOutside(false)
                 .show();
-        handler.sendEmptyMessageDelayed(LOADING, 0);
+        pHandler.sendEmptyMessageDelayed(LOADING, 0);
     }
 
     public static ChartFragment newInstance(String projectName, ArrayList<String> stationNameList, int position, ArrayList<String> stationUUIDList) {
@@ -1006,7 +1006,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             @Override
             public void run() {
                 requestChartDataSync(graphicType, stationUUID, startTime, endTime, deltaTime);
-                handler.sendEmptyMessageDelayed(200,0);
+                pHandler.sendEmptyMessageDelayed(200,0);
             }
         });
         httpThread.start();

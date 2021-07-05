@@ -28,16 +28,10 @@ import com.beyond.beidou.project.ProjectFragment;
 import com.beyond.beidou.util.LoginUtil;
 import com.google.gson.Gson;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.HashMap;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 public class UpdatePwdFragment extends BaseFragment implements View.OnClickListener {
 
@@ -165,7 +159,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                                         MainActivity activity = (MainActivity) getActivity();
                                                         dialog.dismiss();
                                                         saveStringToSP("lastProjectName", activity.getPresentProject());
-                                                        ProjectFragment.isReLogin = true;
+                                                        ProjectFragment.sIsReLogin = true;
                                                         Log.e("logout  ", "position 1");
                                                         logOut(getStringFromSP("userName"), ApiConfig.getAccessToken(), ApiConfig.getSessionUUID());
                                                     }

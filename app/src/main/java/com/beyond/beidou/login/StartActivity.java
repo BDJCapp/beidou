@@ -1,14 +1,10 @@
 package com.beyond.beidou.login;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,13 +15,6 @@ import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
 
 /**
  * @author: 李垚
@@ -33,14 +22,14 @@ import javax.crypto.NoSuchPaddingException;
  */
 public class StartActivity extends BaseActivity {
 
-    private Intent intent;
-    private Handler handler = new Handler(Looper.getMainLooper()) {
+    private Intent mIntent;
+    private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
                 case 1001:
-                    intent.setClass(StartActivity.this, LoginActivity.class);
-                    startActivity(intent);
+                    mIntent.setClass(StartActivity.this, LoginActivity.class);
+                    startActivity(mIntent);
                     finish();
                     break;
             }
@@ -49,7 +38,7 @@ public class StartActivity extends BaseActivity {
 
     @Override
     public void init() {
-        intent = new Intent();
+        mIntent = new Intent();
     }
 
     @Override
@@ -90,7 +79,7 @@ public class StartActivity extends BaseActivity {
         }
 
         //获取到Token和SessionUUID之后等待500毫秒结束启动页
-        handler.sendEmptyMessageDelayed(1001, 500);
+        mHandler.sendEmptyMessageDelayed(1001, 500);
     }
 
     @Override

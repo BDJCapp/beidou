@@ -1,14 +1,11 @@
 package com.beyond.beidou;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,19 +19,19 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public abstract class BaseFragment extends Fragment {
 
-    private Activity activity;
+    private Activity mActivity;
 
     public Context getContext(){
-        if(activity == null){
+        if(mActivity == null){
             return MyApplication.getContext();
         }
-        return activity;
+        return mActivity;
     }
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        activity = getActivity();
+        mActivity = getActivity();
     }
 
 

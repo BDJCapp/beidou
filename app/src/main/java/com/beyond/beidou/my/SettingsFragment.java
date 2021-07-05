@@ -94,7 +94,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                 break;
             case R.id.btn_quit:
                 saveStringToSP("lastProjectName", activity.getPresentProject());
-                ProjectFragment.isReLogin = true;
+                ProjectFragment.sIsReLogin = true;
                 if("".equals(MyFragment.userName)){
                     showToast("用户名未加载出来");
                     return;
