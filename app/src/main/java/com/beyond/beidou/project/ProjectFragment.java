@@ -403,6 +403,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
                             mLocationClient = new LocationClient(mMainActivity.getApplicationContext());
                             mLocationClient.registerLocationListener(new MyLocationListener());
+                            //todo requestLocation 更换位置
                             requestLocation();    //请求百度地图位置
                             initStationList();    //初始化监测点数据
                             mLayoutManager = new LinearLayoutManager(mMainActivity);
@@ -419,6 +420,40 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                     Log.e("project", "you click " + position);
                                     MainActivity activity = (MainActivity) getActivity();
                                     activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(1).getItemId());
+                                }
+                            });
+
+                            mPointsAdapter.setOnAreaClickListener(new MonitoringPointsAdapter.OnAreaClickListener() {
+                                @Override
+                                public void onAreaClick(View view, int position) {
+                                    for(ProjectResponse.ProjectListBean.StationListBean projectStation :
+                                            mProjectStationList){
+                                        if(mStationUUIDList.get(position).equals(projectStation.getStationUUID())){
+                                            LatLng ll;
+                                            double latitude, longitude;
+                                            if (!"".equals(projectStation.getStationLatitude()) && !"".equals(projectStation.getStationLongitude())) {
+                                                latitude = Double.parseDouble(projectStation.getStationLatitude());
+                                                longitude = Double.parseDouble(projectStation.getStationLongitude());
+                                                LatLng sourcePoint = new LatLng(latitude, longitude);
+                                                CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
+                                                ll = converter.convert();
+                                            }else{
+                                                break;
+                                            }
+                                            MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
+                                            mBaiduMap.animateMapStatus(update);
+                                            update = MapStatusUpdateFactory.zoomTo(18f);
+                                            mBaiduMap.animateMapStatus(update);
+                                            mScrollLayout.scrollToOpen();
+                                            return;
+                                        }
+                                    }
+                                    mMainActivity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            showToast("监测点暂无位置数据");
+                                        }
+                                    });
                                 }
                             });
 
@@ -617,7 +652,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 //        mNotification.defaults = Notification.DEFAULT_SOUND; //设置为默认的声音
 //    }
     private void navigateTo(BDLocation location) {
-        Double latitude = location.getLatitude(), longitude = location.getLongitude();
+        double latitude = location.getLatitude(), longitude = location.getLongitude();
         LatLng ll = new LatLng(latitude, longitude);
         if (mIsFirstLocate) {
             if (mProjectStationStatus.getTotal() != 0) {

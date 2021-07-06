@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/header"
     android:orientation="vertical">
     <Spinner
@@ -16,7 +15,7 @@
     <View
         android:id="@+id/line1"
         android:layout_width="match_parent"
-        android:layout_height="3px"
+        android:layout_height="1px"
         android:background="@color/under_line"
         android:layout_marginTop="10dp"
         android:layout_below="@+id/spinner_projectName"

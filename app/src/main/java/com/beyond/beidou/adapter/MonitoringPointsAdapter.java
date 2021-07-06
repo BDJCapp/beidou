@@ -17,20 +17,22 @@ import com.beyond.beidou.entites.MonitoringPoint;
 
 import java.util.List;
 
-public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPointsAdapter.ViewHolder>{
+public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPointsAdapter.ViewHolder> {
 
     private List<MonitoringPoint> mPointsList;
     private static OnItemClickListener mOnItemClickListener;
+    private static OnAreaClickListener mOnAreaClickListener;
 
-    static class ViewHolder extends RecyclerView.ViewHolder{
+    static class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout mLl_item;
         ImageView mIv_status;
         TextView mTv_name;
         TextView mTv_type;
         TextView mTv_activeTime;
         TextView mTv_data;
+        ImageView mIv_arrow;
 
-        public ViewHolder(View view){
+        public ViewHolder(View view) {
             super(view);
             mLl_item = view.findViewById(R.id.ll_item);
             mIv_status = view.findViewById(R.id.iv_status);
@@ -38,11 +40,12 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
             mTv_type = view.findViewById(R.id.tv_type);
             mTv_activeTime = view.findViewById(R.id.tv_activeTime);
             mTv_data = view.findViewById(R.id.tv_data);
+            mIv_arrow = view.findViewById(R.id.iv_arrow);
         }
 
     }
 
-    public MonitoringPointsAdapter(List<MonitoringPoint> mPointsList){
+    public MonitoringPointsAdapter(List<MonitoringPoint> mPointsList) {
         this.mPointsList = mPointsList;
     }
 
@@ -63,16 +66,16 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
         MonitoringPoint point = mPointsList.get(position);
         holder.mTv_name.setText(point.getName());
         int statusCode = Integer.parseInt(point.getStatus());
-        if(statusCode >= 10 && statusCode <= 19){
+        if (statusCode >= 10 && statusCode <= 19) {
             holder.mIv_status.setImageResource(R.drawable.ic_svg_online_point);
-        }else if(statusCode >= 20 && statusCode <= 29){
+        } else if (statusCode >= 20 && statusCode <= 29) {
             holder.mIv_status.setImageResource(R.drawable.ic_svg_offline_point);
-        }else if(statusCode >= 30 && statusCode <= 39){
+        } else if (statusCode >= 30 && statusCode <= 39) {
             holder.mIv_status.setImageResource(R.drawable.ic_svg_warning_point);
-        }else if(statusCode >= 40 && statusCode <= 49){
+        } else if (statusCode >= 40 && statusCode <= 49) {
             holder.mIv_status.setImageResource(R.drawable.ic_svg_error_point);
         }
-        switch (point.getType()){
+        switch (point.getType()) {
             case "0":
                 holder.mTv_type.setText("未知");
                 break;
@@ -84,17 +87,25 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
                 break;
         }
         holder.mTv_activeTime.setText(point.getActiveTime());
-        if(mOnItemClickListener == null){
-            Log.e("pointAdapter", "mOnItemClickListener is null");
-        }
+
         holder.mLl_item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mOnItemClickListener == null) {
-                    Log.e("onBindViewHolder", "mOnItemClickListener is null");
-                } else {
-                    mOnItemClickListener.onItemClick(v, position);
-                }
+                mOnAreaClickListener.onAreaClick(v, position);
+            }
+        });
+
+        holder.mTv_data.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mOnItemClickListener.onItemClick(v, position);
+            }
+        });
+
+        holder.mIv_arrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mOnItemClickListener.onItemClick(v, position);
             }
         });
     }
@@ -104,14 +115,26 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
         return mPointsList.size();
     }
 
-    public interface OnItemClickListener{
+    public interface OnItemClickListener {
         void onItemClick(View view, int position);
     }
 
+    public interface OnAreaClickListener{
+        void onAreaClick(View view, int position);
+    }
+
     public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
-        if(mOnItemClickListener == null){
+        if (mOnItemClickListener == null) {
             Log.e("setOnItemClickListener", "mOnItemClickListener is null");
         }
         MonitoringPointsAdapter.mOnItemClickListener = mOnItemClickListener;
+    }
+
+    public void setOnAreaClickListener(OnAreaClickListener mOnAreaClickListener) {
+        if (mOnAreaClickListener == null) {
+            Log.e("setOnAreaClickListener", "mOnAreaClickListener is null");
+        }
+
+        MonitoringPointsAdapter.mOnAreaClickListener = mOnAreaClickListener;
     }
 }

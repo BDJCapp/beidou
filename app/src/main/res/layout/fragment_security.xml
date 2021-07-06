@@ -38,7 +38,7 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="3px"
+        android:layout_height="1px"
         android:background="@color/under_line"
         android:layout_below="@+id/toolbar"
         />
@@ -55,10 +55,9 @@
             android:layout_margin="10dp"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            app:cardCornerRadius="20dp"
+            app:cardCornerRadius="10dp"
             android:foreground="?attr/selectableItemBackground"
-            android:clickable="true"
-            app:cardElevation="5dp"
+            app:cardElevation="1dp"
             >
 
             <LinearLayout

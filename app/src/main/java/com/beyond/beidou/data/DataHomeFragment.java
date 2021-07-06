@@ -62,8 +62,8 @@ public class DataHomeFragment extends BaseFragment {
     private SmartRefreshLayout mPageRefreshLayout;
     private ArrayList<String> mProjectNameList = new ArrayList<>();
     private Map<String,Object> mProjectName2UUID = new HashMap<>();
-    private Integer mPageNum = 1;
-    private Integer mPageSize = 10;
+    private final int mPageSize = 10;
+    private Integer mCurrentPageSize = mPageSize;
     private int mTotalStationNum;
     MainActivity mainActivity;
     private static final int REQUEST_PROJECT = 1;
@@ -79,7 +79,7 @@ public class DataHomeFragment extends BaseFragment {
                     setViews();
                     break;
                 case REQUEST_DEVICE:
-                    mPageSize = 10;             //切换工程时，恢复初始状态！
+                    mCurrentPageSize = mPageSize;             //切换工程时，恢复初始状态！
                     mPageRefreshLayout.setNoMoreData(false);
                     setmDevicesRv(mProjectSp.getSelectedItem().toString());
                     break;
@@ -229,8 +229,8 @@ public class DataHomeFragment extends BaseFragment {
             projectUUIDArray.put(0,mProjectName2UUID.get(selectedProject));
 
             JSONObject pageObject = new JSONObject();
-            pageObject.put("PageNumber",mPageNum.toString());
-            pageObject.put("PageSize", mPageSize.toString());
+            pageObject.put("PageNumber","1");
+            pageObject.put("PageSize", mCurrentPageSize.toString());
             pageArray.put(0,pageObject);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -254,7 +254,6 @@ public class DataHomeFragment extends BaseFragment {
                     stationUUIDList.add(stationList.get(i).getStationUUID());
                 }
                 mTotalStationNum = stationsResponse.getPageInfo().getTotalNumber();
-                LogUtil.e("获取的监测点总数", String.valueOf(mTotalStationNum));
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -315,8 +314,8 @@ public class DataHomeFragment extends BaseFragment {
         mPageRefreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-                if (mPageSize < mTotalStationNum){
-                    mPageSize+=mPageSize;
+                if (mCurrentPageSize < mTotalStationNum){
+                    mCurrentPageSize+=mCurrentPageSize;
                     pHandler.sendEmptyMessage(PAGING);
                 }else {
                     mPageRefreshLayout.finishLoadMoreWithNoMoreData();

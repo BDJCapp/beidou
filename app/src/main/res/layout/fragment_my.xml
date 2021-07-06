@@ -13,8 +13,8 @@
         android:background="@drawable/bg_title_border"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="15dp"
-        android:layout_marginTop="10dp"
+        android:padding="5dp"
+
         app:layout_constraintTop_toTopOf="parent"
         >
         <ImageView
@@ -139,10 +139,9 @@
             android:layout_margin="5dp"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            app:cardCornerRadius="20dp"
+            app:cardCornerRadius="10dp"
             android:foreground="?attr/selectableItemBackground"
-            android:clickable="true"
-            app:cardElevation="5dp"
+            app:cardElevation="1dp"
             android:id="@+id/cv_settings"
             >
 

@@ -39,12 +39,15 @@
             android:layout_margin="5dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:cardCornerRadius="20dp"
+            app:cardCornerRadius="10dp"
             >
 
             <com.yinglan.scrolllayout.content.ContentScrollView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:scrollbars="vertical"
+                android:scrollbarThumbVertical="@color/main_white"
+                >
 
                 <LinearLayout
                     android:layout_width="match_parent"

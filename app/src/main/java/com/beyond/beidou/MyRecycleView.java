@@ -2,6 +2,7 @@ package com.beyond.beidou;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
@@ -23,33 +24,26 @@ public class MyRecycleView extends RecyclerView {
     }
 
 
-
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        switch (e.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                mLastPosY =e.getY();
-                mMoveY =0;
-                getParent().requestDisallowInterceptTouchEvent(true);
-                break;
-            case MotionEvent.ACTION_MOVE:
-                //如果手指往下滑动
-                if(mLastPosY <e.getY()){
-                    if(onScroll!=null){
-                        mMoveY +=(e.getY()- mLastPosY)/2;
-                        mMoveY =onScroll.scrollPullDown((int) mMoveY);
-                        mLastPosY =e.getY();
-                        if(mMoveY >0)return true;
-                    }
-                }
-                mLastPosY =e.getY();
-                if(mMoveY >0)return true;
-                break;
-            case MotionEvent.ACTION_UP:
-                if(onScroll!=null)
-                    onScroll.eventUp((int) mMoveY);
-                break;
-        }
+//        switch (e.getAction()){
+//            case MotionEvent.ACTION_DOWN:
+//                mLastPosY =e.getY();
+//                mMoveY = 0;
+//                Log.e("MyRecycleView","nmsllllllllllllllllllllllllllllllllll");
+//                Log.e("MyRecycleView","getParent :::::::::::::::: " + getParent());
+//                Log.e("MyRecycleView","getParent getParent :::::::::::::::: " + getParent().getParent());
+//                break;
+//            case MotionEvent.ACTION_MOVE:
+//                Log.e("MyRecycleView","mMoveY :::::::::::::::: " + mMoveY);
+//                mLastPosY =e.getY();
+//                break;
+//            case MotionEvent.ACTION_UP:
+//                if(onScroll!=null)
+//                    onScroll.eventUp((int) mMoveY);
+//                break;
+//        }
+
         return super.onTouchEvent(e);
     }
 
