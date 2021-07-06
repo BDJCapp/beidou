@@ -60,39 +60,36 @@ public class DataHomeFragment extends BaseFragment {
     private RecyclerView mDevicesRv;
     private ZLoadingDialog mLoadingDlg;
     private SmartRefreshLayout mPageRefreshLayout;
-    private ArrayList<String> mStationNameList = new ArrayList<>();
+    private ArrayList<String> mProjectNameList = new ArrayList<>();
     private Map<String,Object> mProjectName2UUID = new HashMap<>();
     private Integer mPageNum = 1;
-    private Integer mPageSize = 2;
+    private Integer mPageSize = 10;
+    private int mTotalStationNum;
     MainActivity mainActivity;
-    private static final int LOADING = 1;
-    private static final int DEVICE_LIST = 2;
+    private static final int REQUEST_PROJECT = 1;
+    private static final int REQUEST_DEVICE = 2;
     private static final int LOADING_FINISH = 200;
     private static final int REQUEST_FAILED = 400;
-    private static final int REFRESH = 201;
-    private static final int LOAD_MORE = 202;
+    private static final int PAGING = 201;
     public Handler pHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
-                case LOADING:
-                    LogUtil.e("LOADING", "Loading===========");
+                case REQUEST_PROJECT:
                     setViews();
                     break;
-                case DEVICE_LIST:
-                    LogUtil.e("DEVICE_LIST", "DEVICE_LIST===========");
+                case REQUEST_DEVICE:
+                    mPageSize = 10;             //切换工程时，恢复初始状态！
+                    mPageRefreshLayout.setNoMoreData(false);
                     setmDevicesRv(mProjectSp.getSelectedItem().toString());
                     break;
                 case LOADING_FINISH:
                     mLoadingDlg.dismiss();
-                    break;
-                case REFRESH:
-                    setmDevicesRv(mProjectSp.getSelectedItem().toString());
+                    mPageRefreshLayout.finishLoadMore(true);
                     mPageRefreshLayout.finishRefresh(true);
                     break;
-                case LOAD_MORE:
+                case PAGING:
                     setmDevicesRv(mProjectSp.getSelectedItem().toString());
-                    mPageRefreshLayout.finishLoadMore(true);
                     break;
                 case REQUEST_FAILED:
                     mLoadingDlg.dismiss();
@@ -105,11 +102,10 @@ public class DataHomeFragment extends BaseFragment {
 
     private void doLoadingDialog(int type) {
         if(type == 1){
-            pHandler.sendEmptyMessageDelayed(LOADING, 150);
+            pHandler.sendEmptyMessageDelayed(REQUEST_PROJECT, 150);
         }else{
-            pHandler.sendEmptyMessageDelayed(DEVICE_LIST, 150);
+            pHandler.sendEmptyMessageDelayed(REQUEST_DEVICE, 150);
         }
-
         mLoadingDlg.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                 .setLoadingColor(Color.BLACK)//颜色
                 .setHintText("Loading...")
@@ -148,7 +144,7 @@ public class DataHomeFragment extends BaseFragment {
         if (mProjectSp.getSelectedItem() != null)
         {
             if (mainActivity.getNowFragment() == mainActivity.getDataFragment() && !mProjectSp.getSelectedItem().toString().equals(((MainActivity)getActivity()).getPresentProject())) {
-                mProjectSp.setSelection(mStationNameList.indexOf(((MainActivity)getActivity()).getPresentProject()), true);
+                mProjectSp.setSelection(mProjectNameList.indexOf(((MainActivity)getActivity()).getPresentProject()), true);
                 //设置spinner选中项
                 doLoadingDialog(2);
 //            setViews();
@@ -168,18 +164,17 @@ public class DataHomeFragment extends BaseFragment {
             @Override
             public void onSuccess(String res) {
                 Gson gson = new Gson();
-                ProjectResponse projectResponse = gson.fromJson(res, ProjectResponse.class);
-                final List<String> projectNameList = new ArrayList<>();
+                final ProjectResponse projectResponse = gson.fromJson(res, ProjectResponse.class);
                 for (int i = 0; i < projectResponse.getProjectList().size(); i++) {
                     String projectName = projectResponse.getProjectList().get(i).getProjectName();
-                    projectNameList.add(projectName);
+                    mProjectNameList.add(projectName);
                     mProjectName2UUID.put(projectName,projectResponse.getProjectList().get(i).getProjectUUID());
                 }
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.item_select, projectNameList);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.item_select, mProjectNameList);
                         adapter.setDropDownViewResource(R.layout.item_drop);
                         mProjectSp.setAdapter(adapter);
 
@@ -187,9 +182,8 @@ public class DataHomeFragment extends BaseFragment {
                         final MainActivity activity = (MainActivity) getActivity();
                         String presentProject = activity.getPresentProject();
                         if (!TextUtils.isEmpty(presentProject)) {
-                            for (int i = 0; i < projectNameList.size(); i++) {
-                                mStationNameList.add(projectNameList.get(i));
-                                if (presentProject.equals(projectNameList.get(i))) {
+                            for (int i = 0; i < mProjectNameList.size(); i++) {
+                                if (presentProject.equals(mProjectNameList.get(i))) {
                                     mProjectSp.setSelection(i, true);
                                     setmDevicesRv(presentProject);
                                 }
@@ -259,6 +253,8 @@ public class DataHomeFragment extends BaseFragment {
                     deviceStatus.add(stationList.get(i).getStationStatus());
                     stationUUIDList.add(stationList.get(i).getStationUUID());
                 }
+                mTotalStationNum = stationsResponse.getPageInfo().getTotalNumber();
+                LogUtil.e("获取的监测点总数", String.valueOf(mTotalStationNum));
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -290,74 +286,6 @@ public class DataHomeFragment extends BaseFragment {
     }
 
 
-    //无刷新，直接请求GetProjects接口
-    /*public void setmDevicesRv(String selectedProject) {
-        HashMap<String, Object> requestParams = new HashMap<>();
-        List<String> requestProjectList = new ArrayList<>();
-        requestProjectList.add(selectedProject);
-
-        requestParams.put("AccessToken", ApiConfig.getAccessToken());
-        requestParams.put("SessionUUID", ApiConfig.getSessionUUID());
-        requestParams.put("ProjectName", requestProjectList);
-
-        SimpleDateFormat sdfTwo = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
-        LogUtil.e("请求工程数据开始时间", sdfTwo.format(System.currentTimeMillis()));
-
-        Api.config(ApiConfig.GET_PROJECTS, requestParams)
-                .postRequest(getActivity(), new ApiCallback() {
-                    @Override
-                    public void onSuccess(String res) {
-
-                        LogUtil.e("DataHome setmDevicesRv() 返回值",res);
-//                        SimpleDateFormat sdfTwo = new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒E", Locale.getDefault());
-//                        LogUtil.e("请求工程数据结束时间", sdfTwo.format(System.currentTimeMillis()));
-
-                        Gson gson = new Gson();
-                        ProjectResponse projectResponse = gson.fromJson(res, ProjectResponse.class);
-                        final ArrayList<String> deviceNames = new ArrayList<>();
-                        final List<String> deviceTypes = new ArrayList<>();
-                        final List<String> lastTimes = new ArrayList<>();
-                        final List<String> deviceStatus = new ArrayList<>();
-                        final ArrayList<String> stationUUIDList = new ArrayList<>();
-                        List<ProjectResponse.ProjectListBean.StationListBean> stationList = projectResponse.getProjectList().get(0).getStationList();
-                        for (int i = 0; i < stationList.size(); i++) {
-                            deviceNames.add(stationList.get(i).getStationName());
-                            deviceTypes.add(getStationType(stationList.get(i).getStationType()));
-                            lastTimes.add(stationList.get(i).getStationLastTime());
-                            deviceStatus.add(stationList.get(i).getStationStatus());
-                            stationUUIDList.add(stationList.get(i).getStationUUID());
-                        }
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                DeviceListAdapter adapter = new DeviceListAdapter(deviceNames, deviceTypes, lastTimes, deviceStatus);
-                                adapter.setLookDataListener(new DeviceListAdapter.onItemLookdataClockListener() {
-                                    @Override
-                                    public void onItemClick(View view, int position) {
-                                        // LogUtil.e("查看的监测点", deviceNames.get(position));
-                                        if (LoginUtil.isNetworkUsable(getActivity()))
-                                        {
-                                            switchFragment(mProjectSp.getSelectedItem().toString(), deviceNames, position, stationUUIDList);
-                                        }
-                                    }
-                                });
-                                mDevicesRv.setAdapter(adapter);
-                                LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-                                manager.setOrientation(RecyclerView.VERTICAL);
-                                mDevicesRv.setLayoutManager(manager);
-                            }
-                        });
-                        pHandler.sendEmptyMessageDelayed(LOADING_FINISH,0);
-//                        isFinishLoading = true;
-                    }
-
-                    @Override
-                    public void onFailure(Exception e) {
-                        pHandler.sendEmptyMessageDelayed(REQUEST_FAILED,0);
-                    }
-                });
-    }*/
-
     public String getStationType(String stationType) {
         switch (stationType) {
             case "0":
@@ -380,16 +308,16 @@ public class DataHomeFragment extends BaseFragment {
         mPageRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-                pHandler.sendEmptyMessage(REFRESH);
+                pHandler.sendEmptyMessage(PAGING);
             }
         });
 
         mPageRefreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-                if (mPageSize < mStationNameList.size()){
+                if (mPageSize < mTotalStationNum){
                     mPageSize+=mPageSize;
-                    pHandler.sendEmptyMessage(LOAD_MORE);
+                    pHandler.sendEmptyMessage(PAGING);
                 }else {
                     mPageRefreshLayout.finishLoadMoreWithNoMoreData();
                 }
