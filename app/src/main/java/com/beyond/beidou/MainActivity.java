@@ -42,6 +42,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Fragment settingsFragment = null;
     private Fragment securityFragment = null;
     private Fragment updatePwdFragment = null;
+    private Fragment userInfoFragment = null;
     private BottomNavigationView navigationView;
     private String presentProject = null;
     private Intent downloadIntent;
@@ -288,6 +289,13 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             nowFragment = securityFragment;
             updatePwdFragment = null;
         }
+
+        if(nowFragment == userInfoFragment){
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.remove(userInfoFragment);
+            nowFragment = myFragment;
+            userInfoFragment = null;
+        }
         super.onBackPressed();
     }
 
@@ -378,5 +386,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     public void setSettingsFragment(Fragment settingsFragment) {
         this.settingsFragment = settingsFragment;
+    }
+
+    public Fragment getUserInfoFragment(){ return userInfoFragment;}
+
+    public void setUserInfoFragment(Fragment userInfoFragment){
+        this.userInfoFragment = userInfoFragment;
     }
 }

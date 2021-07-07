@@ -8,6 +8,7 @@
     android:orientation="vertical"
     android:textStyle="bold"
     android:ellipsize="marquee"
+    android:singleLine="true"
     >
 
 </TextView>

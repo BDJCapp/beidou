@@ -30,7 +30,7 @@
                 android:id="@+id/tv_title"
                 android:text="设置"
                 android:textColor="@color/text_black"
-                android:textSize="24sp"
+                android:textSize="20sp"
                 android:gravity="center"
                 />
         </RelativeLayout>
@@ -82,6 +82,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:src="@drawable/svg_ic_more"
+                    android:alpha="0.5"
                     />
 
             </LinearLayout>

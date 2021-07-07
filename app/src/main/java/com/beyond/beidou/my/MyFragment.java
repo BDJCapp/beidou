@@ -2,6 +2,7 @@ package com.beyond.beidou.my;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -31,7 +32,7 @@ import okhttp3.FormBody;
 
 public class MyFragment extends BaseFragment implements View.OnClickListener {
     private TextView mTvUserName;
-    private ImageView mIvMoreInfo;
+    private ImageView mIvUserInfo;
     public static String userName = "";
     private RelativeLayout mRlHelp;
     private RelativeLayout mRlAbout;
@@ -40,13 +41,14 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
 
     private final int SET_USER_NAME = 1;
 
-    public Handler handler = new Handler() {
+    public Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
                 case SET_USER_NAME:
                     mTvUserName.setText(String.valueOf(msg.obj));
                     saveStringToSP("userName", String.valueOf(msg.obj));
+                    isGetName = true;
                     break;
             }
 
@@ -58,13 +60,13 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(initLayout(), container, false);
         initView(view);
+        setUserName();
         return view;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setUserName();
     }
 
     public int initLayout() {
@@ -72,12 +74,12 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
     }
 
     public void initView(View view) {
-        mTvUserName = view.findViewById(R.id.tv_username);
-        mIvMoreInfo = view.findViewById(R.id.img_UserMore);
+        mTvUserName = view.findViewById(R.id.tv_user_name);
+        mIvUserInfo = view.findViewById(R.id.img_user);
         mRlHelp = view.findViewById(R.id.img_help);
         mRlAbout = view.findViewById(R.id.img_about);
         mCardViewSettings = view.findViewById(R.id.cv_settings);
-        mIvMoreInfo.setOnClickListener(this);
+        mIvUserInfo.setOnClickListener(this);
         mRlHelp.setOnClickListener(this);
         mRlAbout.setOnClickListener(this);
         mCardViewSettings.setOnClickListener(this);
@@ -96,15 +98,26 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
                 Fragment settingsFragment = new SettingsFragment();
                 activity.setSettingsFragment(settingsFragment);
                 activity.setNowFragment(settingsFragment);
-                LogUtil.e("nowFragment", activity.getNowFragment().toString());
                 ft.add(R.id.layout_home, settingsFragment).hide(this);
+                ft.addToBackStack(null);   //加入到返回栈中
+                ft.commit();
+                break;
+            case R.id.img_user:
+                if(!isGetName){
+                    showToast("未获取到用户名，请稍后再试");
+                    break;
+                }
+                Fragment userInfoFragment = new UserInfoFragment();
+                activity.setUserInfoFragment(userInfoFragment);
+                activity.setNowFragment(userInfoFragment);
+                ft.add(R.id.layout_home, userInfoFragment).hide(this);
                 ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
                 break;
         }
     }
     
-    public boolean setUserName() {
+    public void setUserName() {
         FormBody body = new FormBody.Builder()
                 .add("SessionUUID", ApiConfig.getSessionUUID())
                 .add("AccessToken", ApiConfig.getAccessToken())
@@ -117,12 +130,10 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
                     try {
                         JSONObject object = new JSONObject(res);
                         userName = object.getString("UserName");
-                        LogUtil.e("setUserName", userName);
                         Message message = new Message();
                         message.obj = userName;
                         message.what = SET_USER_NAME;
                         handler.sendMessage(message);
-                        isGetName = true;
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -136,6 +147,5 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
 
             }
         });
-        return isGetName;
     }
 }

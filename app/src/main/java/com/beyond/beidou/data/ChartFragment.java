@@ -518,7 +518,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         chartView.setMaximumViewport(viewport);
         chartView.setCurrentViewport(viewport);
 
-
     }
 
     public void convertHeartChartData(List<List<Object>> contentList, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, List<PointValue> pointValues) {

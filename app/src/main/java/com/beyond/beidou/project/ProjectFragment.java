@@ -42,6 +42,7 @@ import com.beyond.beidou.data.ChartFragment;
 import com.beyond.beidou.entites.MonitoringPoint;
 import com.beyond.beidou.entites.ProjectResponse;
 import com.beyond.beidou.login.LoginActivity;
+import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.beyond.beidou.util.ScreenUtil;
 import com.google.gson.Gson;
@@ -86,7 +87,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private ArrayList<String> mStationNameList = new ArrayList<>();
     private ArrayList<String> mStationUUIDList = new ArrayList<>();
 
-    private boolean mIsFirstLocate = true;
+//    private boolean mIsFirstLocate = true;
     private static boolean sIsFirstLogin = true;
     private static String mPresentProject;
     public static boolean sIsReLogin = false;
@@ -110,7 +111,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
         }
     };
-    private Activity mMainActivity = null;
+
+    private MainActivity mMainActivity = null;
     private boolean isMatch = false;
 
 
@@ -127,9 +129,12 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mMainActivity = getActivity();
+        mMainActivity = (MainActivity) getActivity();
         View view = inflater.inflate(initLayout(), container, false);
         initView(view);
+        mLocationClient = new LocationClient(mMainActivity.getApplicationContext());
+        mLocationClient.registerLocationListener(new MyLocationListener());
+        requestLocation(); //请求百度地图位置
         return view;
     }
 
@@ -146,9 +151,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         super.onHiddenChanged(hidden);
         //显示才刷新
         if (!hidden) {
-            MainActivity mMainActivity = (MainActivity) getActivity();
             if (!mPresentProject.equals(mMainActivity.getPresentProject())) {
-                mIsFirstLocate = true;
+//                mIsFirstLocate = true;
 //                getData();
                 doLoadingDialog();
             }
@@ -224,8 +228,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 //                }
                 Log.wtf("onItemSelected", "position:   " + position);
                 mPresentProject = (String) mSpinner.getItemAtPosition(position);
-                mIsFirstLocate = true;
-                MainActivity mMainActivity = (MainActivity) getActivity();
+//                mIsFirstLocate = true;
                 mMainActivity.setPresentProject(mPresentProject);
                 if (sIsFirstBindListener) {
                     sIsFirstBindListener = false;
@@ -301,7 +304,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             mPresentProject = spVal;
             sIsFirstLogin = false;
         } else {
-            MainActivity mMainActivity = (MainActivity) getActivity();
             mPresentProject = mMainActivity.getPresentProject();
             if (mPresentProject == null) {
                 mPresentProject = "";
@@ -341,7 +343,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             if (mPresentProject.equals("")) {
 //                                presentProject = mSpinner.getSelectedItem() == null ? "" : mSpinner.getSelectedItem() .toString();
                                 mPresentProject = mSpinner.getSelectedItem().toString();
-                                MainActivity mMainActivity = (MainActivity) getActivity();
                                 mMainActivity.setPresentProject(mPresentProject);
                                 for (ProjectResponse.ProjectListBean project : mProjectList) {
                                     if (project.getProjectName().equals(mPresentProject)) {
@@ -370,7 +371,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                 }
                                 if(!isMatch){
                                     mPresentProject = mSpinner.getSelectedItem().toString();
-                                    MainActivity mMainActivity = (MainActivity) getActivity();
                                     mMainActivity.setPresentProject(mPresentProject);
                                     for (ProjectResponse.ProjectListBean project : mProjectList) {
                                         if (project.getProjectName().equals(mPresentProject)) {
@@ -401,10 +401,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                 mBtnOffline.setText("离线\n" + mProjectStationStatus.getOffline());
                             }
 
-                            mLocationClient = new LocationClient(mMainActivity.getApplicationContext());
-                            mLocationClient.registerLocationListener(new MyLocationListener());
                             //todo requestLocation 更换位置
-                            requestLocation();    //请求百度地图位置
+
                             initStationList();    //初始化监测点数据
                             mLayoutManager = new LinearLayoutManager(mMainActivity);
                             mRecyclerView.setLayoutManager(mLayoutManager);
@@ -418,10 +416,11 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                     }
                                     switchFragment(mPresentProject, mStationNameList, position, mStationUUIDList);
                                     Log.e("project", "you click " + position);
-                                    MainActivity activity = (MainActivity) getActivity();
-                                    activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(1).getItemId());
+                                    mMainActivity.getNavigationView().setSelectedItemId(mMainActivity.getNavigationView().getMenu().getItem(1).getItemId());
                                 }
                             });
+
+                            navigate();
 
                             mPointsAdapter.setOnAreaClickListener(new MonitoringPointsAdapter.OnAreaClickListener() {
                                 @Override
@@ -624,79 +623,32 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mLocationClient.start();
     }
 
-    /**
-     * 初始化前台服务
-     */
-//    private void initNotification () {
-//        //设置后台定位
-//        //android8.0及以上使用NotificationUtils
-//        if ( Build.VERSION.SDK_INT >= 26) {
-//            NotificationUtils notificationUtils = new NotificationUtils(this);
-//            Notification.Builder builder = notificationUtils.getAndroidChannelNotification
-//                    ("适配android 8限制后台定位功能", "正在后台定位");
-//            mNotification = builder.build();
-//        } else {
-//            //获取一个Notification构造器
-//            Notification.Builder builder = new Notification.Builder(MainActivity.this);
-//            Intent nfIntent = new Intent(MainActivity.this, MainActivity.class);
-//
-//            builder.setContentIntent(PendingIntent.
-//                    getActivity(MainActivity.this, 0, nfIntent, 0)) // 设置PendingIntent
-//                    .setContentTitle("适配android 8限制后台定位功能") // 设置下拉列表里的标题
-//                    .setSmallIcon(R.mipmap.ic_launcher) // 设置状态栏内的小图标
-//                    .setContentText("正在后台定位") // 设置上下文内容
-//                    .setWhen(System.currentTimeMillis()); // 设置该通知发生的时间
-//
-//            mNotification = builder.build(); // 获取构建好的Notification
-//        }
-//        mNotification.defaults = Notification.DEFAULT_SOUND; //设置为默认的声音
-//    }
-    private void navigateTo(BDLocation location) {
-        double latitude = location.getLatitude(), longitude = location.getLongitude();
-        LatLng ll = new LatLng(latitude, longitude);
-        if (mIsFirstLocate) {
-            if (mProjectStationStatus.getTotal() != 0) {
-//                ProjectResponse.ProjectListBean.StationListBean projectStation = projectStationList.get(0);
-//                if(projectStation == null){
-//                    MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
-//                    mBaiduMap.animateMapStatus(update);
-//                    update = MapStatusUpdateFactory.zoomTo(16f);
-//                    mBaiduMap.animateMapStatus(update);
-//                    isFirstLocate = false;
-//                    return;
-//                }
-//                if(!"".equals(projectStation.getStationLatitude()) && !"".equals(projectStation.getStationLongitude())){
-//                    latitude = Double.parseDouble(projectStation.getStationLatitude());
-//                    longitude = Double.parseDouble(projectStation.getStationLongitude());
-//                    LatLng sourcePoint = new LatLng(latitude, longitude);
-//                    CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
-//                    ll = converter.convert();
-//                }
-
-                for (ProjectResponse.ProjectListBean.StationListBean projectStation : mProjectStationList) {
-                    if (projectStation == null) {
-                        continue;
-                    }
-                    if (!"".equals(projectStation.getStationLatitude()) && !"".equals(projectStation.getStationLongitude())) {
-                        latitude = Double.parseDouble(projectStation.getStationLatitude());
-                        longitude = Double.parseDouble(projectStation.getStationLongitude());
-                        LatLng sourcePoint = new LatLng(latitude, longitude);
-                        CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
-                        ll = converter.convert();
-                        break;
-                    }
+    private void navigate() {
+        double latitude, longitude;
+        LatLng ll;
+        boolean hasData = false;
+        if ( mProjectStationStatus != null && mProjectStationStatus.getTotal() != 0) {
+            for (ProjectResponse.ProjectListBean.StationListBean projectStation : mProjectStationList) {
+                if (projectStation == null) {
+                    continue;
+                }
+                if (!"".equals(projectStation.getStationLatitude()) && !"".equals(projectStation.getStationLongitude())) {
+                    latitude = Double.parseDouble(projectStation.getStationLatitude());
+                    longitude = Double.parseDouble(projectStation.getStationLongitude());
+                    LatLng sourcePoint = new LatLng(latitude, longitude);
+                    CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
+                    ll = converter.convert();
+                    MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
+                    mBaiduMap.animateMapStatus(update);
+                    update = MapStatusUpdateFactory.zoomTo(18f);
+                    mBaiduMap.animateMapStatus(update);
+                    hasData = true;
+                    break;
                 }
             }
-            MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
-            mBaiduMap.animateMapStatus(update);
-            update = MapStatusUpdateFactory.zoomTo(18f);
-            mBaiduMap.animateMapStatus(update);
-            mIsFirstLocate = false;
-        } else {
-            MyLocationData.Builder builder = new MyLocationData.Builder();
-            builder.latitude(latitude).longitude(longitude);
-            MyLocationData data = builder.build();
-            mBaiduMap.setMyLocationData(data);
+        }
+        if(!hasData){
+            showToast("项目所有监测点暂无位置数据！");
         }
     }
 
@@ -815,7 +767,12 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
-            navigateTo(bdLocation);
+
+            MyLocationData.Builder builder = new MyLocationData.Builder();
+            builder.latitude(bdLocation.getLatitude()).longitude(bdLocation.getLongitude());
+            MyLocationData data = builder.build();
+            mBaiduMap.setMyLocationData(data);
+
             StringBuilder currentPosition = new StringBuilder();
             currentPosition.append("纬度：").append(bdLocation.getLatitude()).append("\n");
             currentPosition.append("经度：").append(bdLocation.getLongitude()).append("\n");
@@ -850,9 +807,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     public void switchFragment(String projectName, ArrayList<String> stationNameList, int position, ArrayList<String> stationUUIDList) {
 
         ChartFragment chartFragment = ChartFragment.newInstance(projectName, stationNameList, position, stationUUIDList);
-        MainActivity activity = (MainActivity) getActivity();
-        activity.setChartFragment(chartFragment);
-        activity.setNowFragment(chartFragment);
+        mMainActivity.setChartFragment(chartFragment);
+        mMainActivity.setNowFragment(chartFragment);
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.add(R.id.layout_home, chartFragment).hide(this);
