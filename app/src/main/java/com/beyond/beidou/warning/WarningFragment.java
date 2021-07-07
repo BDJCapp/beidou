@@ -11,10 +11,6 @@ import androidx.fragment.app.Fragment;
 
 import com.beyond.beidou.R;
 
-/**
- * @author: 李垚
- * @date: 2021/1/29
- */
 public class WarningFragment extends Fragment {
 
     @Override

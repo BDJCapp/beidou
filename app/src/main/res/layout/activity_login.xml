@@ -1,37 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/back"
-    android:padding="10dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
 
-    <LinearLayout
+    >
+
+    <ImageView
+        android:id="@+id/img_loginImg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/ic_launcher"
+        android:layout_marginTop="50dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/bg_border"
+        />
+
+    <TextView
+        android:id="@+id/tv_loginText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:textSize="20sp"
+        android:textColor="@color/text_black"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/img_loginImg"
+        android:layout_marginTop="10dp"
+        />
+
+   <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="150dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        >
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="18dp"
-            android:layout_marginRight="18dp"
-            android:background="@drawable/shape_login_form"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tv_loginByPwd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="20dp"
-                android:text="密码登录"
-                android:textColor="@color/main_blue"
-                android:textSize="20sp"
-                android:textStyle="bold"/>
+        android:layout_below="@+id/tv_loginText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="18dp"
+        android:layout_marginRight="18dp"
+        android:layout_marginTop="20dp"
+       >
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -131,7 +138,7 @@
                     android:layout_marginLeft="20dp"
                     android:text="平台 :   "
                     android:textColor="@color/text_black"
-                    android:textSize="15sp"/>
+                    android:textSize="15sp" />
 
                 <Spinner
                     android:id="@+id/spinner_platform"
@@ -159,33 +166,19 @@
                 android:layout_marginTop="20dp"
                 android:background="@drawable/button_shape"
                 android:color="@color/main_blue"
-                android:text="登录"
+                android:text="登 录"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
+                android:textSize="18sp"
                 app:backgroundTint="@color/main_blue" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="right">
-
-                <TextView
-                    android:id="@+id/tv_forgetPwd"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="忘记密码？"
-                    android:visibility="gone"
-                    >
-                </TextView>
-
-            </LinearLayout>
 
         </LinearLayout>
 
 
-    </LinearLayout>
 
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</RelativeLayout>

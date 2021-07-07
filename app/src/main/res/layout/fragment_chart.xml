@@ -35,7 +35,7 @@
                     android:textSize="18sp"
                     android:singleLine="true"
                     android:ellipsize="end"
-                    android:maxEms="16"
+                    android:maxWidth="200dp"
                     android:layout_centerInParent="true"
                     />
 

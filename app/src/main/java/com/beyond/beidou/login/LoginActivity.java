@@ -48,18 +48,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
     private EditText mLoginAccountEt;
     private EditText mLoginCheckEt;
-    private ImageView imgVisible;
+    private ImageView mPwdVisibleImg;
     private Button mLoginBtn;
     private Spinner mPlatformSp;
 
-    private final int QUITAPP = 0;
+    private final int QUIT_APP = 0;
     private final int LOGIN = 1;
-    private final int LOGINDEFAULTFAILED = 2;
-    private final int CODE_ERROR = 421;
+    private final int GET_TOKEN_SESSION= 3;
+    private final int LOGIN_FAILED = 400;
+    private final int LOGIN_DEFAULT_FAILED = 400000;
     private final int ACCOUNT_OR_PWD_ERROR = 400120;
-    private final int IIILEGAL_USER_SESSION = 400110;
-    private final int SESSION_EXPIRATION_LOGOUT = 204;
-    private final int CODE_NULL = 423;
+    private final int ILLEGAL_USER_SESSION = 400110;
+    private final int ILLEGAL_USER_TOKEN = 400010;
     private final int SUCCESS = 200;
     private static boolean isExit = false;
     private ZLoadingDialog mLoadingDlg = new ZLoadingDialog(LoginActivity.this);
@@ -75,16 +75,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     Toast.makeText(LoginActivity.this,"用户名或密码错误,请重新输入",Toast.LENGTH_LONG).show();
                     mLoadingDlg.dismiss();
                     break;
-                case IIILEGAL_USER_SESSION:
-
-                case SESSION_EXPIRATION_LOGOUT:
-
-                case 400:
+                case ILLEGAL_USER_SESSION:
+                case ILLEGAL_USER_TOKEN:
+                case LOGIN_DEFAULT_FAILED:
+                case LOGIN_FAILED:
                     Toast.makeText(LoginActivity.this, String.valueOf(msg.obj),Toast.LENGTH_LONG).show();
                     mLoadingDlg.dismiss();
                     break;
                 case LOGIN:
-                    //加载动画之后登录
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -92,7 +90,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                         }
                     }).start();
                     break;
-                case QUITAPP://判断是否连续点击两次
+                case QUIT_APP://判断是否连续点击两次
                     isExit = false;
                     break;
                 case SUCCESS:
@@ -101,8 +99,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     mLoadingDlg.dismiss();
                     finish();
                     break;
-                case 111:
-                    reload();
+                case GET_TOKEN_SESSION:
+                    InitTokenAndSession();
                     break;
             }
         }
@@ -131,14 +129,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     public void initView() {
         mLoginAccountEt = findViewById(R.id.et_loginAccount);
         mLoginCheckEt = findViewById(R.id.et_loginCheck);
-        imgVisible = findViewById(R.id.img_visiblePwd);
+        mPwdVisibleImg = findViewById(R.id.img_visiblePwd);
         mLoginBtn = findViewById(R.id.btn_login);
         mPlatformSp = findViewById(R.id.spinner_platform);
-        imgVisible.setOnClickListener(this);
+        mPwdVisibleImg.setOnClickListener(this);
         mLoginBtn.setOnClickListener(this);
-
-//        etLoginAccount.setText("qazXSW0");
-//        etLoginCheck.setText("qazxswEDCVFR0*");
         mLoginAccountEt.setText("qwerASD5");
         mLoginCheckEt.setText("qwertyuiiopASDFG5*");
 
@@ -170,15 +165,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 switch (position){
                     case 0:
                         ApiConfig.setBaseUrl(ApiConfig.FIRST_BASE_URL);
-//                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
                         break;
                     case 1:
                         ApiConfig.setBaseUrl(ApiConfig.SECOND_BASE_URL);
-//                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
                         break;
                     case 2:
                         ApiConfig.setBaseUrl(ApiConfig.THIRD_BASE_URL);
-//                        LogUtil.e("BASE_URL",ApiConfig.BASE_URL + "  "  + position);
                         break;
                 }
             }
@@ -213,8 +205,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                         .setHintText("Loading...")
                         .setCanceledOnTouchOutside(false)
                         .show();
-//                handler.sendEmptyMessageDelayed(LOGIN,0);
-                handler.sendEmptyMessageDelayed(111,0);
+                handler.sendEmptyMessageDelayed(GET_TOKEN_SESSION,0);
 
                 break;
         }
@@ -223,7 +214,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private void setPwdVisible() {
         if (!isVisible)
         {
-            imgVisible.setImageResource(R.drawable.ic_pwd_visible);
+            mPwdVisibleImg.setImageResource(R.drawable.ic_pwd_visible);
             //设置密码可见
             mLoginCheckEt.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
             //将已输入的密码设置为可见
@@ -231,7 +222,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
             isVisible = true;
         }else{
-            imgVisible.setImageResource(R.drawable.ic_pwd_invisible);
+            mPwdVisibleImg.setImageResource(R.drawable.ic_pwd_invisible);
             //设置密码不可见
             mLoginCheckEt.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
             //将已输入的密码设置为不可见
@@ -257,16 +248,16 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                         String errMsg = object.getString("ResponseMsg");
                         switch (errCode) {
                             case "200": //登录成功
-                                handler.sendEmptyMessageDelayed(200,1000);
+                                handler.sendEmptyMessageDelayed(SUCCESS,1000);
                                 break;
                             case "400"://操作失败/参数非法
                                 message.obj = errMsg;
-                                message.what = 400;
+                                message.what = LOGIN_FAILED;
                                 handler.sendMessage(message);
                                 break;
                             case "400010"://访问令牌非法
                                 message.obj = errMsg;
-                                message.what = 40010;
+                                message.what = ILLEGAL_USER_TOKEN;
                                 handler.sendMessage(message);
                                 break;
                             case "400120": //用户名和密码错误
@@ -276,11 +267,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                                 break;
                             case "400110"://用户会话非法
                                 message.obj = errMsg;
-                                message.what = IIILEGAL_USER_SESSION;
+                                message.what = ILLEGAL_USER_SESSION;
                                 handler.sendMessage(message);
                                 break;
                             default:
-                                message.what = LOGINDEFAULTFAILED;
+                                message.obj = errMsg;
+                                message.what = LOGIN_DEFAULT_FAILED;
                                 handler.sendMessage(message);
                         }
                     } catch (JSONException e) {
@@ -350,7 +342,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             Toast.makeText(getApplicationContext(), "再按一次退出程序",
                     Toast.LENGTH_SHORT).show();
             // 利用handler延迟发送更改状态信息
-            handler.sendEmptyMessageDelayed(QUITAPP, 2000);
+            handler.sendEmptyMessageDelayed(QUIT_APP, 2000);
         } else {
             finish();
             System.exit(0);
@@ -411,7 +403,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         return isCorrect;
     }
 
-    public void reload()
+    public void InitTokenAndSession()
     {
         if (LoginUtil.isNetworkUsable(this))
         {
