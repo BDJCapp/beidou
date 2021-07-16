@@ -20,9 +20,9 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 
 import com.beyond.beidou.BaseFragment;
-import com.beyond.beidou.MyDialog;
+import com.beyond.beidou.views.MyDialog;
 import com.beyond.beidou.MainActivity;
-import com.beyond.beidou.MySpinner;
+import com.beyond.beidou.views.MySpinner;
 import com.beyond.beidou.R;
 import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiCallback;
@@ -1019,25 +1019,17 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         switch (mTimeSp.getSelectedItemPosition()) {
             case 0:
                 //最近1小时
-//                startTime = sdf.format(DateUtil.getHourBegin(1));
-//                endTime = sdf.format(DateUtil.getHourEnd());
                 mStartTime = sdf.format(DateUtil.getCurrentTimeBegin(1));
                 mEndTime = sdf.format(DateUtil.getCurrentTimeEnd(1));
                 mDeltaTime = "60";
-//                doLoadingDialog();
                 break;
             case 1:
                 //最近6小时
-//                startTime = sdf.format(DateUtil.getHourBegin(6));
-//                endTime = sdf.format(DateUtil.getHourEnd());
                 mStartTime = sdf.format(DateUtil.getCurrentTimeBegin(6));
                 mEndTime = sdf.format(DateUtil.getCurrentTimeEnd(6));
                 mDeltaTime = "60";
-//                doLoadingDialog();
                 break;
             case 2:
-//                startTime = sdf.format(DateUtil.getHourBegin(12));
-//                endTime = sdf.format(DateUtil.getHourEnd());
                 mStartTime = sdf.format(DateUtil.getCurrentTimeBegin(12));
                 mEndTime = sdf.format(DateUtil.getCurrentTimeEnd(12));
                 mDeltaTime = "60";

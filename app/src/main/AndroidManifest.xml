@@ -16,7 +16,6 @@
         android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
@@ -31,8 +30,10 @@
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
         >
-        <activity android:name=".login.StartActivity"
-            android:screenOrientation="portrait">
+        <activity
+            android:name=".login.StartActivity"
+            android:screenOrientation="portrait"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -45,9 +46,7 @@
             >
         </activity>
         <activity android:name=".login.LoginActivity" />
-        <activity android:name=".test.DatePickerTestActivity">
 
-        </activity>
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"

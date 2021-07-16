@@ -1,6 +1,5 @@
 package com.beyond.beidou.project;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -32,7 +31,7 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
-import com.beyond.beidou.MyRecycleView;
+import com.beyond.beidou.views.MyRecycleView;
 import com.beyond.beidou.R;
 import com.beyond.beidou.adapter.MonitoringPointsAdapter;
 import com.beyond.beidou.api.Api;
@@ -42,7 +41,6 @@ import com.beyond.beidou.data.ChartFragment;
 import com.beyond.beidou.entites.MonitoringPoint;
 import com.beyond.beidou.entites.ProjectResponse;
 import com.beyond.beidou.login.LoginActivity;
-import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.beyond.beidou.util.ScreenUtil;
 import com.google.gson.Gson;
@@ -319,6 +317,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             public void onSuccess(final String res) {
                 Gson gson = new Gson();
                 ProjectResponse response = gson.fromJson(res, ProjectResponse.class);
+                Log.wtf("res", "========" + response.getProjectList().get(0).getProjectStatus());
                 if (Integer.parseInt(response.getResponseCode()) == 200) {
                     mProjectList = response.getProjectList();
                     if (mProjectList == null) {
@@ -387,7 +386,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                 }
                             }
                             Log.e("project", "present project is " + mPresentProject);
-
                             if (mProjectStationStatus == null) {
                                 back2Login();
                                 Log.e("projectStationStatus", "nullllllllll");

@@ -1,4 +1,4 @@
-package com.beyond.beidou;
+package com.beyond.beidou.views;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.beyond.beidou.R;
 
 /**
  * @author: 李垚

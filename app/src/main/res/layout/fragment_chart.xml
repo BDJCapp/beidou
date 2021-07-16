@@ -82,7 +82,7 @@
             android:textAlignment="center"
             android:theme="@style/spinner_style" />
 
-        <com.beyond.beidou.MySpinner
+        <com.beyond.beidou.views.MySpinner
             android:id="@+id/sp_chart_time"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

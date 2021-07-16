@@ -93,6 +93,16 @@ public class StartActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (!this.isTaskRoot()) {   //解决华为退出到后台，重启app问题
+            Intent mainIntent = getIntent();
+            String action = mainIntent.getAction();
+            if (mainIntent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(action)) {
+                finish();
+                return;
+            }
+        }
+
         setContentView(R.layout.activity_start);
         init();
         if (LoginUtil.isNetworkUsable(this)) {

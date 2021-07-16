@@ -1,4 +1,4 @@
-package com.beyond.beidou;
+package com.beyond.beidou.views;
 
 import android.content.Context;
 import android.util.AttributeSet;

@@ -172,6 +172,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     case 2:
                         ApiConfig.setBaseUrl(ApiConfig.THIRD_BASE_URL);
                         break;
+                    case 3:
+                        ApiConfig.setBaseUrl(ApiConfig.FOURTH_BASE_URL);
+                        break;
                 }
             }
 
