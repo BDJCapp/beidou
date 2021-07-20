@@ -110,6 +110,7 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
         });
     }
 
+
     @Override
     public int getItemCount() {
         return mPointsList.size();

@@ -7,26 +7,24 @@
     <com.baidu.mapapi.map.MapView
         android:id="@+id/bdmapView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent" />
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="match_parent">
+
         <ToggleButton
             android:id="@+id/toggleButton"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginTop="200dp"
             android:layout_alignParentEnd="true"
+            android:layout_marginTop="200dp"
             android:layout_marginEnd="5dp"
+            android:background="@drawable/tg_selector"
             android:checked="true"
-            android:textSize="12sp"
             android:textOff="卫星"
             android:textOn="标准"
-            android:background="@drawable/tg_selector"
-            />
+            android:textSize="12sp" />
 
     </RelativeLayout>
 
@@ -36,18 +34,17 @@
         android:layout_height="match_parent">
 
         <androidx.cardview.widget.CardView
-            android:layout_margin="5dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:cardCornerRadius="10dp"
-            >
+            android:layout_margin="5dp"
+            app:cardCornerRadius="10dp">
 
             <com.yinglan.scrolllayout.content.ContentScrollView
+                android:id="@+id/scrollView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scrollbars="vertical"
                 android:scrollbarThumbVertical="@color/main_white"
-                >
+                android:scrollbars="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -110,11 +107,11 @@
 
                         <ImageView
                             android:id="@+id/iv_refresh"
-                            android:layout_gravity="center_vertical"
                             android:layout_width="0dp"
                             android:layout_height="15dp"
-                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginEnd="5dp"
+                            android:layout_weight="1"
                             android:src="@drawable/ic_refresh" />
 
                     </LinearLayout>
@@ -178,13 +175,23 @@
 
                     </LinearLayout>
 
+
                     <com.beyond.beidou.views.MyRecycleView
                         android:id="@+id/recycle_view"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="120dp"
-                        />
+                        android:layout_marginBottom="120dp" />
+
+
+                    <!--                    <com.yinglan.scrolllayout.content.ContentRecyclerView-->
+                    <!--                        android:id="@+id/recycle_view"-->
+                    <!--                        android:layout_width="match_parent"-->
+                    <!--                        android:layout_height="wrap_content"-->
+                    <!--                        android:layout_marginBottom="120dp"-->
+                    <!--                        />-->
+
                 </LinearLayout>
+
 
             </com.yinglan.scrolllayout.content.ContentScrollView>
 

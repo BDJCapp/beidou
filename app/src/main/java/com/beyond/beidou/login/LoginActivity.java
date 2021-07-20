@@ -242,7 +242,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         LoginUtil.loginByPwd(LoginActivity.this,username, encodePwd, SessionUUID, AccessToken, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-                LogUtil.e("res",res);
+//                LogUtil.e("res",res);
                 if (!TextUtils.isEmpty(res)) {
                     try {
                         Message message = new Message();
@@ -318,7 +318,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 if(grantResults.length > 0){
                     for(int result : grantResults){
                         if(result != PackageManager.PERMISSION_GRANTED){
-                            Toast.makeText(this, "Need to grant all permissions!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "北斗监测App需要获取以上权限才能正常运行", Toast.LENGTH_SHORT).show();
                             finish();
                             return;
                         }

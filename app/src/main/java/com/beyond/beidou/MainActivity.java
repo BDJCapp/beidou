@@ -263,7 +263,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                 this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(0).getItemId());
             } else {
                 this.setNowFragment(this.getDataFragment());
-                Log.e("fragment now1111", nowFragment.toString());
+                Log.e("fragment now", nowFragment.toString());
                 this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(1).getItemId());
             }
 
