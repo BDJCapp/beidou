@@ -21,6 +21,7 @@ import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
@@ -112,8 +113,6 @@ public class LoginUtil {
         {
             sessionUUID = ApiConfig.getSessionUUID();
         }
-        LogUtil.e("缓存中的SessionUUID",((BaseActivity)context).getStringFromSP("SessionUUID"));
-        LogUtil.e("登录使用的SessionUUID",sessionUUID);
 
         FormBody body = new FormBody.Builder()
                     .add("AccessToken", ApiConfig.getAccessToken())
@@ -136,6 +135,9 @@ public class LoginUtil {
                             String sessionUUID = object.getString("SessionUUID");
                             ApiConfig.setSessionUUID(sessionUUID);
                             ((BaseActivity)context).saveStringToSP("SessionUUID",sessionUUID);
+                            //更新Session过期时间
+                            updateSessionExpireTimestamp(context);
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -161,7 +163,7 @@ public class LoginUtil {
             ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
             return false;
         }else {
-                return false;
+            return false;
         }
     }
 
@@ -342,4 +344,12 @@ public class LoginUtil {
         }
         return isUsable;
     }
+
+    public static void updateSessionExpireTimestamp(Context context)
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE,59);
+        ((BaseActivity)context).saveStringToSP("SessionExpireTimestamp", String.valueOf(calendar.getTimeInMillis()));
+    }
+
 }

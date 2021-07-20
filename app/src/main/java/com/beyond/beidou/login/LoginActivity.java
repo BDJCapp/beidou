@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,10 +15,12 @@ import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -51,6 +54,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private ImageView mPwdVisibleImg;
     private Button mLoginBtn;
     private Spinner mPlatformSp;
+    private RelativeLayout mRootRl;
 
     private final int QUIT_APP = 0;
     private final int LOGIN = 1;
@@ -132,10 +136,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         mPwdVisibleImg = findViewById(R.id.img_visiblePwd);
         mLoginBtn = findViewById(R.id.btn_login);
         mPlatformSp = findViewById(R.id.spinner_platform);
+        mRootRl = findViewById(R.id.layout_loginRoot);
+
         mPwdVisibleImg.setOnClickListener(this);
         mLoginBtn.setOnClickListener(this);
         mLoginAccountEt.setText("qwerASD5");
         mLoginCheckEt.setText("qwertyuiiopASDFG5*");
+
+
 
         mLoginAccountEt.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -236,13 +244,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         mLoginCheckEt.setSelection(mLoginCheckEt.getText().toString().length());
     }
 
-    public void login(String username,String password,String SessionUUID,String AccessToken)
+    public void login(final String username, final String password, final String SessionUUID, final String AccessToken)
     {
         String encodePwd = LoginUtil.DES3Encode(password,SessionUUID);
         LoginUtil.loginByPwd(LoginActivity.this,username, encodePwd, SessionUUID, AccessToken, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-//                LogUtil.e("res",res);
+
+                saveStringToSP("userName",username);    //保存信息到SP中，若session未过期，用于自动登录
+                saveStringToSP("password",password);
+                saveStringToSP("sessionUUID",SessionUUID);
+                saveStringToSP("accessToken",AccessToken);
+
                 if (!TextUtils.isEmpty(res)) {
                     try {
                         Message message = new Message();
@@ -318,7 +331,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 if(grantResults.length > 0){
                     for(int result : grantResults){
                         if(result != PackageManager.PERMISSION_GRANTED){
-                            Toast.makeText(this, "北斗监测App需要获取以上权限才能正常运行", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Need to grant all permissions!", Toast.LENGTH_SHORT).show();
                             finish();
                             return;
                         }
@@ -453,4 +466,31 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             }).start();
         }
     }
+
+    public void addLayoutListener(final View main, final View scroll) {
+        main.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                Rect rect = new Rect();
+                //1、获取main在窗体的可视区域
+                main.getWindowVisibleDisplayFrame(rect);
+                //2、获取main在窗体的不可视区域高度，在键盘没有弹起时，main.getRootView().getHeight()调节度应该和rect.bottom高度一样
+                int mainInvisibleHeight = main.getRootView().getHeight() - rect.bottom;
+                int screenHeight = main.getRootView().getHeight();//屏幕高度
+                //3、不可见区域大于屏幕本身高度的1/4：说明键盘弹起了
+                if (mainInvisibleHeight > screenHeight / 4) {
+                    int[] location = new int[2];
+                    scroll.getLocationInWindow(location);
+                    // 4､获取Scroll的窗体坐标，算出main需要滚动的高度
+                    int scrollHeight = (location[1] + scroll.getHeight()) - rect.bottom;
+                    //5､让界面整体上移键盘的高度
+                    main.scrollTo(0, scrollHeight);
+                } else {
+                    //3、不可见区域小于屏幕高度1/4时,说明键盘隐藏了，把界面下移，移回到原有高度
+                    main.scrollTo(0, 0);
+                }
+            }
+        });
+    }
+
 }

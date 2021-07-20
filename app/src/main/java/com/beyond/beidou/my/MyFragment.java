@@ -1,33 +1,22 @@
 package com.beyond.beidou.my;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.baidu.mapapi.SDKInitializer;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
-import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.R;
-import com.beyond.beidou.api.Api;
-import com.beyond.beidou.api.ApiConfig;
-import com.beyond.beidou.util.LogUtil;
-import org.json.JSONException;
-import org.json.JSONObject;
-import okhttp3.FormBody;
 
 
 public class MyFragment extends BaseFragment implements View.OnClickListener {
@@ -39,28 +28,15 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
     private CardView mCardViewSettings;
     private boolean isGetName = false;
 
-    private final int SET_USER_NAME = 1;
-
-    public Handler handler = new Handler(Looper.getMainLooper()) {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            switch (msg.what) {
-                case SET_USER_NAME:
-                    mTvUserName.setText(String.valueOf(msg.obj));
-                    saveStringToSP("userName", String.valueOf(msg.obj));
-                    isGetName = true;
-                    break;
-            }
-
-        }
-    };
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(initLayout(), container, false);
         initView(view);
-        setUserName();
+        userName = getStringFromSP("userName");
+        isGetName = true;
+        mTvUserName.setText(userName);
         return view;
     }
 
@@ -116,36 +92,5 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
                 break;
         }
     }
-    
-    public void setUserName() {
-        FormBody body = new FormBody.Builder()
-                .add("SessionUUID", ApiConfig.getSessionUUID())
-                .add("AccessToken", ApiConfig.getAccessToken())
-                .build();
 
-        Api.config(ApiConfig.GET_SESSION_UUID).postRequestFormBody(getActivity(), body, new ApiCallback() {
-            @Override
-            public void onSuccess(String res) {
-                if (!TextUtils.isEmpty(res)) {
-                    try {
-                        JSONObject object = new JSONObject(res);
-                        userName = object.getString("UserName");
-                        Message message = new Message();
-                        message.obj = userName;
-                        message.what = SET_USER_NAME;
-                        handler.sendMessage(message);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    LogUtil.e("MyFragment setUserName()", "设置用户名的response为空");
-                }
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-
-            }
-        });
-    }
 }

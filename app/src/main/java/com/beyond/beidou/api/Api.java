@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+import com.beyond.beidou.login.LoginActivity;
 import com.beyond.beidou.login.StartActivity;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
@@ -66,10 +67,10 @@ public class Api {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String result = response.body().string();
-
                 String responseCode = parseJSONObject(result,"ResponseCode");
                 if (!responseCodeHandling(context,responseCode))
                 {
+                    LoginUtil.updateSessionExpireTimestamp(context); //每次调用接口都会更新session过期时间
                     callback.onSuccess(result);
                 }
             }
@@ -93,6 +94,7 @@ public class Api {
                 String responseCode = parseJSONObject(responseText,"ResponseCode");
                 if (!responseCodeHandling(context,responseCode))
                 {
+                    LoginUtil.updateSessionExpireTimestamp(context);
                     callback.onSuccess(responseText);
                 }
             }
@@ -122,6 +124,7 @@ public class Api {
                 String responseCode = parseJSONObject(result,"ResponseCode");
                 if (!responseCodeHandling(context,responseCode))
                 {
+                    LoginUtil.updateSessionExpireTimestamp(context);
                     callback.onSuccess(result);
                 }
             }
@@ -145,6 +148,7 @@ public class Api {
                 String responseCode = parseJSONObject(result,"ResponseCode");
                 if (!responseCodeHandling(context,responseCode))
                 {
+                    LoginUtil.updateSessionExpireTimestamp(context);
                     callback.onSuccess(result);
                 }
             }
@@ -166,6 +170,7 @@ public class Api {
                 //如果返回的结果不正确，不调用Success。维持原状，提示用户重新操作
                 if (!responseCodeHandling(context,responseCode))
                 {
+                    LoginUtil.updateSessionExpireTimestamp(context);
                     callback.onSuccess(responseText);
                 }
             }
@@ -222,7 +227,7 @@ public class Api {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Intent intent = new Intent();
-                    intent.setClass(context, StartActivity.class);
+                    intent.setClass(context, LoginActivity.class);
                     context.startActivity(intent);
                     ((Activity)context).finish();   //结束当前活动
                 }

@@ -45,8 +45,9 @@
             android:launchMode="singleTask"
             >
         </activity>
-        <activity android:name=".login.LoginActivity" />
-
+        <activity android:name=".login.LoginActivity"
+            android:windowSoftInputMode="adjustPan"
+            />
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
