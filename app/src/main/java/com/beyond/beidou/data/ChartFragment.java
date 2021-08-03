@@ -1066,6 +1066,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         doLoadingDialog();
     }
 
+
     public void downLoadExcel() {
         //获取URL
         FormBody body = new FormBody.Builder()
