@@ -146,11 +146,17 @@ public class Api {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 final String result = response.body().string();
                 String responseCode = parseJSONObject(result,"ResponseCode");
-                if (!responseCodeHandling(context,responseCode))
+                if (context instanceof StartActivity)
+                {
+                    LogUtil.e("APi postRequestFormBody()","StartActivity");
+                    callback.onSuccess(result);
+                }
+                else if (!responseCodeHandling(context,responseCode))
                 {
                     LoginUtil.updateSessionExpireTimestamp(context);
                     callback.onSuccess(result);
                 }
+
             }
         });
     }

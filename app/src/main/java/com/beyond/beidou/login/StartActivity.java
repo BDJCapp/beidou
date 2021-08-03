@@ -17,6 +17,9 @@ import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Calendar;
 
 /**
@@ -107,7 +110,30 @@ public class StartActivity extends BaseActivity {
                 LogUtil.e("loginactivity initEvent()","自动登录中...");
                 ApiConfig.setAccessToken(getStringFromSP("accessToken"));
                 ApiConfig.setSessionUUID(getStringFromSP("sessionUUID"));
-                mHandler.sendEmptyMessageDelayed(MAIN,500);
+                LoginUtil.loginByPwd(StartActivity.this, getStringFromSP("userName"), getStringFromSP("password"), getStringFromSP("sessionUUID"), getStringFromSP("accessToken"), new ApiCallback() {
+                    @Override
+                    public void onSuccess(String res) {
+                        try {
+                            JSONObject object = new JSONObject(res);
+                            String errCode = object.getString("ResponseCode");
+                            if ("200".equals(errCode)){
+                                mHandler.sendEmptyMessage(MAIN);
+                            }else {
+                                LogUtil.e("loginactivity initEvent()","****自动登录失败*****");
+                                mHandler.sendEmptyMessage(LOGIN);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Exception e) {
+                        mHandler.sendEmptyMessage(LOGIN);
+                    }
+                });
+            }else {
+                LogUtil.e("loginactivity initEvent()","Session过期");
+                mHandler.sendEmptyMessageDelayed(LOGIN, 500);
             }
         }else {
             //首次登录或者上次是退出登录，则进入登录页
@@ -136,14 +162,6 @@ public class StartActivity extends BaseActivity {
         init();
         initEvent();
 
-//        if (LoginUtil.isNetworkUsable(this)) {
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    initData();
-//                }
-//            }).start();
-//        }
 
     }
 }

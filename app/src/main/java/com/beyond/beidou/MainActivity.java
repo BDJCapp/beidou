@@ -163,10 +163,13 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         switch (id) {
             case R.id.nav_my:
                 LogUtil.e("111nowFragement", nowFragment.toString());
-                if (nowFragment == settingsFragment || nowFragment == securityFragment || nowFragment == updatePwdFragment) {
+                if (nowFragment == settingsFragment || nowFragment == securityFragment || nowFragment == updatePwdFragment || nowFragment == userInfoFragment) {
                     break;
                 }
-                if (updatePwdFragment != null) {
+                if(userInfoFragment != null){
+                    switchFragment(nowFragment, userInfoFragment);
+                    break;
+                } else if (updatePwdFragment != null) {
                     switchFragment(nowFragment, updatePwdFragment);
                     break;
                 } else if (securityFragment != null) {

@@ -246,13 +246,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
     public void login(final String username, final String password, final String SessionUUID, final String AccessToken)
     {
-        String encodePwd = LoginUtil.DES3Encode(password,SessionUUID);
+        final String encodePwd = LoginUtil.DES3Encode(password,SessionUUID);
         LoginUtil.loginByPwd(LoginActivity.this,username, encodePwd, SessionUUID, AccessToken, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
 
                 saveStringToSP("userName",username);    //保存信息到SP中，若session未过期，用于自动登录
-                saveStringToSP("password",password);
+                saveStringToSP("password",encodePwd);
                 saveStringToSP("sessionUUID",SessionUUID);
                 saveStringToSP("accessToken",AccessToken);
 
