@@ -48,7 +48,6 @@ import java.util.List;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
-
     private EditText mLoginAccountEt;
     private EditText mLoginCheckEt;
     private ImageView mPwdVisibleImg;
@@ -67,7 +66,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private final int SUCCESS = 200;
     private static boolean isExit = false;
     private ZLoadingDialog mLoadingDlg = new ZLoadingDialog(LoginActivity.this);
-
     private Intent intent;
     private boolean isVisible = false;
     public Handler handler = new  Handler(Looper.getMainLooper()){
@@ -125,9 +123,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     }
 
     @Override
-    public void initData() {
-
-    }
+    public void initData() {}
 
     @Override
     public void initView() {
@@ -137,13 +133,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         mLoginBtn = findViewById(R.id.btn_login);
         mPlatformSp = findViewById(R.id.spinner_platform);
         mRootRl = findViewById(R.id.layout_loginRoot);
-
         mPwdVisibleImg.setOnClickListener(this);
         mLoginBtn.setOnClickListener(this);
         mLoginAccountEt.setText("qwerASD5");
         mLoginCheckEt.setText("qwertyuiiopASDFG5*");
-
-
 
         mLoginAccountEt.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -187,17 +180,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) { }
         });
-
     }
 
     @Override
-    public void initEvent() {
-
-    }
+    public void initEvent() {}
 
     @Override
     public void onClick(View view) {
@@ -217,7 +205,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                         .setCanceledOnTouchOutside(false)
                         .show();
                 handler.sendEmptyMessageDelayed(GET_TOKEN_SESSION,0);
-
                 break;
         }
     }
@@ -230,7 +217,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
             mLoginCheckEt.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
             //将已输入的密码设置为可见
             mLoginCheckEt.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-
             isVisible = true;
         }else{
             mPwdVisibleImg.setImageResource(R.drawable.ic_pwd_invisible);
@@ -250,12 +236,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         LoginUtil.loginByPwd(LoginActivity.this,username, encodePwd, SessionUUID, AccessToken, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-
                 saveStringToSP("userName",username);    //保存信息到SP中，若session未过期，用于自动登录
                 saveStringToSP("password",encodePwd);
                 saveStringToSP("sessionUUID",SessionUUID);
                 saveStringToSP("accessToken",AccessToken);
-
                 if (!TextUtils.isEmpty(res)) {
                     try {
                         Message message = new Message();
@@ -430,32 +414,25 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     Thread getTokenThread = new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            while (!LoginUtil.getAccessToken(LoginActivity.this)){
-                                LogUtil.e("LoginActivity initData()","循环请求Token");
-                            }
+                            while (!LoginUtil.getAccessToken(LoginActivity.this)){ }
                             LoginUtil.upDateToken(getApplicationContext());
                             LogUtil.e("LoginActivity 成功获取Token", ApiConfig.getAccessToken());
                         }
                     });
                     getTokenThread.start();
-
                     try {
                         getTokenThread.join();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
                     Thread getSessionThread = new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            while (!LoginUtil.getSessionId(LoginActivity.this)){
-                                LogUtil.e("LoginActivity initData()","循环请求Session");
-                            }
+                            while (!LoginUtil.getSessionId(LoginActivity.this)){ }
                             LogUtil.e("LoginActivity 成功获取Session", ApiConfig.getSessionUUID());
                         }
                     });
                     getSessionThread.start();
-
                     try {
                         getSessionThread.join();
                     } catch (InterruptedException e) {
@@ -465,32 +442,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 }
             }).start();
         }
-    }
-
-    public void addLayoutListener(final View main, final View scroll) {
-        main.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                Rect rect = new Rect();
-                //1、获取main在窗体的可视区域
-                main.getWindowVisibleDisplayFrame(rect);
-                //2、获取main在窗体的不可视区域高度，在键盘没有弹起时，main.getRootView().getHeight()调节度应该和rect.bottom高度一样
-                int mainInvisibleHeight = main.getRootView().getHeight() - rect.bottom;
-                int screenHeight = main.getRootView().getHeight();//屏幕高度
-                //3、不可见区域大于屏幕本身高度的1/4：说明键盘弹起了
-                if (mainInvisibleHeight > screenHeight / 4) {
-                    int[] location = new int[2];
-                    scroll.getLocationInWindow(location);
-                    // 4､获取Scroll的窗体坐标，算出main需要滚动的高度
-                    int scrollHeight = (location[1] + scroll.getHeight()) - rect.bottom;
-                    //5､让界面整体上移键盘的高度
-                    main.scrollTo(0, scrollHeight);
-                } else {
-                    //3、不可见区域小于屏幕高度1/4时,说明键盘隐藏了，把界面下移，移回到原有高度
-                    main.scrollTo(0, 0);
-                }
-            }
-        });
     }
 
 }

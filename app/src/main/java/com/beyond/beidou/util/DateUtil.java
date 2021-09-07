@@ -295,7 +295,6 @@ public class DateUtil {
 
     public static List<AxisValue> getDayXAxisLabel() {
         String[] labels = new String[]{"00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "24:00"};
-//        String[] labels = new String[]{"00", "02", "04", "06", "08", "10", "12", "14", "16", "18", "20", "22", "24"};
         List<AxisValue> axisValues = new ArrayList<>();
         for (int i = 0; i <= 1440; i += 120) {
             AxisValue axisValue = new AxisValue(i);
@@ -309,8 +308,7 @@ public class DateUtil {
         int totalPoint = 60 * hour;
         int spaceTIme = 5 * hour;
         List<AxisValue> axisValues = new ArrayList<>();
-//        List<String> labelList = DateUtil.getHourXLabel(hour);
-        List<String> labelList = DateUtil.getCurrentTimeXLabel(hour);  //修改后的标签
+        List<String> labelList = DateUtil.getCurrentTimeXLabel(hour);
         for (int i = 0; i <= totalPoint; i += spaceTIme) {
             AxisValue axisValue = new AxisValue(i);
             axisValue.setLabel(labelList.get(i / spaceTIme));
@@ -356,22 +354,16 @@ public class DateUtil {
         String endTime = null;
         switch (selectedTime) {
             case "最近1小时":
-//                startTime = sdf.format(DateUtil.getHourBegin(1));
-//                endTime = sdf.format(DateUtil.getHourEnd());
                 startTime = sdf.format(DateUtil.getCurrentTimeBegin(1));
                 endTime = sdf.format(DateUtil.getCurrentTimeEnd(1));
                 time = startTime + "~" + endTime;
                 break;
             case "最近6小时":
-//                startTime = sdf.format(DateUtil.getHourBegin(6));
-//                endTime = sdf.format(DateUtil.getHourEnd());
                 startTime = sdf.format(DateUtil.getCurrentTimeBegin(6));
                 endTime = sdf.format(DateUtil.getCurrentTimeEnd(6));
                 time = startTime + "~" + endTime;
                 break;
             case "最近12小时":
-//                startTime = sdf.format(DateUtil.getHourBegin(12));
-//                endTime = sdf.format(DateUtil.getHourEnd());
                 startTime = sdf.format(DateUtil.getCurrentTimeBegin(12));
                 endTime = sdf.format(DateUtil.getCurrentTimeEnd(12));
                 time = startTime + "~" + endTime;
@@ -627,13 +619,11 @@ public class DateUtil {
         Date present = calendar.getTime();
         for (int i = 0; i <= 12; i++) {
             labels.add(sdf.format(present));
-//            LogUtil.e("生成的标签", labels.get(i));
             calendar.add(Calendar.MONTH, -1);
             intervals.add(calcDayOffset(calendar.getTime(), present));
             present = calendar.getTime();
         }
         for (Integer integer : intervals) {
-//            LogUtil.e("生成的间隔值", "=========" + integer + "============");
         }
         Calendar cal2 = Calendar.getInstance();
         cal2.add(Calendar.MONTH, 1);
@@ -644,9 +634,7 @@ public class DateUtil {
         int totalXCount = calcDayOffset(date1, date2) * 1440;
         int tick = 12;
         for (long i = 0; i <= totalXCount; i += 1440 * interval) {
-//            LogUtil.e("值和标签", "value : " + i + ", labels: " + labels.get(tick) + " , tick=" + tick);
             interval = (tick == 0) ? 1 : intervals.get(tick - 1);
-//            LogUtil.e("interval", "" + interval);
             AxisValue axisValue = new AxisValue(i);
             axisValue.setLabel(labels.get(tick--));
             xAxis.add(axisValue);
@@ -679,7 +667,6 @@ public class DateUtil {
         cal2.set(Calendar.HOUR_OF_DAY, cal1.get(Calendar.HOUR_OF_DAY));
         int totalXCount = calcDayOffset(date1, cal2.getTime()) * 1440;
         for (int i = 0, j = dayGap; i <= totalXCount; i += 1440) {
-//            LogUtil.e("值和标签", "value : " + i + ", labels: " + labels.get(j) + " , j=" + j);
             AxisValue axisValue = new AxisValue(i);
             axisValue.setLabel(labels.get(j--));
             xAxis.add(axisValue);
@@ -713,7 +700,6 @@ public class DateUtil {
 
         for (int i = 0; i <= monthGap * 2; i++) {
             labels.add(sdf.format(date2));
-//            LogUtil.e("生成的标签", labels.get(i));
             if (i % 2 == 0) {
                 cal2.add(Calendar.MONTH, -1);
                 cal2.set(Calendar.DAY_OF_MONTH, 15);
@@ -728,23 +714,15 @@ public class DateUtil {
         cal2.set(Calendar.DAY_OF_MONTH, 1);
         cal2.set(Calendar.HOUR_OF_DAY, 0);
         int totalXCount = calcDayOffset(date1, cal2.getTime()) * 1440;
-//        LogUtil.e("总点数", totalXCount + "");
-//        for (Integer integer : intervals) {
-//            LogUtil.e("生成的间隔值", "========="+integer+"============");
-//        }
-        LogUtil.e("Time", "startTime" + start + ", cal1Time: " + cal1.getTime());
         offSet = -(start.getTime() - cal1.getTimeInMillis()) / (1000 * 60);
         int tick = monthGap * 2;
         for (long i = offSet; i <= totalXCount + offSet; i += 1440 * interval) {
-//            LogUtil.e("值和标签", "value : " + i + ", labels: " + labels.get(tick) + " , tick=" + tick);
             interval = (tick == 0) ? 1 : intervals.get(tick - 1);
-//            LogUtil.e("interval","" + interval);
             AxisValue axisValue = new AxisValue(i);
             axisValue.setLabel(labels.get(tick--));
             xAxis.add(axisValue);
         }
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-//        cal2.add(Calendar.DAY_OF_YEAR, 15);
         labelEndTime = df.format(cal2.getTime());
         return xAxis;
     }

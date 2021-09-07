@@ -65,7 +65,7 @@ public class DataHomeFragment extends BaseFragment {
     private final int mPageSize = 10;
     private Integer mCurrentPageSize = mPageSize;
     private int mTotalStationNum;
-    MainActivity mainActivity;
+    private MainActivity mainActivity;
     private static final int REQUEST_PROJECT = 1;
     private static final int REQUEST_DEVICE = 2;
     private static final int LOADING_FINISH = 200;
@@ -99,15 +99,14 @@ public class DataHomeFragment extends BaseFragment {
         }
     };
 
-
     private void doLoadingDialog(int type) {
-        if(type == 1){
+        if(type == REQUEST_PROJECT){
             pHandler.sendEmptyMessageDelayed(REQUEST_PROJECT, 150);
         }else{
             pHandler.sendEmptyMessageDelayed(REQUEST_DEVICE, 150);
         }
         mLoadingDlg.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
-                .setLoadingColor(Color.BLACK)//颜色
+                .setLoadingColor(Color.BLACK)
                 .setHintText("Loading...")
                 .setCancelable(false)
                 .setCanceledOnTouchOutside(false)
@@ -134,7 +133,7 @@ public class DataHomeFragment extends BaseFragment {
         mDevicesRv = view.findViewById(R.id.rv_device);
         mPageRefreshLayout = view.findViewById(R.id.layout_refresh);
         mLoadingDlg = new ZLoadingDialog(getActivity());
-        doLoadingDialog(1);
+        doLoadingDialog(REQUEST_PROJECT);
         pageInit();
     }
 
@@ -145,16 +144,12 @@ public class DataHomeFragment extends BaseFragment {
         {
             if (mainActivity.getNowFragment() == mainActivity.getDataFragment() && !mProjectSp.getSelectedItem().toString().equals(((MainActivity)getActivity()).getPresentProject())) {
                 mProjectSp.setSelection(mProjectNameList.indexOf(((MainActivity)getActivity()).getPresentProject()), true);
-                //设置spinner选中项
-                doLoadingDialog(2);
-//            setViews();
+                doLoadingDialog(REQUEST_DEVICE);
             }
         }
     }
 
-
     public void setViews() {
-//        isFinishLoading = false;
         //设置Spinner
         final HashMap<String, Object> requestParams = new HashMap<>();
         requestParams.put("AccessToken", ApiConfig.getAccessToken());
@@ -205,7 +200,6 @@ public class DataHomeFragment extends BaseFragment {
                     }
                 });
                 pHandler.sendEmptyMessageDelayed(200,0);
-//                isFinishLoading = true;
             }
 
             @Override
@@ -225,9 +219,7 @@ public class DataHomeFragment extends BaseFragment {
             jsonData.put("SessionUUID",ApiConfig.getSessionUUID());
             jsonData.put("ProjectUUID",projectUUIDArray);
             jsonData.put("PageInfo",pageArray);
-
             projectUUIDArray.put(0,mProjectName2UUID.get(selectedProject));
-
             JSONObject pageObject = new JSONObject();
             pageObject.put("PageNumber","1");
             pageObject.put("PageSize", mCurrentPageSize.toString());
@@ -274,7 +266,6 @@ public class DataHomeFragment extends BaseFragment {
                     }
                 });
                 pHandler.sendEmptyMessageDelayed(LOADING_FINISH,0);
-//                        isFinishLoading = true;
             }
 
             @Override
@@ -283,7 +274,6 @@ public class DataHomeFragment extends BaseFragment {
             }
         });
     }
-
 
     public String getStationType(String stationType) {
         switch (stationType) {
@@ -326,7 +316,6 @@ public class DataHomeFragment extends BaseFragment {
     }
 
     public void switchFragment(String projectName, ArrayList<String> stationNameList, int devicePosition, ArrayList<String> stationUUIDList) {
-        //Fragment chartFragment = new ChartFragment();
         ChartFragment chartFragment = ChartFragment.newInstance(projectName, stationNameList, devicePosition, stationUUIDList);
         MainActivity activity = (MainActivity) getActivity();
         activity.setChartFragment(chartFragment);

@@ -44,7 +44,6 @@ public class DownloadService extends Service {
             stopForeground(true);
             getNotificationManager().notify(1,getNotification("导出成功",-1));
             downLoadExcelSuccess.showSnackBar();
-//            Toast.makeText(DownloadService.this,"导出成功",Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -52,7 +51,6 @@ public class DownloadService extends Service {
             downloadTask = null;
             stopForeground(true);
             getNotificationManager().notify(1,getNotification(reason,-1));
-//            Toast.makeText(DownloadService.this,reason,Toast.LENGTH_SHORT).show();
         }
 
 

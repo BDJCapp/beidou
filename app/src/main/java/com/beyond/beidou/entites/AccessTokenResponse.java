@@ -1,9 +1,6 @@
 package com.beyond.beidou.entites;
 
-/**
- * @author: 李垚
- * @date: 2021/3/10
- */
+
 public class AccessTokenResponse {
 
     /**

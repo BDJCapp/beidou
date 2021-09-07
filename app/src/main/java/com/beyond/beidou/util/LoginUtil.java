@@ -236,7 +236,6 @@ public class LoginUtil {
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-//                LogUtil.e("定时任务","1111");
                 while (!LoginUtil.getAccessToken(context)){
                     LogUtil.e("LoginUtil upDateToken","循环获取Token");
                 }

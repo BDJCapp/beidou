@@ -6,10 +6,9 @@
 
     <color name="text_black">#4E5157</color>
     <color name="text_gray">#838895</color>
-<!--    <color name="bottom_background">#E6E8E8</color>-->
     <color name="bottom_background">#ffffff</color>
     <color name="under_line">#BDBFBF</color>
-    <color name="main_blue">#2196F3</color>
+    <color name="main_blue">#0075E3</color>
     <color name="main_white">#FFFFFF</color>
 
     <color name="main_money">#ff4757</color>

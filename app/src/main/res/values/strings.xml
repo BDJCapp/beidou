@@ -9,4 +9,5 @@
     <string name="loadExcel"> 导出报表 </string>
     <string name="deviceNum">监测点数:</string>
     <string name="update">更新于:</string>
+    <string name="CoordinateSystem">WGS84坐标系|</string>
 </resources>

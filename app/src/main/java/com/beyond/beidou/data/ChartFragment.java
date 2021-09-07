@@ -165,15 +165,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             mDeviceSp.setSelection(selectedDevicePosition, true);
             mStationUUIDList = getArguments().getStringArrayList("stationUUIDList");
         }
-//        String[] times = new String[]{"最近1小时", "最近6小时", "最近12小时", "本日", "一周", "一月", "一年"};
         final String[] times = new String[]{"最近1小时", "最近6小时", "最近12小时", "本日", "一周", "一月", "一年", "自定义时间"};
         final ArrayAdapter<String> timeAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, times);
         timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
         mTimeSp.setAdapter(timeAdapter);
         mTimeSp.setSelection(3);
-
         mLastSelectedTimePosition = 3;
-
         mNChart = view.findViewById(R.id.chart_X);
         mEChart = view.findViewById(R.id.chart_Y);
         mHChart = view.findViewById(R.id.chart_H);
@@ -219,7 +216,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                         isFirstTimeSelectTime = false;
                         return;
                     }
-
 
                     if (parent.getSelectedItem().toString().equals("自定义时间")) {
                         mTimePickerDlg.setOnClickBottomListener(new MyDialog.OnClickBottomListener() {
@@ -272,7 +268,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                LogUtil.e("NothingSelected","1111");
             }
         });
 
@@ -301,75 +296,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
             }
         });
-
         mNChart.setOnTouchListener(touchListener);
         mEChart.setOnTouchListener(touchListener);
         mHChart.setOnTouchListener(touchListener);
         mDeltaHChart.setOnTouchListener(touchListener);
         mDeltaDChart.setOnTouchListener(touchListener);
         mHeartChart.setOnTouchListener(touchListener);
-
-
-
-
-//        chartX.setViewportChangeListener(new ViewportChangeListener() {
-//            @Override
-//            public void onViewportChanged(Viewport viewport) {
-//                //1494就是给ViewPort设置的MaxRight
-//                if (viewport.right == 1494)
-//                {
-//                    LogUtil.e("已滑到最右边","1111111");
-//                }
-////                LogUtil.e("当前ViewPort的最右边的位置",viewport.right + " ");
-////                LogUtil.e("当前ViewPort的最左边的位置",viewport.left + " ");
-//            }
-//        });
-
-//        数据选择监听
-//        chartX.setOnValueTouchListener(new LineChartOnValueSelectListener() {
-//            @Override
-//            public void onValueSelected(int i, int i1, PointValue pointValue) {
-//                Toast.makeText(getActivity(), pointValue.getX() + " , " + pointValue.getY(), Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onValueDeselected() {
-//
-//            }
-//        });
-//
-//        chartY.setOnValueTouchListener(new LineChartOnValueSelectListener() {
-//            @Override
-//            public void onValueSelected(int i, int i1, PointValue pointValue) {
-//                Toast.makeText(getActivity(), pointValue.getX() + " , " + pointValue.getY(), Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onValueDeselected() {
-//
-//            }
-//        });
-//
-//        chartH.setOnValueTouchListener(new LineChartOnValueSelectListener() {
-//            @Override
-//            public void onValueSelected(int i, int i1, PointValue pointValue) {
-//                Toast.makeText(getActivity(), pointValue.getX() + " , " + pointValue.getY(), Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onValueDeselected() {
-//
-//            }
-//        });
-
-//        chartX.setViewportChangeListener(new ViewportChangeListener() {
-//            @Override
-//            public void onViewportChanged(Viewport viewport) {
-//                LogUtil.e("视图变化","1111");
-//                LogUtil.e("ZoomLevel",chartX.getZoomLevel() + " ");
-//            }
-//        });
-
     }
 
     /**
@@ -394,9 +326,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     yEnd = event.getY();
                     endTime = System.currentTimeMillis();
                     speed = (yEnd - yStart) / (endTime - startTime);
-/*                    if (Math.abs(yEnd - yStart) > 300f) {
-                        svCharts.requestDisallowInterceptTouchEvent(false);
-                    }*/
                     if (speed > 1f || speed < -1.2f) {
                         mChartsSv.requestDisallowInterceptTouchEvent(false);
                     }
@@ -410,19 +339,18 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      * 绘制XYH图表
      */
     public void drawXYHChart(String selectedTime) {
-//        String time = DateUtil.getTimeInterval(spTime.getSelectedItem().toString());
         String time = mStartTime + "~" + mEndTime;
         mNChartNameTv.setText("N");
         mNChartTimeTv.setText(time);
-        mNChartCooTv.setText("WGS84坐标系|");
+        mNChartCooTv.setText(R.string.CoordinateSystem);
 
         mEChartNameTv.setText("E");
         mEChartTimeTv.setText(time);
-        mEChartCooTv.setText("WGS84坐标系|");
+        mEChartCooTv.setText(R.string.CoordinateSystem);
 
         mHChartNameTv.setText("H");
         mHChartTimeTv.setText(time);
-        mHChartCooTv.setText("WGS84坐标系|");
+        mHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
         List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoN")).toString(), mNConvertData);
         convertLines(mNConvertData);
@@ -437,7 +365,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoH")).toString(), mHConvertData);
         convertLines(mHConvertData);
         setChart(mHChart, xAxisValues, yLabel, mHConvertAvg);
-
     }
 
 
@@ -445,38 +372,31 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      * 绘制位移图表
      */
     public void drawDeltaChart(String selectedTime) {
-//        String time = DateUtil.getTimeInterval(selectedTime);
         String time = mStartTime + "~" + mEndTime;
         mDeltaDChartNameTv.setText("水平位移图");
         mDeltaDChartTimeTv.setText(time);
-        mDeltaDChartCooTv.setText("WGS84坐标系|");
-
+        mDeltaDChartCooTv.setText(R.string.CoordinateSystem);
         mDeltaHChartNameTv.setText("垂直位移图");
         mDeltaHChartTimeTv.setText(time);
-        mDeltaHChartCooTv.setText("WGS84坐标系|");
-
+        mDeltaHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
         List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaD")).toString(), mDeltaDConvertData);
         convertLines(mDeltaDConvertData);
         setChart(mDeltaDChart, xAxisValues, yLabel, mDeltaDConvertAvg);
-
         xAxisValues = setXAxisValues(selectedTime);
         yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaH")).toString(), mDeltaHConvertData);
         convertLines(mDeltaHConvertData);
         setChart(mDeltaHChart, xAxisValues, yLabel, mDeltaHConvertAvg);
     }
 
-    public void drawHeartChart(String selectedTime) {
-//        String time = DateUtil.getTimeInterval(selectedTime);
+    public void drawHeartChart() {
         String time = mStartTime + "~" + mEndTime;
         mHeartChartNameTv.setText("心型图");
         mHeartChartTimeTv.setText(time);
-        mHeartChartCooTv.setText("WGS84坐标系|");
-
+        mHeartChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> nAxisValues = new ArrayList<>();
         List<AxisValue> eAxisValues = new ArrayList<>();
         List<PointValue> pointValues = new ArrayList<>();
-
         convertHeartChartData(mContentResponse, nAxisValues, eAxisValues, pointValues);
         setHeartChart(mHeartChart, pointValues, nAxisValues, eAxisValues);
 
@@ -570,8 +490,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             tempString = String.valueOf(strNMin);
             tempDouble = Double.parseDouble(String.valueOf(bResponseNMin));
         }
-
-
         double tempE, tempN;
         BigDecimal minuendN1 = new BigDecimal(df.format(Double.parseDouble(mMinResponse.get(nIndex).toString())));
         minuendN1 = minuendN1.subtract(new BigDecimal("0.02"));
@@ -590,7 +508,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         List<AxisValue> axisValues = new ArrayList<>();
         float valueYMax = values.get(0).getY();
         float valueYMin = values.get(0).getY();
-
         for (PointValue pointValue : values) {
             //确定最大最小值
             if (pointValue.getY() >= valueYMax) {
@@ -600,10 +517,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 valueYMin = pointValue.getY();
             }
         }
-
-//        LogUtil.e("setYLable valueYMax",valueYMax + "");
-//        LogUtil.e("setYLable valueYMin",valueYMin + "");
-//        LogUtil.e("setYLable 传入的最小值VS返回的最小值",yMin + "" + minResponse.get(1));
 
         String space = "0.01";     //每格大小为0.01m
         mConvertYMax = valueYMax + 0.1f;
@@ -618,8 +531,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         tempYmin = tempYmin.subtract(new BigDecimal("0.1"));
         BigDecimal s_yMin = new BigDecimal(df.format(tempYmin));  //传入格式化后的最小值
 
-//        LogUtil.e("convertYMin + tempYmin",convertYMin + "  " + tempYmin);
-
         while (chartValue <= mConvertYMax) {
             b_ymin = b_ymin.add(b_space);
             s_yMin = s_yMin.add(b_space);
@@ -628,7 +539,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             AxisValue axisValue = new AxisValue(chartValue);
             axisValue.setLabel(tempString);
             axisValues.add(axisValue);
-//            LogUtil.e("value lable", String.valueOf(chartValue) + "  " + tempString);
         }
         return axisValues;
     }
@@ -707,9 +617,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         Axis axisY = new Axis().setHasLines(true).setLineColor(Color.BLACK).setTextColor(Color.BLACK);
         //axisY.setInside(true);
         axisY.setValues(yAxisValues);
-
         axisY.setMaxLabelChars(7);
-
         if ("一周".equals(selectedTime) || "自定义时间".equals(selectedTime)) {
             axisX.setMaxLabelChars(8);
         } else if ("一月".equals(selectedTime)) {
@@ -739,7 +647,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         //经过计算：1dp = 0.015875cm；600dp = 9.525cm，所以设置当前窗口显示9个刻度即可保证一格为1cm
         currentWindow.bottom = convertAverage - 0.05f;
         currentWindow.top = convertAverage + 0.04f;
-//        LogUtil.e("currentWindow", "bottom: " + currentWindow.bottom + " , top: " + currentWindow.top);
         switch (mTimeSp.getSelectedItem().toString()) {
             case "最近1小时":
                 maxWindow.right = 60 + (float) (60 / 24);
@@ -778,7 +685,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     maxWindow.left = 0f;
                 }
         }
-
         currentWindow.left = maxWindow.left;
         currentWindow.right = (float) (maxWindow.right * 0.5);
         chartView.setMaximumViewport(maxWindow);
@@ -841,6 +747,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     return;
                 }
 
+                //设置返回Json各字段的下标，防止因返回顺序变化导致获取错误数据
                 List<String> titleResponse = gnssFilterInfoResponse.getTitle();
                 for (int i = 0; i < titleResponse.size(); i++) {
                     switch (titleResponse.get(i)) {
@@ -870,7 +777,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 int hIndex = mTitleIndex.get("GNSSFilterInfoH");
                 int deltaDIndex = mTitleIndex.get("GNSSFilterInfoDeltaD");
                 int deltaHIndex = mTitleIndex.get("GNSSFilterInfoDeltaH");
-//                LogUtil.e("time N E H delta deltaH",timeStampIndex + " " + nIndex + " " + eIndex + " " + hIndex + " " + deltaDIndex + " " + deltaHIndex);
+
                 mMaxResponse = gnssFilterInfoResponse.getMax();
                 mMinResponse = gnssFilterInfoResponse.getMin();
                 mAvgResponse = gnssFilterInfoResponse.getAverage();
@@ -924,7 +831,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
             @Override
             public void onFailure(Exception e) {
-
             }
         });
     }
@@ -948,7 +854,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
         BigDecimal convertMin = new BigDecimal(df.format(valueMin));
         valueMin = Double.parseDouble(String.valueOf(convertMin));
-        float convertAverage = (float) (Double.parseDouble(responseAverage) - valueMin);
         try {
             axisX0 = simpleDateFormat.parse(startTime).getTime() / 1000 / 60; //获取分钟级时间戳
         } catch (ParseException e) {
@@ -959,14 +864,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             convertValue = (float) (Double.parseDouble(data.get(1)) - valueMin);
             axisXValue = Long.parseLong(time) / 60;
             convertData.add(new PointValue((float) (axisXValue - axisX0), convertValue));
-//            LogUtil.e("原始值，转换后数据",Double.parseDouble(data.get(1)) + "  " + convertValue);
         }
         return convertData;
     }
 
     /**
+     * 返回的数据可能是不连续的
      * 判断转换后的数据有几段，并转换成线数据。
-     *
      * @param values 转换后的数据
      */
     public void convertLines(List<PointValue> values) {
@@ -983,7 +887,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             tempSpace = mNConvertData.get(i).getX() - mNConvertData.get(i - 1).getX();
             if (tempSpace > maxSpace) {
                 mChartLines.add(tempLines);
-                tempLines = new ArrayList<>();  //如果用clear()方法清空，那么所有使用该列表的数据都空了。
+                tempLines = new ArrayList<>();  //注意此处清空数据的方法。如果用clear()方法清空，那么所有使用该列表的数据都空了。
             }
             space = tempSpace;
             maxSpace = space * 2;
@@ -1095,14 +999,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 Toast.makeText(getActivity(), "网络连接错误，请稍后再试", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     public void drawChart() {
         if (hasData) {
             drawXYHChart(mTimeSp.getSelectedItem().toString());
             drawDeltaChart(mTimeSp.getSelectedItem().toString());
-            drawHeartChart(mTimeSp.getSelectedItem().toString());
+            drawHeartChart();
         }
         if (mLoadingDlg != null)
         {
@@ -1120,7 +1023,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:00:00");
                 textView.setText(format.format(date));
             }
-//        }).setType(new boolean[]{true, true, true, true, true, true})// 默认全部显示
         }).setType(new boolean[]{true, true, true, true, false, false})// 年月日时
                 .setCancelText("取消")//取消按钮文字
                 .setSubmitText("确定")//确认按钮文字

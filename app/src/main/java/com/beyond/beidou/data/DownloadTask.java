@@ -22,9 +22,7 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
     public static final int TYPE_CANCELED = 2;
     public static final int TYPE_FAILED = 3;
     public static final int TYPE_FAILED_NO_DATA = 4;
-
     private DownloadListener listener;
-
     private boolean isCanceled = false;
     private boolean isPaused = false;
     private int lastProgress;
@@ -36,7 +34,7 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
 
     @Override
     protected Integer doInBackground(String... params) {
-        Log.e("进入后台下载",".....");
+        LogUtil.e("进入后台下载",".....");
         InputStream is = null;
         RandomAccessFile saveFile = null;
         File file = null;
@@ -52,7 +50,6 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
             }
             LogUtil.e("资源URL",downloadurl);
             long contentLength = getContentLength(downloadurl);
-//            LogUtil.e("contentLength",contentLength + " ");
             if (contentLength == 0){
                 return TYPE_FAILED_NO_DATA;
             }else if (contentLength == downloadLength){

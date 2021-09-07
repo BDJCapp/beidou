@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 /**
- * @author: 李垚
  * @date: 2021/5/19
  * @description 重复选中已选项也可触发监听
  */

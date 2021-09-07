@@ -2,10 +2,7 @@ package com.beyond.beidou.entites;
 
 import java.util.List;
 
-/**
- * @author: 李垚
- * @date: 2021/4/22
- */
+
 public class GetStationReportResponse {
 
     /**

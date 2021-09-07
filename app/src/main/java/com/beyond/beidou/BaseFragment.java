@@ -13,10 +13,7 @@ import androidx.fragment.app.Fragment;
 
 import static android.content.Context.MODE_PRIVATE;
 
-/**
- * @author: 李垚
- * @date: 2021/2/1
- */
+
 public abstract class BaseFragment extends Fragment {
 
     private Activity mActivity;

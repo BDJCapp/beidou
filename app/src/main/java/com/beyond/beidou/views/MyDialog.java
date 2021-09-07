@@ -9,12 +9,7 @@ import android.widget.TextView;
 
 import com.beyond.beidou.R;
 
-/**
- * @author: 李垚
- * @date: 2021/5/18
- */
 public class MyDialog extends Dialog {
-
 
     //显示的标题
     private TextView mTitleTv;
@@ -23,7 +18,6 @@ public class MyDialog extends Dialog {
 
     //确认和取消按钮
     private Button mNegativeBtn, mPositiveBtn;
-
 
     public MyDialog(Context context) {
         super(context, R.style.CustomDialog);
@@ -85,7 +79,6 @@ public class MyDialog extends Dialog {
             }
         });
     }
-
 
     @Override
     public void show() {

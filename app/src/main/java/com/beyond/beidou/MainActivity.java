@@ -48,7 +48,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Intent downloadIntent;
     private CoordinatorLayout coordinatorLayout;
     private boolean isExit = false;
-
     private DownloadService.DownloadBinder downloadBinder;
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -72,7 +71,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                     snackbar.show();
                 }
             });
-
         }
 
         @Override
@@ -101,7 +99,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     @Override
     protected void onStop() {
-//        saveStringToSP("sessionUUID", ApiConfig.getSessionUUID());
         saveStringToSP("lastProjectName", getPresentProject());
         super.onStop();
     }
@@ -126,11 +123,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public void initEvent() {
         //首次启动时，应显示工程的Fragment
         switchFragment(nowFragment, projectFragment);
-
         downloadIntent = new Intent(this, DownloadService.class);
         //绑定服务，绑定服务时会自动调用实参connection对象中的onServiceConnected方法
         bindService(downloadIntent, connection, BIND_AUTO_CREATE);
-
         startService(downloadIntent);
     }
 
@@ -162,7 +157,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public void changePageFragment(int id) {
         switch (id) {
             case R.id.nav_my:
-                LogUtil.e("111nowFragement", nowFragment.toString());
                 if (nowFragment == settingsFragment || nowFragment == securityFragment || nowFragment == updatePwdFragment || nowFragment == userInfoFragment) {
                     break;
                 }
@@ -228,7 +222,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             }
         } else {
             // 隐藏当前的fragment，显示下一个
-            Log.e("from", from.toString());
             transaction.hide(from).show(to).commit();
         }
         nowFragment = to;
@@ -257,19 +250,13 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             FragmentManager fm = getProjectFragment().getFragmentManager();
             fm.beginTransaction().remove(nowFragment);
             this.setChartFragment(null);
-            LogUtil.e("nowFragment", nowFragment.toString());
-
-//            Log.e("BackStack11:", "" + fm.getBackStackEntryCount());
-//            Log.e("BackStack11:", fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName());
             if (fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName().equals("projectFragment")) {
                 this.setNowFragment(this.getProjectFragment());
                 this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(0).getItemId());
             } else {
                 this.setNowFragment(this.getDataFragment());
-                Log.e("fragment now", nowFragment.toString());
                 this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(1).getItemId());
             }
-
         }
 
         if (nowFragment == settingsFragment) {
@@ -325,7 +312,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public void setVersionInfoFragment(Fragment versioninfoFragment) {
         this.versionInfoFragment = versioninfoFragment;
     }
-
 
     public Fragment getNowFragment() {
         return nowFragment;
