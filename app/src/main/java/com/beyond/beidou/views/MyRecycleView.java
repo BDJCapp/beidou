@@ -31,19 +31,11 @@ public class MyRecycleView extends RecyclerView {
             case MotionEvent.ACTION_DOWN:
                 mLastPosY =e.getY();
                 mMoveY = 0;
-//                Log.e("MyRecycleView","nmsllllllllllllllllllllllllllllllllll");
-//                Log.e("MyRecycleView","getParent :::::::::::::::: " + getParent());
-//                Log.e("MyRecycleView","getParent getParent :::::::::::::::: " + getParent().getParent());
-//                getParent().getParent().requestDisallowInterceptTouchEvent(true);
-//                getParent().getParent().getParent().getParent().requestDisallowInterceptTouchEvent(true);
                 break;
             case MotionEvent.ACTION_MOVE:
-//                Log.e("MyRecycleView","mMove :::::::::::::::: " + mMoveY);
                 mLastPosY =e.getY();
                 break;
             case MotionEvent.ACTION_UP:
-//                if(onScroll!=null)
-//                    onScroll.eventUp((int) mMoveY);
                 break;
         }
 

@@ -160,7 +160,6 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                                         dialog.dismiss();
                                                         saveStringToSP("lastProjectName", activity.getPresentProject());
                                                         ProjectFragment.sIsReLogin = true;
-                                                        Log.e("logout  ", "position 1");
                                                         logOut(getStringFromSP("userName"), ApiConfig.getAccessToken(), ApiConfig.getSessionUUID());
                                                     }
                                                 });

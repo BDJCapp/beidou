@@ -72,6 +72,8 @@ public class Api {
                 {
                     LoginUtil.updateSessionExpireTimestamp(context); //每次调用接口都会更新session过期时间
                     callback.onSuccess(result);
+                }else{
+                    callback.onFailure(new RuntimeException());
                 }
             }
         });

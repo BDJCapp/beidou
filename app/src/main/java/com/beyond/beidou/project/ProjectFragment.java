@@ -87,7 +87,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private ArrayList<String> mStationNameList = new ArrayList<>();
     private ArrayList<String> mStationUUIDList = new ArrayList<>();
 
-//    private boolean mIsFirstLocate = true;
     private static boolean sIsFirstLogin = true;
     private static String mPresentProject;
     public static boolean sIsReLogin = false;
@@ -101,9 +100,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             switch (msg.what) {
                 case LOADING:
                     getData();
-//                    while (!isFinishLoading) {
-//                    }
-//                    dialog.dismiss();
                     break;
                 case LOADING_FINISH:
                     mDialog.dismiss();
@@ -154,8 +150,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         //显示才刷新
         if (!hidden) {
             if (!mPresentProject.equals(mMainActivity.getPresentProject())) {
-//                mIsFirstLocate = true;
-//                getData();
                 doLoadingDialog();
             }
         }
@@ -164,7 +158,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        getData();
         doLoadingDialog();
     }
 
@@ -230,14 +223,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                try {
-//                    Field field = AdapterView.class.getDeclaredField("mOldSelectedPosition");
-//                    field.setAccessible(true);
-//                    field.setInt(mSpinner, AdapterView.INVALID_POSITION);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-                Log.wtf("onItemSelected", "position:   " + position);
                 mPresentProject = (String) mSpinner.getItemAtPosition(position);
                 mMainActivity.setPresentProject(mPresentProject);
                 if (sIsFirstBindListener) {
@@ -266,7 +251,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mBaiduMap.setOnMapLoadedCallback(new BaiduMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
-                //待改动调整
                 mMapView.setZoomControlsPosition(new Point((int) (width * 0.88 + 0.5f), (int) (height * 0.73 + 0.5f)));
             }
         });
@@ -298,7 +282,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void getData() {
-        Log.wtf("getData", "================Begin================");
         mProjectNameList.clear();
         mStationNameList.clear();
         mStationUUIDList.clear();
@@ -336,7 +319,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                         }
                         mProjectNameList.add(project.getProjectName());
                     }
-                    Log.wtf("projectNameList", mProjectNameList.toString());
                     mMainActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -346,12 +328,10 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             ProjectFragment.sIsFirstBindListener = true;
 
                             if (mPresentProject.equals("")) {
-//                                presentProject = mSpinner.getSelectedItem() == null ? "" : mSpinner.getSelectedItem() .toString();
                                 mPresentProject = mSpinner.getSelectedItem().toString();
                                 mMainActivity.setPresentProject(mPresentProject);
                                 for (ProjectResponse.ProjectListBean project : mProjectList) {
                                     if (project.getProjectName().equals(mPresentProject)) {
-//                                        Log.e("匹配成功", "Position 11111111111");
                                         mProjectStationStatus = project.getProjectStationStatus();
                                         mProjectStationList = project.getStationList();
                                         for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
@@ -363,7 +343,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             } else {
                                 for (ProjectResponse.ProjectListBean project : mProjectList) {
                                     if (project.getProjectName().equals(mPresentProject)) {
-//                                        Log.e("匹配成功", "Position 22222222222");
                                         mProjectStationStatus = project.getProjectStationStatus();
                                         mProjectStationList = project.getStationList();
                                         mSpinner.setSelection(mProjectList.indexOf(project), true);
@@ -379,7 +358,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                     mMainActivity.setPresentProject(mPresentProject);
                                     for (ProjectResponse.ProjectListBean project : mProjectList) {
                                         if (project.getProjectName().equals(mPresentProject)) {
-//                                            Log.e("匹配成功", "Position 333333333");
                                             mProjectStationStatus = project.getProjectStationStatus();
                                             mProjectStationList = project.getStationList();
                                             for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
@@ -402,10 +380,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                 mBtnError.setText("故障\n" + mProjectStationStatus.getError());
                                 mBtnOffline.setText("离线\n" + mProjectStationStatus.getOffline());
                             }
-
-                            //todo requestLocation 更换位置
-
-                            initStationList();    //初始化监测点数据
+                            //初始化监测点数据
+                            initStationList();
                             mPointsAdapter = new MonitoringPointsAdapter(mPointList);
                             mRecyclerView.setAdapter(mPointsAdapter);
                             mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
@@ -484,82 +460,26 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             });
                         }
                     });
-//                    Log.e("ResponseMsg", response.getResponseMsg());
                 }
-                //其他返回码重新登录
                 else {
                     back2Login();
-//                    return;
                 }
-//                isFinishLoading = true;
                 mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
             }
 
             @Override
             public void onFailure(Exception e) {
-                mDialog.dismiss();
-                showToastSync("网络请求失败，请检查网络连接，稍后再试");
+                mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
             }
         });
-
-        Log.wtf("getData", "================End================");
     }
 
     private void back2Login() {
         showToast("未请求到数据，请重新登录！");
         sIsReLogin = true;
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Log.e("back2Login", "position1");
-                LoginUtil.getAccessToken(mMainActivity);
-                Log.e("back2Login", "position2");
-                LoginUtil.getSessionId(mMainActivity);
-                Log.e("back2Login", "position3");
-            }
-        });
-        try {
-            thread.join();
-            thread.start();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         Intent intent = new Intent(mMainActivity, LoginActivity.class);
         startActivity(intent);
         mMainActivity.finish();
-    }
-
-    //获取网络时间，待定
-    private void getNetTime() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    //百度时间
-                    //url = new URL("http://www.baidu.com");
-//                    中国科学院国家授时中心
-                    URL url = new URL("http://www.ntsc.ac.cn");
-                    URLConnection uc = url.openConnection();//生成连接对象
-                    uc.connect(); //发出连接
-                    long ld = uc.getDate(); //取得网站日期时间
-                    Log.e("project", "time ld: " + uc.getDate());
-                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTimeInMillis(ld);
-                    mNetTime = df.format(calendar.getTime());
-                    Log.e("project", "time ld " + mNetTime);
-                    mMainActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mTvTime.setText(mNetTime);
-                        }
-                    });
-                } catch (Exception e) {
-                    Log.e("project", "net time error :" + e.toString());
-                    e.printStackTrace();
-                }
-            }
-        }).start();
     }
 
     private void initStationList() {
@@ -577,7 +497,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
             CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
             LatLng targetPoint = converter.convert();
-            Log.e("project", "point: " + targetPoint.toString());
             BitmapDescriptor markerBitmap = null;
             int statusCode = Integer.parseInt(projectStation.getStationStatus());
             if (statusCode >= 10 && statusCode <= 19) {
@@ -667,7 +586,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         //海外地区定位，无需设置坐标类型，统一返回WGS84类型坐标
         option.setCoorType("BD09LL");
         //可选，设置发起定位请求的问题
-        // ，int类型，单位ms
+        // int类型，单位ms
         //如果设置为0，则代表单次定位，即仅定位一次，默认为0
         //如果设置为非0，需设置1000ms以上才有效
         option.setScanSpan(3000);
@@ -791,7 +710,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 currentPosition.append("网络").append("\n");
             }
             currentPosition.append("getLocType: ").append(bdLocation.getLocType());
-            Log.i("onReceiveLocation", currentPosition.toString());
         }
     }
 

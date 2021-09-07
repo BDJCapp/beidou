@@ -121,12 +121,8 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                         saveStringToSP("SessionExpireTimestamp","");
                         JSONObject object = new JSONObject(res);
                         String responseCode = object.getString("ResponseCode");
-                        Log.e("退出的response",res);
                         switch (responseCode){
                             case "205": //退出成功
-//                                ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
-//                                while (!LoginUtil.getAccessToken(getActivity())){}
-//                                while (!LoginUtil.getSessionId(getActivity())){}
                                 Intent intent= new Intent(getActivity(), LoginActivity.class);
                                 dialog.dismiss();
                                 startActivity(intent);
