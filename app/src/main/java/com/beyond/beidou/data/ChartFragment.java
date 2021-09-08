@@ -722,12 +722,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 .add("DeltaTime", deltaTime)
                 .build();
         final SimpleDateFormat sdfTwo = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        LogUtil.e("请求点数据开始时间", sdfTwo.format(System.currentTimeMillis()));
         Api.config(ApiConfig.GET_GRAPHIC_DATA).postRequestFormBodySync(getActivity(), getChartDataBody, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-                LogUtil.e("请求点数据结束时间", sdfTwo.format(System.currentTimeMillis()));
-                LogUtil.e("请求数据的返回值",res);
                 Gson gson = new Gson();
                 GNSSFilterInfoResponse gnssFilterInfoResponse = gson.fromJson(res, GNSSFilterInfoResponse.class);
                 mContentResponse = gnssFilterInfoResponse.getContent();
@@ -790,7 +787,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 List<List<String>> deltaDResponseData = new ArrayList<>();
                 List<List<String>> deltaHResponseData = new ArrayList<>();
                 //数据提取
-                LogUtil.e("返回数据的数量", String.valueOf(mContentResponse.size()));
                 for (List<Object> responseData : mContentResponse) {
                     List<String> nValue = new ArrayList<>();
                     List<String> eValue = new ArrayList<>();
@@ -826,7 +822,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 mHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(hIndex).toString()) - Double.parseDouble(mMinResponse.get(hIndex).toString()));
                 mDeltaDConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaDIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaDIndex).toString()));
                 mDeltaHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaHIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaHIndex).toString()));
-                LogUtil.e("getData执行结束", "*********");
                 hasData = true;
             }
 

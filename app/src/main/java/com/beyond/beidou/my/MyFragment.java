@@ -75,7 +75,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
                 activity.setSettingsFragment(settingsFragment);
                 activity.setNowFragment(settingsFragment);
                 ft.add(R.id.layout_home, settingsFragment).hide(this);
-                ft.addToBackStack(null);   //加入到返回栈中
+                ft.addToBackStack("MyFragment");   //加入到返回栈中
                 ft.commit();
                 break;
             case R.id.img_user:
@@ -87,10 +87,9 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
                 activity.setUserInfoFragment(userInfoFragment);
                 activity.setNowFragment(userInfoFragment);
                 ft.add(R.id.layout_home, userInfoFragment).hide(this);
-                ft.addToBackStack(null);   //加入到返回栈中
+                ft.addToBackStack("UserInfoFragment");   //加入到返回栈中
                 ft.commit();
                 break;
         }
     }
-
 }

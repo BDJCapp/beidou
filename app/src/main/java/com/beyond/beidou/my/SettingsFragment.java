@@ -89,7 +89,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                 activity.setSecurityFragment(securityFragment);
                 activity.setNowFragment(securityFragment);
                 ft.add(R.id.layout_home, securityFragment).hide(this);
-                ft.addToBackStack(null);   //加入到返回栈中
+                ft.addToBackStack("SettingsFragment");   //加入到返回栈中
                 ft.commit();
                 break;
             case R.id.btn_quit:

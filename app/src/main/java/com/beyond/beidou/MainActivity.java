@@ -260,9 +260,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             }
             else {
                 fm.beginTransaction().hide(chartFragment).show(dataFragment).commit();
+                fm.beginTransaction().remove(chartFragment);
                 this.setChartFragment(null);
             }
-
             nowFragment = dataFragment;
             return;
         }
