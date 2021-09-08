@@ -696,16 +696,17 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         switch (v.getId()) {
             case R.id.img_chart_back:
                 FragmentManager fm = getFragmentManager();
-                fm.popBackStack();
+//                fm.popBackStack();
                 MainActivity activity = (MainActivity) getActivity();
-                activity.setChartFragment(null);
-                if (fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName().equals("projectFragment")) {
-                    activity.setNowFragment(activity.getProjectFragment());
-                    activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(0).getItemId());
-                } else {
-                    activity.setNowFragment(activity.getDataFragment());
+                if (activity.getDataFragment() == null){
+                    activity.setChartFragment(null);
                     activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(1).getItemId());
                 }
+                else {
+                    fm.beginTransaction().hide(activity.getChartFragment()).show(activity.getDataFragment()).commit();
+                    activity.setChartFragment(null);
+                }
+                activity.setNowFragment(activity.getDataFragment());
                 break;
         }
     }

@@ -722,7 +722,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         assert fragmentManager != null;
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.add(R.id.layout_home, chartFragment).hide(this);
-        ft.addToBackStack("projectFragment");   //加入到返回栈中
+//        ft.addToBackStack("projectFragment");   //加入到返回栈中
         ft.commit();
     }
 

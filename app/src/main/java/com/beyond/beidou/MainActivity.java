@@ -233,6 +233,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
      */
     @Override
     public void onBackPressed() {
+        FragmentManager fgm = getSupportFragmentManager();
+        for (int i = 0; i < fgm.getBackStackEntryCount(); i++) {
+            LogUtil.e(i+"  栈中内容",fgm.getBackStackEntryAt(i).toString());
+        }
         if (isExit)
         {
             finish();
@@ -246,17 +250,21 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             }
         }
         isExit = false;
+
         if (nowFragment == chartFragment) {
-            FragmentManager fm = getProjectFragment().getFragmentManager();
-            fm.beginTransaction().remove(nowFragment);
-            this.setChartFragment(null);
-            if (fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName().equals("projectFragment")) {
-                this.setNowFragment(this.getProjectFragment());
-                this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(0).getItemId());
-            } else {
-                this.setNowFragment(this.getDataFragment());
+            FragmentManager fm = getSupportFragmentManager();
+            if (dataFragment == null){
+                this.setChartFragment(null);
+                dataFragment = new DataHomeFragment();
                 this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(1).getItemId());
             }
+            else {
+                fm.beginTransaction().hide(chartFragment).show(dataFragment).commit();
+                this.setChartFragment(null);
+            }
+
+            nowFragment = dataFragment;
+            return;
         }
 
         if (nowFragment == settingsFragment) {

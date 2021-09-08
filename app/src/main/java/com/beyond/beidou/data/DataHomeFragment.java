@@ -84,9 +84,9 @@ public class DataHomeFragment extends BaseFragment {
                     setmDevicesRv(mProjectSp.getSelectedItem().toString());
                     break;
                 case LOADING_FINISH:
-                    mLoadingDlg.dismiss();
                     mPageRefreshLayout.finishLoadMore(true);
                     mPageRefreshLayout.finishRefresh(true);
+                    mLoadingDlg.dismiss();
                     break;
                 case PAGING:
                     setmDevicesRv(mProjectSp.getSelectedItem().toString());
@@ -194,12 +194,10 @@ public class DataHomeFragment extends BaseFragment {
 
                             @Override
                             public void onNothingSelected(AdapterView<?> parent) {
-
                             }
                         });
                     }
                 });
-                pHandler.sendEmptyMessageDelayed(200,0);
             }
 
             @Override
@@ -312,7 +310,6 @@ public class DataHomeFragment extends BaseFragment {
                 }
             }
         });
-
     }
 
     public void switchFragment(String projectName, ArrayList<String> stationNameList, int devicePosition, ArrayList<String> stationUUIDList) {
@@ -323,7 +320,7 @@ public class DataHomeFragment extends BaseFragment {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.add(R.id.layout_home, chartFragment).hide(this);
-        ft.addToBackStack("DataHomeFragment");   //加入到返回栈中
+//        ft.addToBackStack("ChartFragment");   //加入到返回栈中
         ft.commit();
     }
 }

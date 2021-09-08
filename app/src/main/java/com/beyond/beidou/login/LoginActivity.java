@@ -138,6 +138,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         mLoginAccountEt.setText("qwerASD5");
         mLoginCheckEt.setText("qwertyuiiopASDFG5*");
 
+//        mLoginAccountEt.setText("AdminBDS");
+//        mLoginCheckEt.setText("Beijing712*BDJC");
+
         mLoginAccountEt.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -236,7 +239,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         LoginUtil.loginByPwd(LoginActivity.this,username, encodePwd, SessionUUID, AccessToken, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-                saveStringToSP("userName",username);    //保存信息到SP中，若session未过期，用于自动登录
+                //保存信息到SP中，若session未过期，用于自动登录
+                saveStringToSP("userName",username);
                 saveStringToSP("password",encodePwd);
                 saveStringToSP("sessionUUID",SessionUUID);
                 saveStringToSP("accessToken",AccessToken);
@@ -315,7 +319,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 if(grantResults.length > 0){
                     for(int result : grantResults){
                         if(result != PackageManager.PERMISSION_GRANTED){
-                            Toast.makeText(this, "Need to grant all permissions!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "需要获取所需权限！", Toast.LENGTH_SHORT).show();
                             finish();
                             return;
                         }
