@@ -32,6 +32,7 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
+import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.views.MyRecycleView;
 import com.beyond.beidou.R;
 import com.beyond.beidou.adapter.MonitoringPointsAdapter;
@@ -751,6 +752,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             mMapView.onDestroy();
             mMapView = null;
         }
+        sIsFirstLogin = true;
+        sIsFirstBindListener = true;
+        sIsReLogin = true;
         super.onDestroy();
     }
 }

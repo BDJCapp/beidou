@@ -100,6 +100,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     @Override
     protected void onStop() {
         saveStringToSP("lastProjectName", getPresentProject());
+        LogUtil.e("退出前保存的SP值", this.getStringFromSP("lastProjectName"));
         super.onStop();
     }
 
@@ -254,13 +255,13 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         if (nowFragment == chartFragment) {
             FragmentManager fm = getSupportFragmentManager();
             if (dataFragment == null){
+                fm.beginTransaction().remove(chartFragment).commit();
                 this.setChartFragment(null);
                 dataFragment = new DataHomeFragment();
                 this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(1).getItemId());
             }
             else {
-                fm.beginTransaction().hide(chartFragment).show(dataFragment).commit();
-                fm.beginTransaction().remove(chartFragment);
+                fm.beginTransaction().hide(chartFragment).show(dataFragment).remove(chartFragment).commit();
                 this.setChartFragment(null);
             }
             nowFragment = dataFragment;
@@ -269,28 +270,28 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
         if (nowFragment == settingsFragment) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(nowFragment);
+            transaction.remove(nowFragment).commit();
             nowFragment = myFragment;
             settingsFragment = null;
         }
 
         if (nowFragment == securityFragment) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(nowFragment);
+            transaction.remove(nowFragment).commit();
             nowFragment = settingsFragment;
             securityFragment = null;
         }
 
         if (nowFragment == updatePwdFragment) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(updatePwdFragment);
+            transaction.remove(updatePwdFragment).commit();
             nowFragment = securityFragment;
             updatePwdFragment = null;
         }
 
         if(nowFragment == userInfoFragment){
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(userInfoFragment);
+            transaction.remove(userInfoFragment).commit();
             nowFragment = myFragment;
             userInfoFragment = null;
         }
@@ -389,5 +390,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     public void setUserInfoFragment(Fragment userInfoFragment){
         this.userInfoFragment = userInfoFragment;
+    }
+
+    public void setExit(boolean exit) {
+        isExit = exit;
     }
 }

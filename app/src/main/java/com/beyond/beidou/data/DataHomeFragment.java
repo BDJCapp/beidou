@@ -317,6 +317,7 @@ public class DataHomeFragment extends BaseFragment {
         MainActivity activity = (MainActivity) getActivity();
         activity.setChartFragment(chartFragment);
         activity.setNowFragment(chartFragment);
+        activity.setExit(false);
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.add(R.id.layout_home, chartFragment).hide(this);

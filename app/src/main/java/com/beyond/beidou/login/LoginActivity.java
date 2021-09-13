@@ -68,7 +68,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
     private ZLoadingDialog mLoadingDlg = new ZLoadingDialog(LoginActivity.this);
     private Intent intent;
     private boolean isVisible = false;
-
     public Handler handler = new  Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(@NonNull Message msg) {

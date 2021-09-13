@@ -623,8 +623,6 @@ public class DateUtil {
             intervals.add(calcDayOffset(calendar.getTime(), present));
             present = calendar.getTime();
         }
-        for (Integer integer : intervals) {
-        }
         Calendar cal2 = Calendar.getInstance();
         cal2.add(Calendar.MONTH, 1);
         cal2.set(Calendar.DAY_OF_MONTH, 1);
