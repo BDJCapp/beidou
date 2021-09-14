@@ -23,16 +23,21 @@
 
         <TextView
             android:id="@+id/tv_name"
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            />
 
         <TextView
             android:id="@+id/tv_type"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="50dp" />
+            android:layout_marginStart="20dp"
+            />
 
     </LinearLayout>
 

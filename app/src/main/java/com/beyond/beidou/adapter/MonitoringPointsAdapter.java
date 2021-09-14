@@ -49,6 +49,9 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
         this.mPointsList = mPointsList;
     }
 
+    public MonitoringPointsAdapter() {
+    }
+
     public void setData(List<MonitoringPoint> mPointsList) {
         this.mPointsList = mPointsList;
     }
@@ -65,6 +68,7 @@ public class MonitoringPointsAdapter extends RecyclerView.Adapter<MonitoringPoin
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         MonitoringPoint point = mPointsList.get(position);
         holder.mTv_name.setText(point.getName());
+        holder.mTv_name.setSelected(true);
         int statusCode = Integer.parseInt(point.getStatus());
         if (statusCode >= 10 && statusCode <= 19) {
             holder.mIv_status.setImageResource(R.drawable.ic_svg_online_point);

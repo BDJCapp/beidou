@@ -133,6 +133,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mLocationClient.registerLocationListener(new MyLocationListener());
         mLayoutManager = new LinearLayoutManager(mMainActivity);
         mRecyclerView.setLayoutManager(mLayoutManager);
+        mPointsAdapter = new MonitoringPointsAdapter();
         requestLocation(); //请求百度地图位置
         return view;
     }
@@ -300,7 +301,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
         }
         mParams.clear();
-        mProjectList.clear();
+        if(mProjectList != null){
+            mProjectList.clear();
+        }
         mParams.put("AccessToken", ApiConfig.getAccessToken());
         mParams.put("SessionUUID", ApiConfig.getSessionUUID());
         Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(mMainActivity, new ApiCallback() {
@@ -383,7 +386,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             }
                             //初始化监测点数据
                             initStationList();
-                            mPointsAdapter = new MonitoringPointsAdapter(mPointList);
+//                            mPointsAdapter = new MonitoringPointsAdapter(mPointList);
+                            mPointsAdapter.setData(mPointList);
                             mRecyclerView.setAdapter(mPointsAdapter);
                             mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
                                 @Override
@@ -476,11 +480,15 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void back2Login() {
-        showToast("未请求到数据，请重新登录！");
+        mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
+        sIsFirstLogin = true;
+        sIsFirstBindListener = true;
         sIsReLogin = true;
-        Intent intent = new Intent(mMainActivity, LoginActivity.class);
-        startActivity(intent);
-        mMainActivity.finish();
+        showToastSync("未请求到数据，请稍后再试！");
+//        Intent intent = new Intent(mMainActivity, LoginActivity.class);
+//        startActivity(intent);
+//        mMainActivity.finish();
+
     }
 
     private void initStationList() {
