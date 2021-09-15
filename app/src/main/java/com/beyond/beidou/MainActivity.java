@@ -248,6 +248,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         }
         isExit = false;
 
+
         if (nowFragment == chartFragment) {
             FragmentManager fm = getSupportFragmentManager();
             if (dataFragment == null){
