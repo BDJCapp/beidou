@@ -100,7 +100,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     @Override
     protected void onStop() {
         saveStringToSP("lastProjectName", getPresentProject());
-        LogUtil.e("退出前保存的SP值", this.getStringFromSP("lastProjectName"));
         super.onStop();
     }
 
@@ -235,9 +234,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     @Override
     public void onBackPressed() {
         FragmentManager fgm = getSupportFragmentManager();
-        for (int i = 0; i < fgm.getBackStackEntryCount(); i++) {
-            LogUtil.e(i+"  栈中内容",fgm.getBackStackEntryAt(i).toString());
-        }
         if (isExit)
         {
             finish();

@@ -595,19 +595,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             lines.add(line);
         }
 
-        //实现自定义竖向分割线
-//        List<PointValue> leftValue = new ArrayList<>();
-//        leftValue.add(new PointValue(100,-0.1f));
-//        leftValue.add(new PointValue(100,0.1f));
-//        Line leftLine = new Line(leftValue);
-//        leftLine.setColor(R.color.main_red);
-//        List<PointValue> rightValue = new ArrayList<>();
-//        rightValue.add(new PointValue(200,-0.1f));
-//        rightValue.add(new PointValue(200,0.1f));
-//        Line rightLine = new Line(rightValue);
-//        rightLine.setColor(R.color.main_red);
-//        lines.add(leftLine);
-//        lines.add(rightLine);
         LineChartData data = new LineChartData();
         data.setLines(lines);
         Axis axisX = new Axis().setHasLines(true).setLineColor(Color.BLACK).setTextColor(Color.BLACK);
@@ -1033,6 +1020,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 .isDialog(true)
                 .build();
         pvTime.show();
+
         //解决PickerView被Dialog覆盖问题
         Dialog dialog = pvTime.getDialog();
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) pvTime.getDialogContainerLayout().getLayoutParams();

@@ -51,9 +51,6 @@ import java.util.List;
 import java.util.Map;
 
 
-/**
- * @author: 李垚
- */
 public class DataHomeFragment extends BaseFragment {
 
     private Spinner mProjectSp;
