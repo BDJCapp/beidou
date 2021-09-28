@@ -150,7 +150,6 @@ public class Api {
                 String responseCode = parseJSONObject(result,"ResponseCode");
                 if (context instanceof StartActivity)
                 {
-                    LogUtil.e("APi postRequestFormBody()","StartActivity");
                     callback.onSuccess(result);
                 }
                 else if (!responseCodeHandling(context,responseCode))

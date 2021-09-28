@@ -40,16 +40,16 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
         File file = null;
             try {
             long downloadLength = 0;
-            String downloadurl = params[0];
-            String filename = downloadurl.substring(downloadurl.lastIndexOf("/"));
+            String downloadUrl = params[0];
+            String filename = downloadUrl.substring(downloadUrl.lastIndexOf("/"));
             String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
             file = new File(directory + filename);
             LogUtil.e("文件存放地址",directory + filename);
             if (file.exists()){
                 downloadLength = file.length();
             }
-            LogUtil.e("资源URL",downloadurl);
-            long contentLength = getContentLength(downloadurl);
+            LogUtil.e("资源URL",downloadUrl);
+            long contentLength = getContentLength(downloadUrl);
             if (contentLength == 0){
                 return TYPE_FAILED_NO_DATA;
             }else if (contentLength == downloadLength){
@@ -59,7 +59,7 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder()
                     .addHeader("RANGE","byte="+downloadLength+"-")
-                    .url(downloadurl)
+                    .url(downloadUrl)
                     .build();
 
             Response response = client.newCall(request).execute();
@@ -151,10 +151,10 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
         isCanceled = true;
     }
 
-    private long getContentLength(String downloadurl) throws IOException {
+    private long getContentLength(String downloadUrl) throws IOException {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url(downloadurl)
+                .url(downloadUrl)
                 .build();
         Response response = client.newCall(request).execute();
         if (response != null && response.isSuccessful()){

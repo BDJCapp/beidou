@@ -91,7 +91,7 @@ public class DownloadService extends Service {
                 String fileName = downloadUrl.substring(downloadUrl.lastIndexOf("/"));
                 String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
                 filePath = directory + fileName;
-                //此时是在Service中执行该任务
+                //在Service中执行该任务
                 downloadTask.execute(downloadUrl);
                 startForeground(1,getNotification("导出中,请稍后...",0));
             }
