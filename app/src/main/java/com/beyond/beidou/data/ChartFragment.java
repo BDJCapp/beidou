@@ -518,6 +518,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         }
 
+        //结果出现是0.005时，在浮点运算时会四舍五入为0.01，影响运算结果
+        if (Math.abs(valueYMin - 0.005) < 0.0001){
+            valueYMin = 0;
+        }
+
         String space = "0.01";     //每格大小为0.01m
         mConvertYMax = valueYMax + 0.1f;
         mConvertYMin = valueYMin - 0.1f;
