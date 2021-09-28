@@ -523,7 +523,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             valueYMin = 0;
         }
 
-
         String space = "0.01";     //每格大小为0.01m
         mConvertYMax = valueYMax + 0.1f;
         mConvertYMin = valueYMin - 0.1f;
