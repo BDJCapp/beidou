@@ -4,7 +4,7 @@
     android:textSize="20sp"
     android:typeface="normal">
 
-    <solid android:color="#448944" />
+    <solid android:color="#BFBFBF" />
     <stroke
         android:width="2dp"
         android:color="#000000" />

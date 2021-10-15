@@ -4,12 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -101,6 +103,12 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             switch (msg.what) {
                 case LOADING:
                     getData();
+                    mBtnAmount.setBackgroundResource(R.drawable.btn_amount_selected_bg);
+                    mBtnAmount.animate().scaleX(1.25f).scaleY(1.25f).setDuration(100).start();
+                    clearAnimation(R.id.btn_online);
+                    clearAnimation(R.id.btn_warning);
+                    clearAnimation(R.id.btn_error);
+                    clearAnimation(R.id.btn_offline);
                     break;
                 case LOADING_FINISH:
                     mDialog.dismiss();
@@ -377,6 +385,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                 back2Login();
                                 return;
                             } else {
+//                                Log.e("mProjectStationStatus", mProjectStationStatus.toString());
                                 mTvAmount.setText(String.valueOf(mProjectStationStatus.getTotal()));
                                 mBtnAmount.setText("总数\n" + mProjectStationStatus.getTotal());
                                 mBtnOnline.setText("在线\n" + mProjectStationStatus.getOnline());
@@ -423,7 +432,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                                             mBaiduMap.animateMapStatus(update);
                                             update = MapStatusUpdateFactory.zoomTo(18f);
                                             mBaiduMap.animateMapStatus(update);
-                                            mScrollLayout.scrollToOpen();
                                             return;
                                         }
                                     }
@@ -624,6 +632,13 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_amount:
+                mScrollLayout.scrollToClose();
+                v.setBackgroundResource(R.drawable.btn_amount_selected_bg);
+                v.animate().scaleX(1.25f).scaleY(1.25f).setDuration(100).start();
+                clearAnimation(R.id.btn_online);
+                clearAnimation(R.id.btn_warning);
+                clearAnimation(R.id.btn_error);
+                clearAnimation(R.id.btn_offline);
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                         mProjectStationList) {
@@ -631,9 +646,15 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 mPointsAdapter.setData(mPointList);
                 mPointsAdapter.notifyDataSetChanged();
-                mScrollLayout.scrollToClose();
                 break;
             case R.id.btn_online:
+                mScrollLayout.scrollToClose();
+                v.setBackgroundResource(R.drawable.btn_online_selected_bg);
+                v.animate().scaleX(1.25f).scaleY(1.25f).setDuration(100).start();
+                clearAnimation(R.id.btn_amount);
+                clearAnimation(R.id.btn_warning);
+                clearAnimation(R.id.btn_error);
+                clearAnimation(R.id.btn_offline);
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                         mProjectStationList) {
@@ -644,9 +665,15 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 mPointsAdapter.setData(mPointList);
                 mPointsAdapter.notifyDataSetChanged();
-                mScrollLayout.scrollToClose();
                 break;
             case R.id.btn_warning:
+                mScrollLayout.scrollToClose();
+                v.setBackgroundResource(R.drawable.btn_warning_selected_bg);
+                v.animate().scaleX(1.25f).scaleY(1.25f).setDuration(100).start();
+                clearAnimation(R.id.btn_amount);
+                clearAnimation(R.id.btn_online);
+                clearAnimation(R.id.btn_error);
+                clearAnimation(R.id.btn_offline);
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                         mProjectStationList) {
@@ -657,9 +684,16 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 mPointsAdapter.setData(mPointList);
                 mPointsAdapter.notifyDataSetChanged();
-                mScrollLayout.scrollToClose();
+
                 break;
             case R.id.btn_error:
+                mScrollLayout.scrollToClose();
+                v.setBackgroundResource(R.drawable.btn_error_selected_bg);
+                v.animate().scaleX(1.25f).scaleY(1.25f).setDuration(100).start();
+                clearAnimation(R.id.btn_amount);
+                clearAnimation(R.id.btn_online);
+                clearAnimation(R.id.btn_warning);
+                clearAnimation(R.id.btn_offline);
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                         mProjectStationList) {
@@ -670,9 +704,15 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 mPointsAdapter.setData(mPointList);
                 mPointsAdapter.notifyDataSetChanged();
-                mScrollLayout.scrollToClose();
                 break;
             case R.id.btn_offline:
+                mScrollLayout.scrollToClose();
+                v.setBackgroundResource(R.drawable.btn_offline_selected_bg);
+                v.animate().scaleX(1.25f).scaleY(1.25f).setDuration(100).start();
+                clearAnimation(R.id.btn_amount);
+                clearAnimation(R.id.btn_online);
+                clearAnimation(R.id.btn_warning);
+                clearAnimation(R.id.btn_error);
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                         mProjectStationList) {
@@ -683,10 +723,34 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 mPointsAdapter.setData(mPointList);
                 mPointsAdapter.notifyDataSetChanged();
-                mScrollLayout.scrollToClose();
                 break;
             case R.id.iv_refresh:
                 doLoadingDialog();
+                break;
+        }
+    }
+
+    private void clearAnimation(int drawable){
+        switch (drawable){
+            case R.id.btn_amount:
+                mBtnAmount.setBackgroundResource(R.drawable.btn_amount_bg);
+                mBtnAmount.animate().scaleX(1.0f).scaleY(1.0f).setDuration(10).start();
+                break;
+            case R.id.btn_online:
+                mBtnOnline.setBackgroundResource(R.drawable.btn_online_bg);
+                mBtnOnline.animate().scaleX(1.0f).scaleY(1.0f).setDuration(10).start();
+                break;
+            case R.id.btn_warning:
+                mBtnWarning.setBackgroundResource(R.drawable.btn_warning_bg);
+                mBtnWarning.animate().scaleX(1.0f).scaleY(1.0f).setDuration(10).start();
+                break;
+            case R.id.btn_error:
+                mBtnError.setBackgroundResource(R.drawable.btn_error_bg);
+                mBtnError.animate().scaleX(1.0f).scaleY(1.0f).setDuration(10).start();
+                break;
+            case R.id.btn_offline:
+                mBtnOffline.setBackgroundResource(R.drawable.btn_offline_bg);
+                mBtnOffline.animate().scaleX(1.0f).scaleY(1.0f).setDuration(10).start();
                 break;
         }
     }

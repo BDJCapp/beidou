@@ -44,7 +44,6 @@ public class LoginUtil {
     public static final int CHANGEPWD = 0;
     public static final int RESETPWD = 1;
 
-
     public LoginUtil() {
     }
     /**

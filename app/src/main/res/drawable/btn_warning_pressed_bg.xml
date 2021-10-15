@@ -3,10 +3,10 @@
     android:shape="oval"
     >
     <solid
-        android:color="#BFBF00"
+        android:color="#BC7D26"
         />
-    <stroke
-        android:width="1dp"
-        android:color="#BBBBBB"
-        />
+<!--    <stroke-->
+<!--        android:width="1dp"-->
+<!--        android:color="#BBBBBB"-->
+<!--        />-->
 </shape>

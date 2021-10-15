@@ -2,13 +2,19 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:state_pressed="false"
+        android:state_checked="false"
+
         android:drawable="@drawable/btn_online_bg"
+        android:textSize="12sp"
+        android:typeface="serif"
         />
 
     <item
-        android:state_pressed="true"
+        android:state_checked="true"
         android:drawable="@drawable/btn_online_pressed_bg"
+        android:textSize="15sp"
+        android:typeface="normal"
+
         />
 
 </selector>

@@ -77,21 +77,6 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.Vi
             holder.status.setImageResource(R.drawable.ic_svg_offline_point);
         }
 
-        /*switch (tStatus){
-            case "在线":
-                holder.status.setImageResource(R.drawable.ic_svg_online_point);
-                break;
-            case "警告":
-                holder.status.setImageResource(R.drawable.ic_svg_warning_point);
-                break;
-            case "故障":
-                holder.status.setImageResource(R.drawable.ic_svg_error_point);
-                break;
-            case "离线":
-                holder.status.setImageResource(R.drawable.ic_svg_offline_point);
-                break;
-        }*/
-
         holder.lookData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
