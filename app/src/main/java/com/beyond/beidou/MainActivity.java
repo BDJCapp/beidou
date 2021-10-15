@@ -49,6 +49,20 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private CoordinatorLayout coordinatorLayout;
     private boolean isExit = false;
     private DownloadService.DownloadBinder downloadBinder;
+    private Toast mToast;
+
+    public void displayToast(String msg){
+        mToast = Toast.makeText(this, msg, Toast.LENGTH_SHORT);
+        mToast.show();
+    }
+
+    public void cancelToast() {
+        if (mToast != null) {
+            LogUtil.e("MainActivity cancelToast","toast不为空");
+            mToast.cancel();
+            mToast = null;
+        }
+    }
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -59,7 +73,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             service.setDownLoadExcelSuccess(new DownloadService.DownLoadExcelSuccess() {
                 @Override
                 public void showSnackBar() {
-                    final Snackbar snackbar = Snackbar.make(coordinatorLayout, "导出路径为：" + service.getFilePath().substring(20), Snackbar.LENGTH_LONG)
+                    //LENGTH_INDEFINITE：不取消显示
+                    cancelToast();
+                    final Snackbar snackbar = Snackbar.make(coordinatorLayout, "导出路径为：" + service.getFilePath().substring(20), Snackbar.LENGTH_INDEFINITE)
                             .setAction("打开报表", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {

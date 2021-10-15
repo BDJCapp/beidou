@@ -1,6 +1,7 @@
 package com.beyond.beidou.login;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -16,6 +17,7 @@ import android.text.method.PasswordTransformationMethod;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -198,6 +200,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 setPwdVisible();
                 break;
             case R.id.btn_login:
+                //收起软键盘
+                InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
                 if (!(checkAccount()&&checkPassword()))
                 {
                     break;
@@ -399,11 +405,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         {
             isCorrect = false;
             Toast.makeText(getApplicationContext(),"请输入密码",Toast.LENGTH_SHORT).show();
-        } else if (!LoginUtil.checkPwd(password))
+        }
+
+        /*
+        else if (!LoginUtil.checkPwd(password))  检查密码正则
         {
             isCorrect = false;
             Toast.makeText(getApplicationContext(),"密码输入有误，请重新输入",Toast.LENGTH_SHORT).show();
         }
+        */
         return isCorrect;
     }
 
@@ -445,6 +455,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                     handler.sendEmptyMessageDelayed(LOGIN,0);
                 }
             }).start();
+        }else {
+            mLoadingDlg.dismiss();
         }
     }
 

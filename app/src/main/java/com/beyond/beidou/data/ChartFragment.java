@@ -291,9 +291,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             public void onClick(View v) {
                 if (LoginUtil.isNetworkUsable(getActivity()))
                 {
+                    MainActivity activity = (MainActivity)getActivity();
+                    if (activity != null){
+                        activity.displayToast("正在导出...");
+                    }
                     downLoadExcel();
                 }
-
             }
         });
         mNChart.setOnTouchListener(touchListener);
@@ -977,20 +980,23 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         api.postRequestFormBody(getActivity(), body, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
+                LogUtil.e("导出报表返回值",res);
                 String url = api.parseJSONObject(res, "ReportFilePath");
-                LogUtil.e("获取的下载·地址为", url);
+                String responseCode = api.parseJSONObject(res,"ResponseCode");
+
                 MainActivity mainActivity = (MainActivity) getActivity();
-                if (mainActivity != null && !"".equals(url)) {
+                if (mainActivity != null && "200".equals(responseCode)) {
                     mainActivity.getDownloadBinder().startDownload(url);
                 } else {
-                    Toast.makeText(getActivity(), "获取URL有误，请稍后再试", Toast.LENGTH_SHORT).show();
+                    String responseMsg = api.parseJSONObject(res,"ResponseMsg");
+                    showToastSync("导出失败," + responseMsg);
                 }
             }
 
             @Override
             public void onFailure(Exception e) {
                 LogUtil.e("downloadReport network failure", e.toString());
-                Toast.makeText(getActivity(), "网络连接错误，请稍后再试", Toast.LENGTH_SHORT).show();
+                showToastSync("服务器连接超时，请稍后再试");
             }
         });
     }

@@ -28,15 +28,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         mContext = this;
     }
 
-    public void showToast(String msg){
-        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-    }
-
-    public void showToastSync(String msg){
-        Looper.prepare();
-        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-        Looper.loop();
-    }
 
     public void navigateTo(Class cls){
         Intent intent = new Intent(mContext, cls);
