@@ -29,6 +29,7 @@ import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.GetStationsResponse;
 import com.beyond.beidou.entites.ProjectResponse;
+import com.beyond.beidou.util.ListUtil;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.google.gson.Gson;
@@ -59,15 +60,11 @@ public class DataHomeFragment extends BaseFragment {
     private SmartRefreshLayout mPageRefreshLayout;
     private ArrayList<String> mProjectNameList = new ArrayList<>();
     private Map<String,Object> mProjectName2UUID = new HashMap<>();
-    private final int mPageSize = 10;
-    private Integer mCurrentPageSize = mPageSize;
-    private int mTotalStationNum;
     private MainActivity mainActivity;
     private static final int REQUEST_PROJECT = 1;
     private static final int REQUEST_DEVICE = 2;
     private static final int LOADING_FINISH = 200;
     private static final int REQUEST_FAILED = 400;
-    private static final int PAGING = 201;
     public Handler pHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -76,17 +73,11 @@ public class DataHomeFragment extends BaseFragment {
                     setViews();
                     break;
                 case REQUEST_DEVICE:
-                    mCurrentPageSize = mPageSize;             //切换工程时，恢复初始状态！
-                    mPageRefreshLayout.setNoMoreData(false);
                     setmDevicesRv(mProjectSp.getSelectedItem().toString());
                     break;
                 case LOADING_FINISH:
-                    mPageRefreshLayout.finishLoadMore(true);
                     mPageRefreshLayout.finishRefresh(true);
                     mLoadingDlg.dismiss();
-                    break;
-                case PAGING:
-                    setmDevicesRv(mProjectSp.getSelectedItem().toString());
                     break;
                 case REQUEST_FAILED:
                     mLoadingDlg.dismiss();
@@ -186,7 +177,7 @@ public class DataHomeFragment extends BaseFragment {
                             @Override
                             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                                 ((MainActivity)getActivity()).setPresentProject(mProjectSp.getSelectedItem().toString());
-                                doLoadingDialog(2);
+                                doLoadingDialog(REQUEST_DEVICE);
                             }
 
                             @Override
@@ -212,12 +203,13 @@ public class DataHomeFragment extends BaseFragment {
         try {
             jsonData.put("AccessToken",ApiConfig.getAccessToken());
             jsonData.put("SessionUUID",ApiConfig.getSessionUUID());
-            jsonData.put("ProjectUUID",projectUUIDArray);
-            jsonData.put("PageInfo",pageArray);
             projectUUIDArray.put(0,mProjectName2UUID.get(selectedProject));
+            jsonData.put("ProjectUUID",projectUUIDArray);
+
+            jsonData.put("PageInfo",pageArray);
             JSONObject pageObject = new JSONObject();
-            pageObject.put("PageNumber","1");
-            pageObject.put("PageSize", mCurrentPageSize.toString());
+            //无法返回全部数据，先指定页面大小为100
+            pageObject.put("PageSize", "100");
             pageArray.put(0,pageObject);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -233,6 +225,8 @@ public class DataHomeFragment extends BaseFragment {
                 final List<String> deviceStatus = new ArrayList<>();
                 final ArrayList<String> stationUUIDList = new ArrayList<>();
                 List<GetStationsResponse.StationListBean> stationList = stationsResponse.getStationList();
+                //对返回数据按照StationName,StationUUID顺序进行升序排序
+                ListUtil.sort(stationList,true,"StationName","StationUUID");
                 for (int i = 0; i < stationList.size(); i++) {
                     deviceNames.add(stationList.get(i).getStationName());
                     deviceTypes.add(getStationType(stationList.get(i).getStationType()));
@@ -240,7 +234,6 @@ public class DataHomeFragment extends BaseFragment {
                     deviceStatus.add(stationList.get(i).getStationStatus());
                     stationUUIDList.add(stationList.get(i).getStationUUID());
                 }
-                mTotalStationNum = stationsResponse.getPageInfo().getTotalNumber();
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -287,24 +280,12 @@ public class DataHomeFragment extends BaseFragment {
     {
         if (getActivity() != null){
             mPageRefreshLayout.setRefreshHeader(new ClassicsHeader(getActivity()));
-            mPageRefreshLayout.setRefreshFooter(new ClassicsFooter(getActivity()));
         }
+
         mPageRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-                pHandler.sendEmptyMessage(PAGING);
-            }
-        });
-
-        mPageRefreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
-            @Override
-            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-                if (mCurrentPageSize < mTotalStationNum){
-                    mCurrentPageSize+=mCurrentPageSize;
-                    pHandler.sendEmptyMessage(PAGING);
-                }else {
-                    mPageRefreshLayout.finishLoadMoreWithNoMoreData();
-                }
+                pHandler.sendEmptyMessage(REQUEST_DEVICE);
             }
         });
     }
@@ -318,7 +299,6 @@ public class DataHomeFragment extends BaseFragment {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.add(R.id.layout_home, chartFragment).hide(this);
-//        ft.addToBackStack("ChartFragment");   //加入到返回栈中
         ft.commit();
     }
 }

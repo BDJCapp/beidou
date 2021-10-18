@@ -119,97 +119,92 @@
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="10dp"
                         android:orientation="horizontal"
                         android:padding="10dp">
 
                         <Button
                             android:id="@+id/btn_amount"
                             android:layout_width="0dp"
-                            android:layout_height="55dp"
+                            android:layout_height="50dp"
                             android:layout_marginVertical="7dp"
-                            android:layout_marginStart="7dp"
-                            android:layout_marginEnd="5dp"
+                            android:layout_marginHorizontal="7dp"
                             android:layout_weight="1"
                             android:background="@drawable/btn_amount_bg"
                             android:gravity="center"
                             android:textSize="12sp"
                             android:typeface="serif"
-                            android:text="总数:\n" />
+                            android:text="总数\n" />
 
                         <Button
                             android:id="@+id/btn_online"
                             android:layout_width="0dp"
-                            android:layout_height="55dp"
+                            android:layout_height="50dp"
                             android:layout_marginVertical="7dp"
-                            android:layout_marginHorizontal="5dp"
+                            android:layout_marginHorizontal="7dp"
                             android:layout_weight="1"
                             android:background="@drawable/btn_online_bg"
                             android:gravity="center"
                             android:textSize="12sp"
                             android:typeface="serif"
-                            android:text="在线:\n" />
+                            android:text="在线\n" />
 
                         <Button
                             android:id="@+id/btn_warning"
                             android:layout_width="0dp"
-                            android:layout_height="55dp"
+                            android:layout_height="50dp"
                             android:layout_marginVertical="7dp"
-                            android:layout_marginHorizontal="5dp"
+                            android:layout_marginHorizontal="7dp"
                             android:layout_weight="1"
                             android:background="@drawable/btn_warning_bg"
                             android:gravity="center"
                             android:textSize="12sp"
                             android:typeface="serif"
-                            android:text="警告:\n" />
+                            android:text="警告\n" />
 
                         <Button
                             android:id="@+id/btn_error"
                             android:layout_width="0dp"
-                            android:layout_height="55dp"
+                            android:layout_height="50dp"
                             android:layout_marginVertical="7dp"
-                            android:layout_marginHorizontal="5dp"
+                            android:layout_marginHorizontal="7dp"
                             android:layout_weight="1"
                             android:background="@drawable/btn_error_bg"
                             android:gravity="center"
                             android:textSize="12sp"
                             android:typeface="serif"
-                            android:text="故障:\n" />
+                            android:text="故障\n" />
 
                         <Button
                             android:id="@+id/btn_offline"
                             android:layout_width="0dp"
-                            android:layout_height="55dp"
+                            android:layout_height="50dp"
                             android:layout_marginVertical="7dp"
-                            android:layout_marginStart="5dp"
-                            android:layout_marginEnd="7dp"
+                            android:layout_marginHorizontal="7dp"
                             android:layout_weight="1"
                             android:background="@drawable/btn_offline_bg"
                             android:gravity="center"
                             android:textSize="12sp"
                             android:typeface="serif"
-                            android:text="离线:\n" />
+                            android:text="离线\n" />
 
                     </LinearLayout>
-
-
 
                     <com.beyond.beidou.views.MyRecycleView
                         android:id="@+id/recycle_view"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="120dp" />
+                        android:layout_marginBottom="120dp"/>
 
-
-                    <!--                    <com.yinglan.scrolllayout.content.ContentRecyclerView-->
-                    <!--                        android:id="@+id/recycle_view"-->
-                    <!--                        android:layout_width="match_parent"-->
-                    <!--                        android:layout_height="wrap_content"-->
-                    <!--                        android:layout_marginBottom="120dp"-->
-                    <!--                        />-->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="已加载全部监测点"
+                        android:visibility="gone"
+                        android:gravity="center"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="120dp"/>
 
                 </LinearLayout>
-
 
             </com.yinglan.scrolllayout.content.ContentScrollView>
 

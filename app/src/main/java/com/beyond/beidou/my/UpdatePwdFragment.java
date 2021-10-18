@@ -104,15 +104,6 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                 }
                             });
                     builder.create().show();
-                } else if (!LoginUtil.checkPwd(newPwd)) {
-                    builder = new AlertDialog.Builder(getContext()).setTitle("提示")
-                            .setMessage("密码格式不正确！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                    builder.create().show();
                 } else if (!newPwd.equals(confirmPwd)) {
                     builder = new AlertDialog.Builder(getContext()).setTitle("提示")
                             .setMessage("两次输入的密码不一致！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -131,7 +122,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                         @Override
                         public void onSuccess(String res) {
                             Gson gson = new Gson();
-                            LoginResponse response = gson.fromJson(res, LoginResponse.class);
+                            final LoginResponse response = gson.fromJson(res, LoginResponse.class);
                             if (Integer.parseInt(response.getResponseCode()) == 400412) {
                                 mMainActivity.runOnUiThread(new Runnable() {
                                     @Override
@@ -161,6 +152,38 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                                         saveStringToSP("lastProjectName", activity.getPresentProject());
                                                         ProjectFragment.sIsReLogin = true;
                                                         logOut(getStringFromSP("userName"), ApiConfig.getAccessToken(), ApiConfig.getSessionUUID());
+                                                    }
+                                                });
+                                        builder.create().show();
+                                    }
+                                });
+                            }
+                            else if (Integer.parseInt(response.getResponseCode()) == 400) {
+                                mMainActivity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        AlertDialog.Builder builder;
+                                        builder = new AlertDialog.Builder(getContext()).setTitle("提示")
+                                                .setMessage("密码太简单，请重新修改！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        dialog.dismiss();
+                                                    }
+                                                });
+                                        builder.create().show();
+                                    }
+                                });
+                            }
+                            else{
+                                mMainActivity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        AlertDialog.Builder builder;
+                                        builder = new AlertDialog.Builder(getContext()).setTitle("提示")
+                                                .setMessage(response.getResponseMsg()).setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        dialog.dismiss();
                                                     }
                                                 });
                                         builder.create().show();

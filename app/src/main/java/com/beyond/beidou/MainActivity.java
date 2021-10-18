@@ -81,9 +81,12 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                                 public void onClick(View v) {
                                     LogUtil.e("获取的FilePath", service.getFilePath());
                                     FileUtil.openExcelFile(getApplicationContext(), service.getFilePath());
+//                                    FileUtil.openDownload(getApplicationContext(),service.getFilePath());
                                 }
                             })
                             .setActionTextColor(getResources().getColor(R.color.main_blue));
+                    //默认显示5s
+                    snackbar.setDuration(5000);
                     snackbar.show();
                 }
             });

@@ -1,16 +1,20 @@
 package com.beyond.beidou.entites;
 
+import java.util.UUID;
+
 public class MonitoringPoint {
     private String name;
     private String type;
     private String activeTime;
     private String status;
+    private String uuid;
 
-    public MonitoringPoint(String name, String type, String activeTime, String status) {
+    public MonitoringPoint(String name, String type, String activeTime, String status, String uuid) {
         this.name = name;
         this.type = type;
         this.activeTime = activeTime;
         this.status = status;
+        this.uuid = uuid;
     }
 
     public String getStatus() {
@@ -43,5 +47,13 @@ public class MonitoringPoint {
 
     public void setActiveTime(String activeTime) {
         this.activeTime = activeTime;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }
