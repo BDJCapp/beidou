@@ -299,44 +299,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 }
             }
         });
-        mNChart.setOnTouchListener(touchListener);
-        mEChart.setOnTouchListener(touchListener);
-        mHChart.setOnTouchListener(touchListener);
-        mDeltaHChart.setOnTouchListener(touchListener);
-        mDeltaDChart.setOnTouchListener(touchListener);
-        mHeartChart.setOnTouchListener(touchListener);
     }
-
-    /**
-     * 解决图表与ScrollView滑动冲突
-     * 图表可上下左右滑动，ScrollView可上下滑动
-     */
-    View.OnTouchListener touchListener = new View.OnTouchListener() {
-        float yStart = 0f;
-        float yEnd = 0f;
-        long startTime;
-        long endTime;
-        float speed = 0f;
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    yStart = event.getY();
-                    startTime = System.currentTimeMillis();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    yEnd = event.getY();
-                    endTime = System.currentTimeMillis();
-                    speed = (yEnd - yStart) / (endTime - startTime);
-                    if (speed > 1f || speed < -1.2f) {
-                        mChartsSv.requestDisallowInterceptTouchEvent(false);
-                    }
-                    break;
-            }
-            return false;
-        }
-    };
 
     /**
      * 绘制XYH图表

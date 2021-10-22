@@ -95,7 +95,7 @@
             android:theme="@style/spinner_style" />
     </LinearLayout>
 
-    <ScrollView
+    <com.beyond.beidou.views.MyScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/layout_spinner"
@@ -161,7 +161,7 @@
                 />
         </RelativeLayout>
 
-        <lecho.lib.hellocharts.view.LineChartView
+        <com.beyond.beidou.views.MyChartView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_X"
@@ -223,7 +223,7 @@
                 android:layout_below="@+id/tv_chartNameY"
                 />
         </RelativeLayout>
-        <lecho.lib.hellocharts.view.LineChartView
+        <com.beyond.beidou.views.MyChartView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_Y"
@@ -285,7 +285,7 @@
                 android:layout_below="@+id/tv_chartNameH"
                 />
         </RelativeLayout>
-        <lecho.lib.hellocharts.view.LineChartView
+        <com.beyond.beidou.views.MyChartView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_H"
@@ -346,7 +346,7 @@
                 />
         </RelativeLayout>
 
-        <lecho.lib.hellocharts.view.LineChartView
+        <com.beyond.beidou.views.MyChartView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_DeltaD"
@@ -407,7 +407,7 @@
                 />
         </RelativeLayout>
 
-        <lecho.lib.hellocharts.view.LineChartView
+        <com.beyond.beidou.views.MyChartView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_DeltaH"
@@ -468,7 +468,7 @@
                 />
         </RelativeLayout>
 
-        <lecho.lib.hellocharts.view.LineChartView
+        <com.beyond.beidou.views.MyChartView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_Heart"
@@ -476,5 +476,5 @@
             />
     </LinearLayout>
 </LinearLayout>
-    </ScrollView>
+    </com.beyond.beidou.views.MyScrollView>
 </RelativeLayout>

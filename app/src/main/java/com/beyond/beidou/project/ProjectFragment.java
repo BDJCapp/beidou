@@ -399,6 +399,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             ListUtil.sort(mPointList, true, "name", "uuid");
                             mPointsAdapter.setData(mPointList);
                             mRecyclerView.setAdapter(mPointsAdapter);
+                            mPointsAdapter.addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.item_footer_layout,null));
                             mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(View view, int position) {
