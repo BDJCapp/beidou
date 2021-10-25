@@ -93,6 +93,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                     TextView messageView = snackBarView.findViewById(com.google.android.material.R.id.snackbar_text);
                     messageView.setMaxLines(3);
                     snackbar.show();
+
                 }
             });
         }
