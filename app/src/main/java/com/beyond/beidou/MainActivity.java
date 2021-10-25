@@ -14,6 +14,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.beyond.beidou.data.DataHomeFragment;
@@ -73,8 +74,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             service.setDownLoadExcelSuccess(new DownloadService.DownLoadExcelSuccess() {
                 @Override
                 public void showSnackBar() {
-                    //LENGTH_INDEFINITE：不取消显示
                     cancelToast();
+                    //LENGTH_INDEFINITE：不取消显示
                     final Snackbar snackbar = Snackbar.make(coordinatorLayout, "导出路径为：" + service.getFilePath().substring(20), Snackbar.LENGTH_INDEFINITE)
                             .setAction("打开报表", new View.OnClickListener() {
                                 @Override
@@ -85,8 +86,12 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                                 }
                             })
                             .setActionTextColor(getResources().getColor(R.color.main_blue));
-                    //默认显示5s
-                    snackbar.setDuration(5000);
+                    //默认显示10s
+                    snackbar.setDuration(10000);
+                    //设置3行显示，避免文字截断
+                    View snackBarView = snackbar.getView();
+                    TextView messageView = snackBarView.findViewById(com.google.android.material.R.id.snackbar_text);
+                    messageView.setMaxLines(3);
                     snackbar.show();
                 }
             });

@@ -1,5 +1,6 @@
 package com.beyond.beidou.data;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
@@ -26,9 +27,11 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
     private boolean isCanceled = false;
     private boolean isPaused = false;
     private int lastProgress;
+    private String filepath;
 
-    public DownloadTask(DownloadListener listener)
+    public DownloadTask(String filepath,DownloadListener listener)
     {
+        this.filepath = filepath;
         this.listener = listener;
     }
 
@@ -41,13 +44,10 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
             try {
             long downloadLength = 0;
             String downloadUrl = params[0];
-            String filename = downloadUrl.substring(downloadUrl.lastIndexOf("/"));
-            String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
-            file = new File(directory + filename);
-            LogUtil.e("文件存放地址",directory + filename);
-            if (file.exists()){
+            file = new File(filepath);
+            /**if (file.exists()){    //文件存在就不再下载
                 downloadLength = file.length();
-            }
+            }**/
             LogUtil.e("资源URL",downloadUrl);
             long contentLength = getContentLength(downloadUrl);
             if (contentLength == 0){
@@ -55,7 +55,6 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
             }else if (contentLength == downloadLength){
                 return TYPE_SUCCESS;
             }
-
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder()
                     .addHeader("RANGE","byte="+downloadLength+"-")
@@ -67,7 +66,6 @@ public class DownloadTask extends AsyncTask<String,Integer,Integer> {
                 is = response.body().byteStream();
                 saveFile = new RandomAccessFile(file,"rw");
                 saveFile.seek(downloadLength);//跳过已下载的部分
-
                 byte[] b = new byte[1024];
                 int total = 0;
                 int len;
