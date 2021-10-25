@@ -34,6 +34,7 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
+import com.beyond.beidou.util.ListUtil;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.views.MyRecycleView;
 import com.beyond.beidou.R;
@@ -83,7 +84,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     private List<ProjectResponse.ProjectListBean> mProjectList = new ArrayList<>();
     private ProjectResponse.ProjectListBean.ProjectStationStatusBean mProjectStationStatus;
     private ArrayList<String> mProjectNameList = new ArrayList<>();
-    private String mNetTime;
     private List<ProjectResponse.ProjectListBean.StationListBean> mProjectStationList = new ArrayList<>();
     private MonitoringPointsAdapter mPointsAdapter;
     private LinearLayoutManager mLayoutManager;
@@ -396,8 +396,10 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             //初始化监测点数据
                             initStationList();
 //                            mPointsAdapter = new MonitoringPointsAdapter(mPointList);
+                            ListUtil.sort(mPointList, true, "name", "uuid");
                             mPointsAdapter.setData(mPointList);
                             mRecyclerView.setAdapter(mPointsAdapter);
+                            mPointsAdapter.addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.item_footer_layout,null));
                             mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(View view, int position) {
@@ -505,7 +507,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         LatLng sourcePoint;
         for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                 mProjectStationList) {
-            mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+            mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus(), projectStation.getDeviceUUID()));
             if (!TextUtils.isEmpty(projectStation.getStationLatitude()) && !TextUtils.isEmpty(projectStation.getStationLongitude())) {
                 sourcePoint = new LatLng(Double.parseDouble(projectStation.getStationLatitude()), Double.parseDouble(projectStation.getStationLongitude()));
             } else {
@@ -642,10 +644,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 mPointList.clear();
                 for (ProjectResponse.ProjectListBean.StationListBean projectStation :
                         mProjectStationList) {
-                    mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                    mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus(), projectStation.getDeviceUUID()));
                 }
-                mPointsAdapter.setData(mPointList);
-                mPointsAdapter.notifyDataSetChanged();
                 break;
             case R.id.btn_online:
                 mScrollLayout.scrollToClose();
@@ -660,11 +660,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                         mProjectStationList) {
                     int statusCode = Integer.parseInt(projectStation.getStationStatus());
                     if (statusCode >= 10 && statusCode <= 19) {
-                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus(), projectStation.getDeviceUUID()));
                     }
                 }
-                mPointsAdapter.setData(mPointList);
-                mPointsAdapter.notifyDataSetChanged();
                 break;
             case R.id.btn_warning:
                 mScrollLayout.scrollToClose();
@@ -679,12 +677,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                         mProjectStationList) {
                     int statusCode = Integer.parseInt(projectStation.getStationStatus());
                     if (statusCode >= 30 && statusCode <= 39) {
-                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus(), projectStation.getDeviceUUID()));
                     }
                 }
-                mPointsAdapter.setData(mPointList);
-                mPointsAdapter.notifyDataSetChanged();
-
                 break;
             case R.id.btn_error:
                 mScrollLayout.scrollToClose();
@@ -699,11 +694,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                         mProjectStationList) {
                     int statusCode = Integer.parseInt(projectStation.getStationStatus());
                     if (statusCode >= 40 && statusCode <= 49) {
-                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus(), projectStation.getDeviceUUID()));
                     }
                 }
-                mPointsAdapter.setData(mPointList);
-                mPointsAdapter.notifyDataSetChanged();
                 break;
             case R.id.btn_offline:
                 mScrollLayout.scrollToClose();
@@ -718,16 +711,17 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                         mProjectStationList) {
                     int statusCode = Integer.parseInt(projectStation.getStationStatus());
                     if (statusCode >= 20 && statusCode <= 29) {
-                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus()));
+                        mPointList.add(new MonitoringPoint(projectStation.getStationName(), projectStation.getStationType(), projectStation.getStationLastTime(), projectStation.getStationStatus(), projectStation.getDeviceUUID()));
                     }
                 }
-                mPointsAdapter.setData(mPointList);
-                mPointsAdapter.notifyDataSetChanged();
                 break;
             case R.id.iv_refresh:
                 doLoadingDialog();
                 break;
         }
+        ListUtil.sort(mPointList, true, "name", "uuid");
+        mPointsAdapter.setData(mPointList);
+        mPointsAdapter.notifyDataSetChanged();
     }
 
     private void clearAnimation(int drawable){

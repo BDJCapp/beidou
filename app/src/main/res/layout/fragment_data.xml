@@ -26,10 +26,10 @@
         android:id="@+id/layout_refresh"
         android:layout_below="@+id/line1"
         >
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/rv_device"
-            />
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rv_device"
+                />
     </com.scwang.smart.refresh.layout.SmartRefreshLayout>
 </RelativeLayout>

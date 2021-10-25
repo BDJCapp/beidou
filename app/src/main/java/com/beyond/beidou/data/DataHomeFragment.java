@@ -24,19 +24,19 @@ import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
 import com.beyond.beidou.adapter.DeviceListAdapter;
+import com.beyond.beidou.adapter.MonitoringPointsAdapter;
 import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.GetStationsResponse;
 import com.beyond.beidou.entites.ProjectResponse;
+import com.beyond.beidou.util.ListUtil;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.google.gson.Gson;
-import com.scwang.smart.refresh.footer.ClassicsFooter;
 import com.scwang.smart.refresh.header.ClassicsHeader;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
-import com.scwang.smart.refresh.layout.listener.OnLoadMoreListener;
 import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 import com.zyao89.view.zloading.ZLoadingDialog;
 import com.zyao89.view.zloading.Z_TYPE;
@@ -59,34 +59,24 @@ public class DataHomeFragment extends BaseFragment {
     private SmartRefreshLayout mPageRefreshLayout;
     private ArrayList<String> mProjectNameList = new ArrayList<>();
     private Map<String,Object> mProjectName2UUID = new HashMap<>();
-    private final int mPageSize = 10;
-    private Integer mCurrentPageSize = mPageSize;
-    private int mTotalStationNum;
     private MainActivity mainActivity;
     private static final int REQUEST_PROJECT = 1;
     private static final int REQUEST_DEVICE = 2;
     private static final int LOADING_FINISH = 200;
     private static final int REQUEST_FAILED = 400;
-    private static final int PAGING = 201;
     public Handler pHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
                 case REQUEST_PROJECT:
-                    setViews();
+                    getProjectsData();
                     break;
                 case REQUEST_DEVICE:
-                    mCurrentPageSize = mPageSize;             //切换工程时，恢复初始状态！
-                    mPageRefreshLayout.setNoMoreData(false);
-                    setmDevicesRv(mProjectSp.getSelectedItem().toString());
+                    getDevicesData(mProjectSp.getSelectedItem().toString());
                     break;
                 case LOADING_FINISH:
-                    mPageRefreshLayout.finishLoadMore(true);
                     mPageRefreshLayout.finishRefresh(true);
                     mLoadingDlg.dismiss();
-                    break;
-                case PAGING:
-                    setmDevicesRv(mProjectSp.getSelectedItem().toString());
                     break;
                 case REQUEST_FAILED:
                     mLoadingDlg.dismiss();
@@ -146,7 +136,7 @@ public class DataHomeFragment extends BaseFragment {
         }
     }
 
-    public void setViews() {
+    public void getProjectsData() {
         //设置Spinner
         final HashMap<String, Object> requestParams = new HashMap<>();
         requestParams.put("AccessToken", ApiConfig.getAccessToken());
@@ -161,11 +151,13 @@ public class DataHomeFragment extends BaseFragment {
                     String projectName = projectResponse.getProjectList().get(i).getProjectName();
                     mProjectNameList.add(projectName);
                     mProjectName2UUID.put(projectName,projectResponse.getProjectList().get(i).getProjectUUID());
+
                 }
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        List<ProjectResponse.ProjectListBean.StationListBean> stationList = new ArrayList<>();
                         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.item_select, mProjectNameList);
                         adapter.setDropDownViewResource(R.layout.item_drop);
                         mProjectSp.setAdapter(adapter);
@@ -177,7 +169,8 @@ public class DataHomeFragment extends BaseFragment {
                             for (int i = 0; i < mProjectNameList.size(); i++) {
                                 if (presentProject.equals(mProjectNameList.get(i))) {
                                     mProjectSp.setSelection(i, true);
-                                    setmDevicesRv(presentProject);
+                                    stationList = projectResponse.getProjectList().get(i).getStationList();
+                                    setListByProjects(stationList);
                                 }
                             }
                         }
@@ -186,7 +179,7 @@ public class DataHomeFragment extends BaseFragment {
                             @Override
                             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                                 ((MainActivity)getActivity()).setPresentProject(mProjectSp.getSelectedItem().toString());
-                                doLoadingDialog(2);
+                                doLoadingDialog(REQUEST_DEVICE);
                             }
 
                             @Override
@@ -205,19 +198,20 @@ public class DataHomeFragment extends BaseFragment {
         });
     }
 
-    public void setmDevicesRv(String selectedProject) {
+    public void getDevicesData(String selectedProject) {
         JSONObject jsonData = new JSONObject();
         JSONArray projectUUIDArray = new JSONArray();
         JSONArray pageArray = new JSONArray();
         try {
             jsonData.put("AccessToken",ApiConfig.getAccessToken());
             jsonData.put("SessionUUID",ApiConfig.getSessionUUID());
-            jsonData.put("ProjectUUID",projectUUIDArray);
-            jsonData.put("PageInfo",pageArray);
             projectUUIDArray.put(0,mProjectName2UUID.get(selectedProject));
+            jsonData.put("ProjectUUID",projectUUIDArray);
+
+            jsonData.put("PageInfo",pageArray);
             JSONObject pageObject = new JSONObject();
-            pageObject.put("PageNumber","1");
-            pageObject.put("PageSize", mCurrentPageSize.toString());
+            //无法返回全部数据，先指定页面大小为100
+            pageObject.put("PageSize", "100");
             pageArray.put(0,pageObject);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -227,40 +221,8 @@ public class DataHomeFragment extends BaseFragment {
             public void onSuccess(String res) {
                 Gson gson = new Gson();
                 GetStationsResponse stationsResponse = gson.fromJson(res, GetStationsResponse.class);
-                final ArrayList<String> deviceNames = new ArrayList<>();
-                final List<String> deviceTypes = new ArrayList<>();
-                final List<String> lastTimes = new ArrayList<>();
-                final List<String> deviceStatus = new ArrayList<>();
-                final ArrayList<String> stationUUIDList = new ArrayList<>();
                 List<GetStationsResponse.StationListBean> stationList = stationsResponse.getStationList();
-                for (int i = 0; i < stationList.size(); i++) {
-                    deviceNames.add(stationList.get(i).getStationName());
-                    deviceTypes.add(getStationType(stationList.get(i).getStationType()));
-                    lastTimes.add(stationList.get(i).getStationLastTime());
-                    deviceStatus.add(stationList.get(i).getStationStatus());
-                    stationUUIDList.add(stationList.get(i).getStationUUID());
-                }
-                mTotalStationNum = stationsResponse.getPageInfo().getTotalNumber();
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        DeviceListAdapter adapter = new DeviceListAdapter(deviceNames, deviceTypes, lastTimes, deviceStatus);
-                        adapter.setLookDataListener(new DeviceListAdapter.onItemLookdataClockListener() {
-                            @Override
-                            public void onItemClick(View view, int position) {
-                                if (LoginUtil.isNetworkUsable(getActivity()))
-                                {
-                                    switchFragment(mProjectSp.getSelectedItem().toString(), deviceNames, position, stationUUIDList);
-                                }
-                            }
-                        });
-                        mDevicesRv.setAdapter(adapter);
-                        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-                        manager.setOrientation(RecyclerView.VERTICAL);
-                        mDevicesRv.setLayoutManager(manager);
-                    }
-                });
-                pHandler.sendEmptyMessageDelayed(LOADING_FINISH,0);
+                setListByStations(stationList);
             }
 
             @Override
@@ -268,6 +230,83 @@ public class DataHomeFragment extends BaseFragment {
                 pHandler.sendEmptyMessageDelayed(REQUEST_FAILED,0);
             }
         });
+    }
+
+    //后续可以可与工程模块一起优化
+    public void setListByStations(final List<GetStationsResponse.StationListBean> stationList){
+        final ArrayList<String> deviceNames = new ArrayList<>();
+        final List<String> deviceTypes = new ArrayList<>();
+        final List<String> lastTimes = new ArrayList<>();
+        final List<String> deviceStatus = new ArrayList<>();
+        final ArrayList<String> stationUUIDList = new ArrayList<>();
+        //对返回数据按照StationName,StationUUID顺序进行升序排序
+        ListUtil.sort(stationList,true,"StationName","StationUUID");
+        for (int i = 0; i < stationList.size(); i++) {
+            deviceNames.add(stationList.get(i).getStationName());
+            deviceTypes.add(getStationType(stationList.get(i).getStationType()));
+            lastTimes.add(stationList.get(i).getStationLastTime());
+            deviceStatus.add(stationList.get(i).getStationStatus());
+            stationUUIDList.add(stationList.get(i).getStationUUID());
+        }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                DeviceListAdapter adapter = new DeviceListAdapter(deviceNames, deviceTypes, lastTimes, deviceStatus);
+                adapter.setLookDataListener(new DeviceListAdapter.onItemLookdataClockListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        if (LoginUtil.isNetworkUsable(getActivity()))
+                        {
+                            switchFragment(mProjectSp.getSelectedItem().toString(), deviceNames, position, stationUUIDList);
+                        }
+                    }
+                });
+                mDevicesRv.setAdapter(adapter);
+                adapter.addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.item_footer_layout,null));
+                LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+                manager.setOrientation(RecyclerView.VERTICAL);
+                mDevicesRv.setLayoutManager(manager);
+            }
+        });
+        pHandler.sendEmptyMessageDelayed(LOADING_FINISH,0);
+    }
+
+    public void setListByProjects(List<ProjectResponse.ProjectListBean.StationListBean> stationList){
+        final ArrayList<String> deviceNames = new ArrayList<>();
+        final List<String> deviceTypes = new ArrayList<>();
+        final List<String> lastTimes = new ArrayList<>();
+        final List<String> deviceStatus = new ArrayList<>();
+        final ArrayList<String> stationUUIDList = new ArrayList<>();
+        //对返回数据按照StationName,StationUUID顺序进行升序排序
+        ListUtil.sort(stationList,true,"StationName","StationUUID");
+        for (int i = 0; i < stationList.size(); i++) {
+            deviceNames.add(stationList.get(i).getStationName());
+            deviceTypes.add(getStationType(stationList.get(i).getStationType()));
+            lastTimes.add(stationList.get(i).getStationLastTime());
+            deviceStatus.add(stationList.get(i).getStationStatus());
+            stationUUIDList.add(stationList.get(i).getStationUUID());
+        }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                DeviceListAdapter adapter = new DeviceListAdapter(deviceNames, deviceTypes, lastTimes, deviceStatus);
+                adapter.setLookDataListener(new DeviceListAdapter.onItemLookdataClockListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        if (LoginUtil.isNetworkUsable(getActivity()))
+                        {
+                            switchFragment(mProjectSp.getSelectedItem().toString(), deviceNames, position, stationUUIDList);
+                        }
+                    }
+                });
+                mDevicesRv.setAdapter(adapter);
+                adapter.addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.item_footer_layout,null));
+                LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+                manager.setOrientation(RecyclerView.VERTICAL);
+                mDevicesRv.setLayoutManager(manager);
+            }
+        });
+        pHandler.sendEmptyMessageDelayed(LOADING_FINISH,0);
     }
 
     public String getStationType(String stationType) {
@@ -287,24 +326,12 @@ public class DataHomeFragment extends BaseFragment {
     {
         if (getActivity() != null){
             mPageRefreshLayout.setRefreshHeader(new ClassicsHeader(getActivity()));
-            mPageRefreshLayout.setRefreshFooter(new ClassicsFooter(getActivity()));
         }
+
         mPageRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-                pHandler.sendEmptyMessage(PAGING);
-            }
-        });
-
-        mPageRefreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
-            @Override
-            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-                if (mCurrentPageSize < mTotalStationNum){
-                    mCurrentPageSize+=mCurrentPageSize;
-                    pHandler.sendEmptyMessage(PAGING);
-                }else {
-                    mPageRefreshLayout.finishLoadMoreWithNoMoreData();
-                }
+                pHandler.sendEmptyMessage(REQUEST_DEVICE);
             }
         });
     }
@@ -318,7 +345,6 @@ public class DataHomeFragment extends BaseFragment {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.add(R.id.layout_home, chartFragment).hide(this);
-//        ft.addToBackStack("ChartFragment");   //加入到返回栈中
         ft.commit();
     }
 }

@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -87,10 +88,11 @@ public class DownloadService extends Service {
         public void startDownload(String url){
             if (downloadTask == null){
                 downloadUrl = url;
-                downloadTask = new DownloadTask(listener);
                 String fileName = downloadUrl.substring(downloadUrl.lastIndexOf("/"));
-                String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+                //获取应用外部存储Download路径
+                String directory = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath();
                 filePath = directory + fileName;
+                downloadTask = new DownloadTask(filePath,listener);
                 //在Service中执行该任务
                 downloadTask.execute(downloadUrl);
                 startForeground(1,getNotification("导出中,请稍后...",0));
@@ -109,9 +111,7 @@ public class DownloadService extends Service {
                 downloadTask.cancelDownload();
             }else {
                 if (downloadUrl != null){
-                    String fileName = downloadUrl.substring(downloadUrl.lastIndexOf("/"));
-                    String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
-                    File file = new File(directory + fileName);
+                    File file = new File(filePath);
                     if (file.exists())
                     {
                         file.delete();

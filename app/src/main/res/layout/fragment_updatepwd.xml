@@ -75,6 +75,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
                 android:text="新密码必须是12-64位的数字、大小写字母、特殊符号组合"
+                android:visibility="gone"
                 />
 
             <TextView
@@ -95,7 +96,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="20dp"
             >
 
             <TextView
