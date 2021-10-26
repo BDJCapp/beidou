@@ -1,0 +1,35 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<!--    <item-->
+<!--        android:id="@+id/search_button"-->
+<!--        android:icon="@mipmap/navigation_icon_search"-->
+<!--        android:orderInCategory="100"-->
+<!--        android:title="搜索"-->
+<!--        app:showAsAction="ifRoom" />-->
+<!--    <item-->
+<!--        android:id="@+id/scan_button"-->
+<!--        android:icon="@mipmap/navigation_icon_sweep"-->
+<!--        android:orderInCategory="100"-->
+<!--        android:title="扫描"-->
+<!--        app:showAsAction="ifRoom" />-->
+
+    <item
+        android:id="@+id/mu_checkAll"
+        android:orderInCategory="100"
+        android:title="全选"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/mu_setting"
+        android:orderInCategory="100"
+        android:title="编辑"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/mu_complete"
+        android:orderInCategory="100"
+        android:title="完成"
+        app:showAsAction="ifRoom" />
+
+
+</menu>

@@ -3,6 +3,7 @@ package com.beyond.beidou.my;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import android.text.TextUtils;
@@ -87,7 +88,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
         String originalPwd = mEtOriginalPwd.getText().toString();
         String newPwd = mEtNewPwd.getText().toString();
         String confirmPwd = mEtConfirmPwd.getText().toString();
-        AlertDialog.Builder builder;
+        AlertDialog dialog = null;
         switch (v.getId()) {
             case R.id.img_updatePwd_back:
                 getFragmentManager().popBackStack();
@@ -96,23 +97,25 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                 break;
             case R.id.btn_confirm:
                 if (TextUtils.isEmpty(originalPwd) || TextUtils.isEmpty(newPwd) || TextUtils.isEmpty(confirmPwd)) {
-                    builder = new AlertDialog.Builder(getContext()).setTitle("提示")
+                    dialog = new AlertDialog.Builder(getContext()).setTitle("提示")
                             .setMessage("输入不能为空！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
                                 }
-                            });
-                    builder.create().show();
+                            }).setCancelable(false).create();
+                    dialog.show();
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
                 } else if (!newPwd.equals(confirmPwd)) {
-                    builder = new AlertDialog.Builder(getContext()).setTitle("提示")
+                    dialog = new AlertDialog.Builder(getContext()).setTitle("提示")
                             .setMessage("两次输入的密码不一致！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
                                 }
-                            });
-                    builder.create().show();
+                            }).setCancelable(false).create();
+                    dialog.show();
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
                 } else {
                     mParams.put("AccessToken", ApiConfig.getAccessToken());
                     mParams.put("SessionUUID", ApiConfig.getSessionUUID());
@@ -127,23 +130,22 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                 mMainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        AlertDialog.Builder builder;
-                                        builder = new AlertDialog.Builder(getContext()).setTitle("提示")
+                                        AlertDialog dialog1= new AlertDialog.Builder(getContext()).setTitle("提示")
                                                 .setMessage("原密码错误！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                                     @Override
                                                     public void onClick(DialogInterface dialog, int which) {
                                                         dialog.dismiss();
                                                     }
-                                                });
-                                        builder.create().show();
+                                                }).create();
+                                        dialog1.show();
+                                        dialog1.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
                                     }
                                 });
                             }else if (Integer.parseInt(response.getResponseCode()) == 200) {
                                 mMainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        AlertDialog.Builder builder;
-                                        builder = new AlertDialog.Builder(getContext()).setTitle("提示").setCancelable(false)
+                                        AlertDialog dialog2 = new AlertDialog.Builder(getContext()).setTitle("提示").setCancelable(false)
                                                 .setMessage("修改成功，请重新登录！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                                     @Override
                                                     public void onClick(DialogInterface dialog, int which) {
@@ -153,8 +155,9 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                                         ProjectFragment.sIsReLogin = true;
                                                         logOut(getStringFromSP("userName"), ApiConfig.getAccessToken(), ApiConfig.getSessionUUID());
                                                     }
-                                                });
-                                        builder.create().show();
+                                                }).create();
+                                        dialog2.show();
+                                        dialog2.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
                                     }
                                 });
                             }
@@ -162,15 +165,15 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                 mMainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        AlertDialog.Builder builder;
-                                        builder = new AlertDialog.Builder(getContext()).setTitle("提示")
+                                        AlertDialog dialog = new AlertDialog.Builder(getContext()).setTitle("提示")
                                                 .setMessage("密码太简单，请重新修改！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                                     @Override
                                                     public void onClick(DialogInterface dialog, int which) {
                                                         dialog.dismiss();
                                                     }
-                                                });
-                                        builder.create().show();
+                                                }).create();
+                                        dialog.show();
+                                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
                                     }
                                 });
                             }
@@ -178,15 +181,15 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                 mMainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        AlertDialog.Builder builder;
-                                        builder = new AlertDialog.Builder(getContext()).setTitle("提示")
+                                        AlertDialog dialog = new AlertDialog.Builder(mMainActivity).setTitle("提示")
                                                 .setMessage(response.getResponseMsg()).setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                                     @Override
                                                     public void onClick(DialogInterface dialog, int which) {
                                                         dialog.dismiss();
                                                     }
-                                                });
-                                        builder.create().show();
+                                                }).create();
+                                        dialog.show();
+                                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
                                     }
                                 });
                             }

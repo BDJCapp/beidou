@@ -23,9 +23,8 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
     private TextView mTvUserName;
     private ImageView mIvUserInfo;
     public static String userName = "";
-    private RelativeLayout mRlHelp;
-    private RelativeLayout mRlAbout;
     private CardView mCardViewSettings;
+    private CardView mCardViewFile;
     private boolean isGetName = false;
 
 
@@ -52,13 +51,11 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
     public void initView(View view) {
         mTvUserName = view.findViewById(R.id.tv_user_name);
         mIvUserInfo = view.findViewById(R.id.img_user);
-        mRlHelp = view.findViewById(R.id.img_help);
-        mRlAbout = view.findViewById(R.id.img_about);
         mCardViewSettings = view.findViewById(R.id.cv_settings);
+        mCardViewFile = view.findViewById(R.id.cv_file);
         mIvUserInfo.setOnClickListener(this);
-        mRlHelp.setOnClickListener(this);
-        mRlAbout.setOnClickListener(this);
         mCardViewSettings.setOnClickListener(this);
+        mCardViewFile.setOnClickListener(this);
     }
 
     @Override
@@ -76,6 +73,19 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
                 activity.setNowFragment(settingsFragment);
                 activity.setExit(false);
                 ft.add(R.id.layout_home, settingsFragment).hide(this);
+                ft.addToBackStack(null);   //加入到返回栈中
+                ft.commit();
+                break;
+            case R.id.cv_file:
+                if(!isGetName){
+                    showToast("未获取到用户名，请稍后再试");
+                    break;
+                }
+                Fragment fileManageFragment = new FileManageFragment();
+                activity.setFileManageFragment(fileManageFragment);
+                activity.setNowFragment(fileManageFragment);
+                activity.setExit(false);
+                ft.add(R.id.layout_home, fileManageFragment).hide(this);
                 ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
                 break;

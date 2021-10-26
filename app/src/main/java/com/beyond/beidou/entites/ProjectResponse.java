@@ -285,6 +285,17 @@ public class ProjectResponse {
             public void setOffline(int Offline) {
                 this.Offline = Offline;
             }
+
+            @Override
+            public String toString() {
+                return "ProjectStationStatusBean{" +
+                        "Total=" + Total +
+                        ", Online=" + Online +
+                        ", Error=" + Error +
+                        ", Warning=" + Warning +
+                        ", Offline=" + Offline +
+                        '}';
+            }
         }
 
         public static class StationListBean {

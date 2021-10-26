@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.beyond.beidou.data.DataHomeFragment;
 import com.beyond.beidou.data.DownloadService;
+import com.beyond.beidou.my.FileManageFragment;
 import com.beyond.beidou.my.MyFragment;
 import com.beyond.beidou.project.ProjectFragment;
 import com.beyond.beidou.util.FileUtil;
@@ -44,6 +45,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private Fragment securityFragment = null;
     private Fragment updatePwdFragment = null;
     private Fragment userInfoFragment = null;
+    private Fragment fileManageFragment = null;
     private BottomNavigationView navigationView;
     private String presentProject = null;
     private Intent downloadIntent;
@@ -91,7 +93,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                     //设置3行显示，避免文字截断
                     View snackBarView = snackbar.getView();
                     TextView messageView = snackBarView.findViewById(com.google.android.material.R.id.snackbar_text);
-                    messageView.setMaxLines(3);
+                    messageView.setMaxLines(4);
                     snackbar.show();
 
                 }
@@ -169,6 +171,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         if (item.getItemId() == R.id.nav_warning) {
             return false;
         }
+        FileManageFragment f = (FileManageFragment) fileManageFragment;
+        if(f != null && f.mPopupWindow != null && f.mPopupWindow.isShowing()){
+            f.popWindowDismiss();
+        }
         isExit = false;
         changePageFragment(item.getItemId());
         return true;
@@ -182,7 +188,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public void changePageFragment(int id) {
         switch (id) {
             case R.id.nav_my:
-                if (nowFragment == settingsFragment || nowFragment == securityFragment || nowFragment == updatePwdFragment || nowFragment == userInfoFragment) {
+                if (nowFragment == settingsFragment || nowFragment == securityFragment || nowFragment == updatePwdFragment || nowFragment == userInfoFragment || nowFragment == fileManageFragment) {
+                    break;
+                }
+                if(fileManageFragment != null){
+                    switchFragment(nowFragment, fileManageFragment);
                     break;
                 }
                 if(userInfoFragment != null){
@@ -258,7 +268,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
      */
     @Override
     public void onBackPressed() {
-        FragmentManager fgm = getSupportFragmentManager();
+        FileManageFragment f = (FileManageFragment) fileManageFragment;
+        if(f != null && f.mPopupWindow != null && f.mPopupWindow.isShowing()){
+            f.popWindowDismiss();
+        }
         if (isExit)
         {
             finish();
@@ -315,6 +328,13 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             transaction.remove(userInfoFragment).commit();
             nowFragment = myFragment;
             userInfoFragment = null;
+        }
+
+        if(nowFragment == fileManageFragment){
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.remove(fileManageFragment).commit();
+            nowFragment = myFragment;
+            fileManageFragment = null;
         }
         super.onBackPressed();
     }
@@ -413,7 +433,16 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         this.userInfoFragment = userInfoFragment;
     }
 
+    public Fragment getFileManageFragment() {
+        return fileManageFragment;
+    }
+
+    public void setFileManageFragment(Fragment fileManageFragment) {
+        this.fileManageFragment = fileManageFragment;
+    }
+
     public void setExit(boolean exit) {
         isExit = exit;
     }
+
 }

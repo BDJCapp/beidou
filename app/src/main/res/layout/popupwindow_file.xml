@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <Button
+        android:id="@+id/pop_btn_delete"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:textColor="#DA4F49"
+        android:text="删除"/>
+
+</LinearLayout>

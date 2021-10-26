@@ -492,6 +492,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         String space = "0.01";     //每格大小为0.01m
         mConvertYMax = valueYMax + 0.1f;
         mConvertYMin = valueYMin - 0.1f;
+       
 
         //保证convertYmin和yMin是真实值。这样即使转成只有两位小数，也是对应的。
         DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度

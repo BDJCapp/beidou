@@ -29,6 +29,7 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
+            android:textColor="@color/text_black"
             />
 
         <TextView

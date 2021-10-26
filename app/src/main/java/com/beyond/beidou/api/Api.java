@@ -8,7 +8,6 @@ import android.content.Intent;
 
 import com.beyond.beidou.login.LoginActivity;
 import com.beyond.beidou.login.StartActivity;
-import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 
 import org.jetbrains.annotations.NotNull;
