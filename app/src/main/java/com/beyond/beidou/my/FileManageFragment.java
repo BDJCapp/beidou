@@ -47,6 +47,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
     private Toolbar mToolbar;
     public PopupWindow mPopupWindow;
     private boolean isCheckAll = false;
+    private Menu mMenu;
 
     public FileManageFragment() {
         // Required empty public constructor
@@ -133,7 +134,6 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
         for (File f : files) {
             mFiles.add(new FileItem(f.getName()));
         }
-//        Collections.sort(mFiles, );
         ListUtil.sort(mFiles, true, "fileName");
     }
 
@@ -152,6 +152,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        this.mMenu = menu;
         inflater.inflate(R.menu.mu_file, menu);
     }
 
@@ -189,6 +190,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
     }
 
     private void showPopupWindow() {
+        mMainActivity.getNavigationView().setVisibility(View.INVISIBLE);
         View contentView = LayoutInflater.from(mMainActivity).inflate(R.layout.popupwindow_file, null);
         mPopupWindow = new PopupWindow(contentView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, false);
         Button button = contentView.findViewById(R.id.pop_btn_delete);
@@ -201,6 +203,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
         for (FileItem mFile : mFiles) {
             mFilesSelect.add(new FileSelectItem(mFile.getFileName()));
         }
+
         ListUtil.sort(mFilesSelect, true, "fileName");
         mFileSelectAdapter = new FileSelectAdapter(mFilesSelect);
         mFileSelectAdapter.setOnItemClickListener(new FileSelectAdapter.OnItemClickListener() {
@@ -223,11 +226,11 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
     }
 
     public void popWindowDismiss() {
+        mMainActivity.getNavigationView().setVisibility(View.VISIBLE);
         sIsSettingsSelected = false;
         mMainActivity.invalidateOptionsMenu();
         mRecyclerView.setAdapter(mFileAdapter);
         mPopupWindow.dismiss();
-        ;
     }
 
     private void deleteFiles(final List<String> fileList) {

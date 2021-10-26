@@ -21,7 +21,7 @@ import java.util.List;
 public class FileSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<FileSelectItem> files;
-    private static FileSelectAdapter.OnItemClickListener mOnItemClickListener;
+    private FileSelectAdapter.OnItemClickListener mOnItemClickListener;
 
     static class ViewHolder extends RecyclerView.ViewHolder{
 
@@ -83,7 +83,7 @@ public class FileSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         if (mOnItemClickListener == null) {
             Log.e("setOnItemClickListener", "mOnItemClickListener is null");
         }
-        FileSelectAdapter.mOnItemClickListener = mOnItemClickListener;
+        this.mOnItemClickListener = mOnItemClickListener;
     }
 
     public List<String> getDeleteList(){
