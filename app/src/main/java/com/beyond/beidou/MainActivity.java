@@ -12,6 +12,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -27,6 +28,8 @@ import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.warning.WarningFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.lang.reflect.Method;
 
 
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
@@ -90,12 +93,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                             .setActionTextColor(getResources().getColor(R.color.main_blue));
                     //默认显示10s
                     snackbar.setDuration(10000);
-                    //设置3行显示，避免文字截断
+                    //设置4行显示，避免文字截断
                     View snackBarView = snackbar.getView();
                     TextView messageView = snackBarView.findViewById(com.google.android.material.R.id.snackbar_text);
                     messageView.setMaxLines(4);
                     snackbar.show();
-
                 }
             });
         }
@@ -104,6 +106,24 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         public void onServiceDisconnected(ComponentName componentName) {
         }
     };
+
+    //Menu显示图标
+    @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+        if (menu != null) {
+            if (menu.getClass().getSimpleName().equalsIgnoreCase("MenuBuilder")) {
+                try {
+                    Method method = menu.getClass().getDeclaredMethod("setOptionalIconsVisible", Boolean.TYPE);
+                    method.setAccessible(true);
+                    method.invoke(menu, true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return super.onMenuOpened(featureId, menu);
+    }
+
 
     public DownloadService.DownloadBinder getDownloadBinder() {
         return downloadBinder;
@@ -331,10 +351,15 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         }
 
         if(nowFragment == fileManageFragment){
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(fileManageFragment).commit();
-            nowFragment = myFragment;
-            fileManageFragment = null;
+            if (myFragment == null){
+                getSupportFragmentManager().beginTransaction().remove(fileManageFragment).commit();
+                this.setFileManageFragment(null);
+                this.getNavigationView().setSelectedItemId(this.getNavigationView().getMenu().getItem(3).getItemId());
+            }else {
+                getSupportFragmentManager().beginTransaction().hide(fileManageFragment).show(this.getMyFragment()).remove(fileManageFragment).commit();
+                this.setFileManageFragment(null);
+            }
+            return;
         }
         super.onBackPressed();
     }

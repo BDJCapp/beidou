@@ -9,9 +9,10 @@
     >
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/tb_chart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:theme="@style/OverflowMenuStyle"
             app:contentInsetStart="0dp"
             >
             <RelativeLayout
@@ -45,10 +46,12 @@
                     android:layout_height="30dp"
                     android:layout_alignParentRight="true"
                     android:layout_marginRight="0dp"
-                    android:text="@string/loadExcel"
                     android:gravity="center"
+                    android:text="@string/loadExcel"
                     android:textColor="@color/main_blue"
-                    android:textSize="13sp" />
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    />
             </RelativeLayout>
 
         </androidx.appcompat.widget.Toolbar>
@@ -58,7 +61,7 @@
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:background="@color/under_line"
-        android:layout_below="@+id/toolbar"
+        android:layout_below="@+id/tb_chart"
         />
 
     <LinearLayout

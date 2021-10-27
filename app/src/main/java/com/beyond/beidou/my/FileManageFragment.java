@@ -67,6 +67,8 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
     @Override
     public void onHiddenChanged(boolean hidden) {
         if (!hidden) {
+            ((MainActivity) getActivity()).setSupportActionBar(mToolbar);
+            setHasOptionsMenu(true);
             getFileNames();
             mFileAdapter.setData(mFiles);
         }
@@ -104,8 +106,14 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                 if (mPopupWindow != null && mPopupWindow.isShowing()) {
                     popWindowDismiss();
                 }
-                getFragmentManager().popBackStack();
-                mMainActivity.setUserInfoFragment(null);
+                if (mMainActivity.getMyFragment() == null){
+                    getFragmentManager().beginTransaction().remove(mMainActivity.getFileManageFragment()).commit();
+                    mMainActivity.setFileManageFragment(null);
+                    mMainActivity.getNavigationView().setSelectedItemId(mMainActivity.getNavigationView().getMenu().getItem(3).getItemId());
+                }else {
+                    getFragmentManager().beginTransaction().hide(mMainActivity.getFileManageFragment()).show(mMainActivity.getMyFragment()).remove(mMainActivity.getFileManageFragment()).commit();
+                    mMainActivity.setFileManageFragment(null);
+                }
                 mMainActivity.setNowFragment(mMainActivity.getMyFragment());
             }
         });

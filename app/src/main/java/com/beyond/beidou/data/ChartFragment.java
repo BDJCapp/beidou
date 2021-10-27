@@ -9,6 +9,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +20,13 @@ import android.view.WindowManager;
 import android.widget.*;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.beyond.beidou.BaseFragment;
+import com.beyond.beidou.my.FileManageFragment;
 import com.beyond.beidou.views.MyDialog;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.views.MySpinner;
@@ -38,6 +45,7 @@ import com.google.gson.Gson;
 import com.zyao89.view.zloading.ZLoadingDialog;
 import com.zyao89.view.zloading.Z_TYPE;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -57,6 +65,7 @@ import lecho.lib.hellocharts.view.LineChartView;
 import okhttp3.FormBody;
 
 public class ChartFragment extends BaseFragment implements View.OnClickListener {
+    private Toolbar toolbar;
     private Spinner mDeviceSp;
     private MySpinner mTimeSp;
     private LineChartView mNChart, mEChart, mHChart, mDeltaDChart, mDeltaHChart, mHeartChart;
@@ -136,6 +145,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -148,6 +158,48 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mDeltaTime = "60";
         doLoadingDialog();
         return view;
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        if (!hidden) {
+            ((MainActivity)getActivity()).setSupportActionBar(toolbar);
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.mu_download,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.mu_download:
+                if (LoginUtil.isNetworkUsable(getActivity()))
+                {
+                    MainActivity activity = (MainActivity)getActivity();
+                    if (activity != null){
+                        activity.displayToast("正在导出...");
+                    }
+                    downLoadExcel();
+                }
+                return true;
+            case R.id.mu_manageFile:
+                MainActivity activity = (MainActivity) getActivity();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                Fragment fileManageFragment = new FileManageFragment();
+                activity.setFileManageFragment(fileManageFragment);
+                activity.setNowFragment(fileManageFragment);
+                activity.setExit(false);
+                ft.add(R.id.layout_home, fileManageFragment).hide(this);
+                ft.commit();
+                activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(3).getItemId());
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public void initView(final View view) {
@@ -206,6 +258,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mBackIv.setOnClickListener(this);
 
         mChartsSv = view.findViewById(R.id.sv_charts);
+
+        //解决Menu不显示，因为主题为NoAction
+        toolbar = view.findViewById(R.id.tb_chart);
+        ((MainActivity)getActivity()).setSupportActionBar(toolbar);
 
         mTimeSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -283,20 +339,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
-            }
-        });
-
-        mDownLoadExcelTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (LoginUtil.isNetworkUsable(getActivity()))
-                {
-                    MainActivity activity = (MainActivity)getActivity();
-                    if (activity != null){
-                        activity.displayToast("正在导出...");
-                    }
-                    downLoadExcel();
-                }
             }
         });
     }
@@ -655,7 +697,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         switch (v.getId()) {
             case R.id.img_chart_back:
                 FragmentManager fm = getFragmentManager();
-//                fm.popBackStack();
                 MainActivity activity = (MainActivity) getActivity();
                 if (activity.getDataFragment() == null){
                     fm.beginTransaction().remove(activity.getChartFragment()).commit();

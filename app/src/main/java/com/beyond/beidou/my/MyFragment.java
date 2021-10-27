@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
+import com.beyond.beidou.util.LogUtil;
 
 
 public class MyFragment extends BaseFragment implements View.OnClickListener {
@@ -41,6 +42,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        LogUtil.e("MyFragMent Oncreate","已执行");
         super.onCreate(savedInstanceState);
     }
 
