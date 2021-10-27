@@ -75,7 +75,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
                 activity.setNowFragment(settingsFragment);
                 activity.setExit(false);
                 ft.add(R.id.layout_home, settingsFragment).hide(this);
-                ft.addToBackStack(null);   //加入到返回栈中
+//                ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
                 break;
             case R.id.cv_file:
@@ -88,7 +88,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
                 activity.setNowFragment(fileManageFragment);
                 activity.setExit(false);
                 ft.add(R.id.layout_home, fileManageFragment).hide(this);
-                ft.addToBackStack(null);   //加入到返回栈中
+//                ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
                 break;
             case R.id.img_user:
@@ -101,7 +101,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
                 activity.setNowFragment(userInfoFragment);
                 activity.setExit(false);
                 ft.add(R.id.layout_home, userInfoFragment).hide(this);
-                ft.addToBackStack(null);   //加入到返回栈中
+//                ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
                 break;
         }

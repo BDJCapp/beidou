@@ -30,7 +30,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="115dp"
-                android:text="已下载文件"
+                android:text="已下载报表"
                 android:textColor="@color/text_black"
                 android:textSize="20sp" />
 

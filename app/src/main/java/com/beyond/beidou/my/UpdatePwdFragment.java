@@ -91,7 +91,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
         AlertDialog dialog = null;
         switch (v.getId()) {
             case R.id.img_updatePwd_back:
-                getFragmentManager().popBackStack();
+                getFragmentManager().beginTransaction().hide(activity.getUpdatePwdFragment()).show(activity.getSecurityFragment()).remove(activity.getUpdatePwdFragment()).commit();
                 activity.setUpdatePwdFragment(null);
                 activity.setNowFragment(activity.getSecurityFragment());
                 break;

@@ -64,7 +64,7 @@ public class UserInfoFragment extends BaseFragment {
         mIvBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().popBackStack();
+                getFragmentManager().beginTransaction().hide(mMainActivity.getUserInfoFragment()).show(mMainActivity.getMyFragment()).remove(mMainActivity.getUserInfoFragment()).commit();
                 mMainActivity.setUserInfoFragment(null);
                 mMainActivity.setNowFragment(mMainActivity.getMyFragment());
             }

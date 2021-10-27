@@ -29,7 +29,7 @@ import com.zyao89.view.zloading.Z_TYPE;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class SettingsFragment extends BaseFragment implements View.OnClickListener{
+public class SettingsFragment extends BaseFragment implements View.OnClickListener {
 
     private Button mBtnQuit;
     private ImageView mImageBack;
@@ -63,7 +63,7 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         return R.layout.fragment_settings;
     }
 
-    public void initView(View view){
+    public void initView(View view) {
         mBtnQuit = view.findViewById(R.id.btn_quit);
         mImageBack = view.findViewById(R.id.img_settings_back);
         mCardViewSettings = view.findViewById(R.id.cv_security);
@@ -78,9 +78,9 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
     public void onClick(View v) {
         MainActivity activity = (MainActivity) getActivity();
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.img_settings_back:
-                getFragmentManager().popBackStack();
+                getFragmentManager().beginTransaction().hide(activity.getSettingsFragment()).show(activity.getMyFragment()).remove(activity.getSettingsFragment()).commit();
                 activity.setSettingsFragment(null);
                 activity.setNowFragment(activity.getMyFragment());
                 break;
@@ -89,13 +89,13 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
                 activity.setSecurityFragment(securityFragment);
                 activity.setNowFragment(securityFragment);
                 ft.add(R.id.layout_home, securityFragment).hide(this);
-                ft.addToBackStack(null);   //加入到返回栈中
+//                ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
                 break;
             case R.id.btn_quit:
                 saveStringToSP("lastProjectName", activity.getPresentProject());
                 ProjectFragment.sIsReLogin = true;
-                if("".equals(MyFragment.userName)){
+                if ("".equals(MyFragment.userName)) {
                     showToast("用户名未加载出来");
                     return;
                 }
@@ -109,21 +109,19 @@ public class SettingsFragment extends BaseFragment implements View.OnClickListen
         }
     }
 
-    public void logout(String Username, final String SessionUUID, String AccessToken)
-    {
-        LoginUtil.logout(getActivity(),Username,  SessionUUID, AccessToken, new ApiCallback() {
+    public void logout(String Username, final String SessionUUID, String AccessToken) {
+        LoginUtil.logout(getActivity(), Username, SessionUUID, AccessToken, new ApiCallback() {
 
             @Override
             public void onSuccess(String res) {
-                if (!TextUtils.isEmpty(res))
-                {
+                if (!TextUtils.isEmpty(res)) {
                     try {
-                        saveStringToSP("SessionExpireTimestamp","");
+                        saveStringToSP("SessionExpireTimestamp", "");
                         JSONObject object = new JSONObject(res);
                         String responseCode = object.getString("ResponseCode");
-                        switch (responseCode){
+                        switch (responseCode) {
                             case "205": //退出成功
-                                Intent intent= new Intent(getActivity(), LoginActivity.class);
+                                Intent intent = new Intent(getActivity(), LoginActivity.class);
                                 dialog.dismiss();
                                 startActivity(intent);
                                 getActivity().finish();

@@ -29,8 +29,12 @@ import com.beyond.beidou.util.LogUtil;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.CRC32;
+import java.util.zip.ZipOutputStream;
 
 
 public class FileManageFragment extends BaseFragment implements View.OnClickListener {
@@ -105,12 +109,13 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
             public void onClick(View v) {
                 if (mPopupWindow != null && mPopupWindow.isShowing()) {
                     popWindowDismiss();
+                    return;
                 }
-                if (mMainActivity.getMyFragment() == null){
+                if (mMainActivity.getMyFragment() == null) {
                     getFragmentManager().beginTransaction().remove(mMainActivity.getFileManageFragment()).commit();
                     mMainActivity.setFileManageFragment(null);
                     mMainActivity.getNavigationView().setSelectedItemId(mMainActivity.getNavigationView().getMenu().getItem(3).getItemId());
-                }else {
+                } else {
                     getFragmentManager().beginTransaction().hide(mMainActivity.getFileManageFragment()).show(mMainActivity.getMyFragment()).remove(mMainActivity.getFileManageFragment()).commit();
                     mMainActivity.setFileManageFragment(null);
                 }
@@ -181,7 +186,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                         selectItem.setSelect(true);
                     }
                     mFileSelectAdapter.setData(mFilesSelect);
-                    item.setTitle("全不选");
+                    item.setTitle("全反选");
                     isCheckAll = !isCheckAll;
                 } else {
                     for (FileSelectItem selectItem : mFilesSelect) {
@@ -200,12 +205,14 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
     private void showPopupWindow() {
         mMainActivity.getNavigationView().setVisibility(View.INVISIBLE);
         View contentView = LayoutInflater.from(mMainActivity).inflate(R.layout.popupwindow_file, null);
-        mPopupWindow = new PopupWindow(contentView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, false);
-        Button button = contentView.findViewById(R.id.pop_btn_delete);
-        button.setOnClickListener(this);
+        mPopupWindow = new PopupWindow(contentView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, false);
+        Button mDeleteButton = contentView.findViewById(R.id.pop_btn_delete);
+        mDeleteButton.setOnClickListener(this);
+        Button mShareButton = contentView.findViewById(R.id.pop_btn_share);
+        mShareButton.setOnClickListener(this);
         View rootView = LayoutInflater.from(mMainActivity).inflate(R.layout.activity_main, null);
 //        mPopupWindow.setBackgroundDrawable(new ColorDrawable(0x66000000));
-        mPopupWindow.showAtLocation(rootView, Gravity.BOTTOM, 0, 200);
+        mPopupWindow.showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
 
         mFilesSelect.clear();
         for (FileItem mFile : mFiles) {
@@ -228,7 +235,31 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.pop_btn_delete:
-                deleteFiles(mFileSelectAdapter.getDeleteList());
+                List<String> deleteList = mFileSelectAdapter.getDeleteList();
+                if (deleteList.size() == 0) {
+                    showToast("删除的文件不存在");
+                    break;
+                }
+                deleteFiles(deleteList);
+                break;
+            case R.id.pop_btn_share:
+                List<String> shareFilePaths = new ArrayList<>();
+                for (FileSelectItem file : mFilesSelect) {
+                    if (file.isSelect()) {
+                        shareFilePaths.add(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + file.getFileName());
+//                        FileUtil.shareFile(mMainActivity, mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + file.getFileName());
+//                        List<String> filePaths = new ArrayList<>();
+//                        filePaths.add(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + file.getFileName());
+//                        FileUtil.yeZip(filePaths);
+                    }
+                }
+                if (shareFilePaths.size() > 1) {
+                    showToast("只支持单文件分享，请重试");
+                } else if (shareFilePaths.size() < 1) {
+                    FileUtil.shareFile(mMainActivity, "");
+                } else {
+                    FileUtil.shareFile(mMainActivity, shareFilePaths.get(0));
+                }
                 break;
         }
     }
@@ -244,34 +275,34 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
     private void deleteFiles(final List<String> fileList) {
         AlertDialog dialog = new AlertDialog.Builder(mMainActivity).setTitle("提示")
                 .setMessage("确定要删除" + fileList.size() + "个文件吗？").setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                popWindowDismiss();
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        popWindowDismiss();
 
-                String prefix = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/";
-                File file = null;
-                for (String fileName : fileList) {
-                    file = new File(prefix + fileName);
-                    file.delete();
-                }
-                mFiles.clear();
-                for (int i = 0; i < mFilesSelect.size(); i++) {
-                    if (mFilesSelect.get(i).isSelect()) {
-                        mFilesSelect.remove(i--);
-                    } else {
-                        mFiles.add(new FileItem(mFilesSelect.get(i).getFileName()));
+                        String prefix = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/";
+                        File file = null;
+                        for (String fileName : fileList) {
+                            file = new File(prefix + fileName);
+                            file.delete();
+                        }
+                        mFiles.clear();
+                        for (int i = 0; i < mFilesSelect.size(); i++) {
+                            if (mFilesSelect.get(i).isSelect()) {
+                                mFilesSelect.remove(i--);
+                            } else {
+                                mFiles.add(new FileItem(mFilesSelect.get(i).getFileName()));
+                            }
+                        }
+                        popWindowDismiss();
+
+                        dialog.dismiss();
                     }
-                }
-                popWindowDismiss();
-
-                dialog.dismiss();
-            }
-        }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        }).setCancelable(false).create();
+                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).setCancelable(false).create();
         dialog.show();
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#0075E3"));

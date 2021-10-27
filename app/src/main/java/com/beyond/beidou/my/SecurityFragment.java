@@ -70,11 +70,11 @@ public class SecurityFragment extends BaseFragment implements View.OnClickListen
                 activity.setUpdatePwdFragment(updatePwdFragment);
                 activity.setNowFragment(updatePwdFragment);
                 ft.add(R.id.layout_home, updatePwdFragment).hide(this);
-                ft.addToBackStack(null);   //加入到返回栈中
+//                ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
                 break;
             case R.id.img_security_back:
-                getFragmentManager().popBackStack();
+                getFragmentManager().beginTransaction().hide(activity.getSecurityFragment()).show(activity.getSettingsFragment()).remove(activity.getSecurityFragment()).commit();
                 activity.setSecurityFragment(null);
                 activity.setNowFragment(activity.getSettingsFragment());
                 break;

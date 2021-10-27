@@ -291,6 +291,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         FileManageFragment f = (FileManageFragment) fileManageFragment;
         if(f != null && f.mPopupWindow != null && f.mPopupWindow.isShowing()){
             f.popWindowDismiss();
+            return;
         }
         if (isExit)
         {
@@ -324,30 +325,34 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
         if (nowFragment == settingsFragment) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(nowFragment).commit();
+            transaction.hide(settingsFragment).remove(settingsFragment).show(myFragment).commit();
             nowFragment = myFragment;
             settingsFragment = null;
+            return;
         }
 
         if (nowFragment == securityFragment) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(nowFragment).commit();
+            transaction.hide(securityFragment).remove(securityFragment).show(settingsFragment).commit();
             nowFragment = settingsFragment;
             securityFragment = null;
+            return;
         }
 
         if (nowFragment == updatePwdFragment) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(updatePwdFragment).commit();
+            transaction.hide(updatePwdFragment).remove(updatePwdFragment).show(securityFragment).commit();
             nowFragment = securityFragment;
             updatePwdFragment = null;
+            return;
         }
 
         if(nowFragment == userInfoFragment){
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.remove(userInfoFragment).commit();
+            transaction.hide(userInfoFragment).remove(userInfoFragment).show(myFragment).commit();
             nowFragment = myFragment;
             userInfoFragment = null;
+            return;
         }
 
         if(nowFragment == fileManageFragment){
@@ -359,6 +364,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                 getSupportFragmentManager().beginTransaction().hide(fileManageFragment).show(this.getMyFragment()).remove(fileManageFragment).commit();
                 this.setFileManageFragment(null);
             }
+            nowFragment = myFragment;
             return;
         }
         super.onBackPressed();
