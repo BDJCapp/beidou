@@ -254,7 +254,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                     }
                 }
                 if (shareFilePaths.size() > 1) {
-                    showToast("只支持单文件分享，请重试");
+                    showToast("只支持单文件分享，请重选");
                 } else if (shareFilePaths.size() < 1) {
                     FileUtil.shareFile(mMainActivity, "");
                 } else {

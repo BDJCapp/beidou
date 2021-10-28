@@ -1,5 +1,6 @@
 package com.beyond.beidou.adapter;
 
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,8 +66,10 @@ public class FileSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         });
         if(files.get(position).isSelect()){
             itemHolder.mIv_Check.setImageResource(R.drawable.ic_file_checked);
+            itemHolder.mLl_item.setBackgroundColor(Color.parseColor("#D6D8DA"));
         }else{
             itemHolder.mIv_Check.setImageResource(R.drawable.ic_file_unchecked);
+            itemHolder.mLl_item.setBackgroundColor(Color.parseColor("#FFFFFF"));
         }
     }
 

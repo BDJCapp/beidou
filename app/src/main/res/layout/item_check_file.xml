@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:foreground="?attr/selectableItemBackground"
     android:orientation="vertical"
+    android:paddingHorizontal="5dp"
     >
 
     <RelativeLayout
@@ -24,7 +25,7 @@
 
         <TextView
             android:id="@+id/tv_fileName"
-            android:layout_width="320dp"
+            android:layout_width="290dp"
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:textColor="@color/text_black"
