@@ -91,8 +91,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                                 }
                             })
                             .setActionTextColor(getResources().getColor(R.color.main_blue));
-                    //默认显示10s
-                    snackbar.setDuration(10000);
+                    //默认显示7s
+                    snackbar.setDuration(7000);
                     //设置4行显示，避免文字截断
                     View snackBarView = snackbar.getView();
                     TextView messageView = snackBarView.findViewById(com.google.android.material.R.id.snackbar_text);
@@ -106,24 +106,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         public void onServiceDisconnected(ComponentName componentName) {
         }
     };
-
-    //Menu显示图标
-    @Override
-    public boolean onMenuOpened(int featureId, Menu menu) {
-        if (menu != null) {
-            if (menu.getClass().getSimpleName().equalsIgnoreCase("MenuBuilder")) {
-                try {
-                    Method method = menu.getClass().getDeclaredMethod("setOptionalIconsVisible", Boolean.TYPE);
-                    method.setAccessible(true);
-                    method.invoke(menu, true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return super.onMenuOpened(featureId, menu);
-    }
-
 
     public DownloadService.DownloadBinder getDownloadBinder() {
         return downloadBinder;
