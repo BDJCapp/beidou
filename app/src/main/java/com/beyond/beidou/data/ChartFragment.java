@@ -388,9 +388,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mDeltaHChartTimeTv.setText(time);
         mDeltaHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
-        List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaD")).toString(), mDeltaDConvertData);
+        List<AxisValue> yLabel = setDeltaDAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaD")).toString(), mDeltaDConvertData);
         convertLines(mDeltaDConvertData);
         setChart(mDeltaDChart, xAxisValues, yLabel, mDeltaDConvertAvg);
+
         xAxisValues = setXAxisValues(selectedTime);
         yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaH")).toString(), mDeltaHConvertData);
         convertLines(mDeltaHConvertData);
@@ -526,7 +527,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         }
 
-
         //结果出现是0.005时，在浮点运算时会四舍五入为0.01，影响运算结果
         if (Math.abs(valueYMin - 0.005) < 0.0001){
             valueYMin = 0;
@@ -535,7 +535,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         String space = "0.01";     //每格大小为0.01m
         mConvertYMax = valueYMax + 0.1f;
         mConvertYMin = valueYMin - 0.1f;
-       
 
         //保证convertYmin和yMin是真实值。这样即使转成只有两位小数，也是对应的。
         DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
@@ -544,6 +543,64 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         BigDecimal b_space = new BigDecimal(space);
         chartValue = mConvertYMin;
         tempYmin = tempYmin.subtract(new BigDecimal("0.1"));
+        BigDecimal s_yMin = new BigDecimal(df.format(tempYmin));  //传入格式化后的最小值
+
+        while (chartValue <= mConvertYMax) {
+            b_ymin = b_ymin.add(b_space);
+            s_yMin = s_yMin.add(b_space);
+            tempString = String.valueOf(s_yMin);
+            chartValue = Float.parseFloat(String.valueOf(b_ymin));
+            AxisValue axisValue = new AxisValue(chartValue);
+            axisValue.setLabel(tempString);
+            axisValues.add(axisValue);
+        }
+        return axisValues;
+    }
+
+    //防止DeltaD数据异常导致卡死
+    public List<AxisValue> setDeltaDAxisYLabel(String yMin, List<PointValue> values) {
+        float chartValue;
+        String tempString;
+        String minSubNum;     //最小值的减数
+        List<AxisValue> axisValues = new ArrayList<>();
+        float valueYMax = values.get(0).getY();
+        float valueYMin = values.get(0).getY();
+        for (PointValue pointValue : values) {
+            //确定最大最小值
+            if (pointValue.getY() >= valueYMax) {
+                valueYMax = pointValue.getY();
+            }
+            if (pointValue.getY() <= valueYMin) {
+                valueYMin = pointValue.getY();
+            }
+        }
+
+        //结果出现是0.005时，在浮点运算时会四舍五入为0.01，影响运算结果
+        if (Math.abs(valueYMin - 0.005) < 0.0001){
+            valueYMin = 0;
+        }
+
+        if (valueYMax - valueYMin > 1000){
+            mConvertYMax = valueYMin + 0.2f;
+            mConvertYMin = valueYMin - 0.01f;
+            mDeltaDConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            LogUtil.e("Chart mDeltaDConvertAvg:" ,"" + mDeltaDConvertAvg);
+            minSubNum = "0.01";
+        }else {
+            mConvertYMax = valueYMax + 0.1f;
+            mConvertYMin = valueYMin - 0.1f;
+            minSubNum = "0.1";
+        }
+
+        String space = "0.01";     //每格大小为0.01m
+
+        //保证convertYmin和yMin是真实值。这样即使转成只有两位小数，也是对应的。
+        DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
+        BigDecimal b_ymin = new BigDecimal(df.format(mConvertYMin));
+        BigDecimal tempYmin = new BigDecimal(df.format(Double.parseDouble(yMin)));
+        BigDecimal b_space = new BigDecimal(space);
+        chartValue = mConvertYMin;
+        tempYmin = tempYmin.subtract(new BigDecimal(minSubNum));
         BigDecimal s_yMin = new BigDecimal(df.format(tempYmin));  //传入格式化后的最小值
 
         while (chartValue <= mConvertYMax) {
