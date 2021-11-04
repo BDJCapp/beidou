@@ -130,7 +130,7 @@ public class FileUtil {
             share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             context.startActivity(Intent.createChooser(share, "分享文件"));
         } else {
-            Toast.makeText(context, "分享文件不存在", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "未选中分享的文件", Toast.LENGTH_SHORT).show();
         }
     }
 

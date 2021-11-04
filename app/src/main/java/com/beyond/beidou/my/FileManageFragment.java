@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.*;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -29,13 +30,8 @@ import com.beyond.beidou.util.LogUtil;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.CRC32;
-import java.util.zip.ZipOutputStream;
-
 
 public class FileManageFragment extends BaseFragment implements View.OnClickListener {
 
@@ -212,6 +208,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
         mShareButton.setOnClickListener(this);
         View rootView = LayoutInflater.from(mMainActivity).inflate(R.layout.activity_main, null);
 //        mPopupWindow.setBackgroundDrawable(new ColorDrawable(0x66000000));
+        mPopupWindow.setAnimationStyle(R.style.pop_anim_style);
         mPopupWindow.showAtLocation(rootView, Gravity.BOTTOM, 0, 0);
 
         mFilesSelect.clear();
@@ -237,7 +234,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
             case R.id.pop_btn_delete:
                 List<String> deleteList = mFileSelectAdapter.getDeleteList();
                 if (deleteList.size() == 0) {
-                    showToast("删除的文件不存在");
+                    showToast("未选中删除的文件");
                     break;
                 }
                 deleteFiles(deleteList);

@@ -1,6 +1,7 @@
 package com.beyond.beidou.my;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,14 @@ import androidx.fragment.app.FragmentTransaction;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
+import com.beyond.beidou.entites.FileItem;
+import com.beyond.beidou.util.ListUtil;
 import com.beyond.beidou.util.LogUtil;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MyFragment extends BaseFragment implements View.OnClickListener {
@@ -28,7 +36,6 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
     private CardView mCardViewFile;
     private boolean isGetName = false;
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -38,12 +45,6 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
         isGetName = true;
         mTvUserName.setText(userName);
         return view;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        LogUtil.e("MyFragMent Oncreate","已执行");
-        super.onCreate(savedInstanceState);
     }
 
     public int initLayout() {

@@ -83,7 +83,7 @@
             android:layout_marginEnd="2dp"
             android:layout_toStartOf="@+id/iv_arrow"
             android:text="查看数据"
-            android:textColor="#68ADFE" />
+            android:textColor="@color/main_blue" />
 
         <ImageView
             android:id="@+id/iv_arrow"

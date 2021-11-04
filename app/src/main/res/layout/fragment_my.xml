@@ -8,6 +8,14 @@
     android:padding="5dp"
     >
 
+    <androidx.cardview.widget.CardView
+        android:layout_margin="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="10dp"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardElevation="1dp"
+        >
     <LinearLayout
         android:id="@+id/title"
         android:layout_width="match_parent"
@@ -20,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="15dp"
-            android:src="@drawable/svg_ic_user_icon"
+            android:src="@drawable/ic_svg_user_icon"
             android:layout_marginStart="10dp"
             android:id="@+id/img_ChatHead"
             android:background="@drawable/bg_border"
@@ -42,12 +50,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/img_user"
-            android:src="@drawable/svg_ic_more"
+            android:src="@drawable/ic_svg_more"
             android:alpha="0.5"
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
             />
     </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
 
     <RelativeLayout
         android:id="@+id/img_about"
@@ -62,7 +72,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/svg_ic_accountsecurity"
+            android:src="@drawable/ic_svg__accountsecurity"
             android:layout_marginLeft="10dp"
             android:id="@+id/img_accountSecurity"
             android:layout_alignParentLeft="true"
@@ -82,7 +92,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/img_accountSecurityMore"
-            android:src="@drawable/svg_ic_more"
+            android:src="@drawable/ic_svg_more"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             />
@@ -100,7 +110,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/svg_ic_messages"
+            android:src="@drawable/ic_svg_messages"
             android:layout_marginLeft="10dp"
             android:id="@+id/img_messages"
             android:layout_alignParentLeft="true"
@@ -121,7 +131,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/img_message"
-            android:src="@drawable/svg_ic_more"
+            android:src="@drawable/ic_svg_more"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             />
@@ -155,7 +165,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/ic_settings"
+                    android:src="@drawable/ic_svg_settings"
                     />
 
                 <TextView
@@ -171,7 +181,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/svg_ic_more"
+                    android:src="@drawable/ic_svg_more"
                     android:alpha="0.5"
                     />
 
@@ -204,12 +214,12 @@
                 android:gravity="center_vertical"
                 android:padding="12dp"
                 >
+
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/ic_download"
-                    />
+                    android:src="@drawable/ic_svg_download" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -224,7 +234,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/svg_ic_more"
+                    android:src="@drawable/ic_svg_more"
                     android:alpha="0.5"
                     />
 

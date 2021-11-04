@@ -199,6 +199,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
         });
 
+
+
         mTvAmount = view.findViewById(R.id.tv_amount);
         mBtnAmount = view.findViewById(R.id.btn_amount);
         mBtnOnline = view.findViewById(R.id.btn_online);

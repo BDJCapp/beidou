@@ -13,7 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.beyond.beidou.R;
-import com.beyond.beidou.entites.FileItem;
 import com.beyond.beidou.entites.FileSelectItem;
 
 import java.util.ArrayList;
@@ -65,11 +64,11 @@ public class FileSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             }
         });
         if(files.get(position).isSelect()){
-            itemHolder.mIv_Check.setImageResource(R.drawable.ic_file_checked);
+            itemHolder.mIv_Check.setImageResource(R.drawable.ic_svg_file_checked);
             itemHolder.mLl_item.setBackgroundColor(Color.parseColor("#D6D8DA"));
         }else{
-            itemHolder.mIv_Check.setImageResource(R.drawable.ic_file_unchecked);
-            itemHolder.mLl_item.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            itemHolder.mIv_Check.setImageResource(R.drawable.ic_svg_file_unchecked);
+            itemHolder.mLl_item.setBackgroundColor(Color.parseColor("#FAFAFA"));
         }
     }
 

@@ -18,7 +18,7 @@
             android:id="@+id/iv_fileIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_file"
+            android:src="@drawable/ic_svg_file"
             android:layout_alignParentStart="true"
             android:layout_centerInParent="true"
             />
