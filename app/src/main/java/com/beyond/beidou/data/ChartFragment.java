@@ -526,6 +526,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         }
 
+
         //结果出现是0.005时，在浮点运算时会四舍五入为0.01，影响运算结果
         if (Math.abs(valueYMin - 0.005) < 0.0001){
             valueYMin = 0;
