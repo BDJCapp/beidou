@@ -125,7 +125,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private void doLoadingDialog() {
         mLoadingDlg.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                 .setLoadingColor(Color.BLACK)//颜色
-                .setHintText("Loading...")
+                .setHintText("加载中")
                 .setCanceledOnTouchOutside(false)
                 .show();
         pHandler.sendEmptyMessageDelayed(LOADING, 0);

@@ -126,7 +126,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_svg_chart"
+                android:src="@drawable/ic_svg_linechart"
                 android:id="@+id/img_icChartX"
                 />
 
@@ -188,7 +188,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_svg_chart"
+                android:src="@drawable/ic_svg_linechart"
                 android:id="@+id/img_icChartY"
                 />
 
@@ -251,7 +251,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_svg_chart"
+                android:src="@drawable/ic_svg_linechart"
                 android:id="@+id/img_icChartH"
                 />
 
@@ -312,7 +312,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_svg_chart"
+                android:src="@drawable/ic_svg_linechart"
                 android:id="@+id/img_icDeltaD"
                 />
             <TextView
@@ -372,7 +372,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_svg_chart"
+                android:src="@drawable/ic_svg_linechart"
                 android:id="@+id/img_icChartDeltaH"
                 />
 
@@ -433,7 +433,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_svg_chart"
+                android:src="@drawable/ic_svg_heartchart"
                 android:id="@+id/img_icChartHeart"
                 />
 

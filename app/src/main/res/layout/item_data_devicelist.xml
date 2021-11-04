@@ -60,6 +60,7 @@
     </LinearLayout>
 
     <RelativeLayout
+        android:id="@+id/layout_bottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -105,5 +106,11 @@
             android:layout_centerVertical="true"
             />
     </RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_marginTop="10dp"
+        android:background="#B3BCBABA"
+        android:layout_below="@+id/layout_bottom"/>
 
 </RelativeLayout>

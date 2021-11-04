@@ -125,7 +125,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mHandler.sendEmptyMessageDelayed(LOADING, 50);
         mDialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                 .setLoadingColor(Color.BLACK)//颜色
-                .setHintText("Loading...")
+                .setHintText("加载中")
                 .setCancelable(false)
                 .setCanceledOnTouchOutside(false)
                 .show();

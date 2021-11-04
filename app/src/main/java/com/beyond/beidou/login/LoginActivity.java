@@ -210,7 +210,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                 }
                 mLoadingDlg.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                         .setLoadingColor(Color.BLACK)//颜色
-                        .setHintText("Loading...")
+                        .setHintText("加载中")
                         .setCanceledOnTouchOutside(false)
                         .show();
                 handler.sendEmptyMessageDelayed(GET_TOKEN_SESSION,0);

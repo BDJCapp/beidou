@@ -94,7 +94,7 @@ public class DataHomeFragment extends BaseFragment {
         }
         mLoadingDlg.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
                 .setLoadingColor(Color.BLACK)
-                .setHintText("Loading...")
+                .setHintText("加载中")
                 .setCancelable(false)
                 .setCanceledOnTouchOutside(false)
                 .show();
