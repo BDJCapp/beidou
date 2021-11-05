@@ -584,7 +584,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             mConvertYMax = valueYMin + 0.2f;
             mConvertYMin = valueYMin - 0.01f;
             mDeltaDConvertAvg = (mConvertYMax + mConvertYMin) / 2;
-            LogUtil.e("Chart mDeltaDConvertAvg:" ,"" + mDeltaDConvertAvg);
             minSubNum = "0.01";
         }else {
             mConvertYMax = valueYMax + 0.1f;
