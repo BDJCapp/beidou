@@ -18,7 +18,8 @@ import java.util.List;
 public class FileManagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<FileItem> files;
-    private static FileManagerAdapter.OnItemClickListener mOnItemClickListener;
+    private FileManagerAdapter.OnItemClickListener mOnItemClickListener;
+    private FileManagerAdapter.OnItemLongClickListener mOnItemLongClickListener;
 
     static class ViewHolder extends RecyclerView.ViewHolder{
 
@@ -58,6 +59,13 @@ public class FileManagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 mOnItemClickListener.onItemClick(v, position);
             }
         });
+        itemHolder.mLl_item.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                mOnItemLongClickListener.onItemLongClickListener(v, position);
+                return true;
+            }
+        });
     }
 
     @Override
@@ -69,10 +77,19 @@ public class FileManagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         void onItemClick(View view, int position);
     }
 
+    public interface OnItemLongClickListener{
+        void onItemLongClickListener(View view, int position);
+    }
+
     public void setOnItemClickListener(FileManagerAdapter.OnItemClickListener mOnItemClickListener) {
         if (mOnItemClickListener == null) {
             Log.e("setOnItemClickListener", "mOnItemClickListener is null");
         }
-        FileManagerAdapter.mOnItemClickListener = mOnItemClickListener;
+        this.mOnItemClickListener = mOnItemClickListener;
     }
+
+    public void setOnItemLongClickListener(FileManagerAdapter.OnItemLongClickListener mOnItemLongClickListener){
+        this.mOnItemLongClickListener = mOnItemLongClickListener;
+    }
+
 }

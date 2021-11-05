@@ -1066,8 +1066,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
     public void drawChart() {
         if (hasData) {
+            LogUtil.e("position", "111111");
             drawXYHChart(mTimeSp.getSelectedItem().toString());
+            LogUtil.e("position", "22222");
             drawDeltaChart(mTimeSp.getSelectedItem().toString());
+            LogUtil.e("position", "333333");
             drawHeartChart();
         }
         if (mLoadingDlg != null)

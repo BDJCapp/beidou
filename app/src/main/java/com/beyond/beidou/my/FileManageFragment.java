@@ -1,14 +1,16 @@
 package com.beyond.beidou.my;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Selection;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.PopupWindow;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -84,6 +86,60 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
             @Override
             public void onItemClick(View view, int position) {
                 FileUtil.openExcelFile(mMainActivity, mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + mFiles.get(position).getFileName());
+            }
+        });
+        mFileAdapter.setOnItemLongClickListener(new FileManagerAdapter.OnItemLongClickListener() {
+            @Override
+            public void onItemLongClickListener(final View view, final int position) {
+                final View dialogView = LayoutInflater.from(mMainActivity).inflate(R.layout.dialog_file, (ViewGroup) view, false);
+                final EditText mEtFileName = dialogView.findViewById(R.id.et_fileName);
+                String oldName = mFiles.get(position).getFileName();
+                mEtFileName.setText(oldName.substring(0, oldName.length() - 4));
+                final AlertDialog dialog = new AlertDialog.Builder(mMainActivity).setTitle("提示")
+                        .setView(dialogView)
+                        .setMessage("请输入新名字：").setPositiveButton("确定", null).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).setCancelable(false).create();
+                dialog.show();
+
+                mEtFileName.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mEtFileName.requestFocus();
+                        mEtFileName.selectAll();
+                        InputMethodManager manager = ((InputMethodManager)mMainActivity.getSystemService(Context.INPUT_METHOD_SERVICE));
+                        if (manager != null) {
+                            manager.showSoftInput(mEtFileName, 0);
+                        }
+                    }
+                }, 300);
+
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        EditText mEtFileName = dialogView.findViewById(R.id.et_fileName);
+                        String oldName = mFiles.get(position).getFileName();
+                        String newName = mEtFileName.getText().toString();
+                        if (TextUtils.isEmpty(newName)) {
+                            showToast("名字不能为空");
+                            return;
+                        }
+                        if (newName.length() > 204) {
+                            showToast("文件名过长");
+                            return;
+                        }
+                        fileRename(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + oldName, mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + newName + ".xls");
+                        dialog.dismiss();
+                        onHiddenChanged(false);
+                    }
+
+                });
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#0075E3"));
+
             }
         });
         mRecyclerView.setAdapter(mFileAdapter);
@@ -270,6 +326,9 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
     }
 
     private void deleteFiles(final List<String> fileList) {
+        if (fileList.isEmpty()) {
+            return;
+        }
         AlertDialog dialog = new AlertDialog.Builder(mMainActivity).setTitle("提示")
                 .setMessage("确定要删除" + fileList.size() + "个文件吗？").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
@@ -303,5 +362,12 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
         dialog.show();
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#0075E3"));
+    }
+
+    private void fileRename(String oldPath, String newPath) {
+        if (TextUtils.isEmpty(oldPath) || TextUtils.isEmpty(newPath)) {
+            return;
+        }
+        new File(oldPath).renameTo(new File(newPath));
     }
 }
