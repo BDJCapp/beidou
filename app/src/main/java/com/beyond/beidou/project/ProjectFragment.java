@@ -290,27 +290,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void getData() {
-        mProjectNameList.clear();
-        mStationNameList.clear();
-        mStationUUIDList.clear();
-        if (sIsReLogin) {
-            sIsFirstLogin = true;
-            sIsReLogin = false;
-        }
-        if (sIsFirstLogin) {
-            mPresentProject = getStringFromSP("lastProjectName");
-            sIsFirstLogin = false;
-        } else {
-            mPresentProject = mMainActivity.getPresentProject();
-            if (mPresentProject == null) {
-                mPresentProject = "";
-            }
-        }
-        mParams.clear();
-        if (mProjectList != null) {
-            mProjectList.clear();
-        }
-
         if (FileUtil.fileExist(mMainActivity.getCacheDir() + "/" + "projectCache-" + getStringFromSP("presentPlatform"))) {
             Gson gson = new Gson();
             projectResponse = gson.fromJson(FileUtil.getProjectCache(mMainActivity), ProjectResponse.class);
@@ -328,6 +307,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                             FileUtil.saveProjectCache(mMainActivity, res);
                             Gson gson = new Gson();
                             projectResponse = gson.fromJson(res, ProjectResponse.class);
+
                             extractData();
                             LogUtil.e("projectFragment", "extract complete");
                         }
@@ -358,6 +338,26 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void extractData(){
+        mProjectNameList.clear();
+        mStationNameList.clear();
+        mStationUUIDList.clear();
+        if (sIsReLogin) {
+            sIsFirstLogin = true;
+            sIsReLogin = false;
+        }
+        if (sIsFirstLogin) {
+            mPresentProject = getStringFromSP("lastProjectName");
+            sIsFirstLogin = false;
+        } else {
+            mPresentProject = mMainActivity.getPresentProject();
+            if (mPresentProject == null) {
+                mPresentProject = "";
+            }
+        }
+        mParams.clear();
+        if (mProjectList != null) {
+            mProjectList.clear();
+        }
         if (Integer.parseInt(projectResponse.getResponseCode()) == 200) {
             mProjectList = projectResponse.getProjectList();
             if (mProjectList == null) {
