@@ -34,8 +34,7 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
-import com.beyond.beidou.util.ListUtil;
-import com.beyond.beidou.util.LogUtil;
+import com.beyond.beidou.util.*;
 import com.beyond.beidou.views.MyRecycleView;
 import com.beyond.beidou.R;
 import com.beyond.beidou.adapter.MonitoringPointsAdapter;
@@ -46,8 +45,6 @@ import com.beyond.beidou.data.ChartFragment;
 import com.beyond.beidou.entites.MonitoringPoint;
 import com.beyond.beidou.entites.ProjectResponse;
 import com.beyond.beidou.login.LoginActivity;
-import com.beyond.beidou.util.LoginUtil;
-import com.beyond.beidou.util.ScreenUtil;
 import com.google.gson.Gson;
 import com.yinglan.scrolllayout.ScrollLayout;
 import com.yinglan.scrolllayout.content.ContentScrollView;
@@ -119,7 +116,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
     private MainActivity mMainActivity = null;
     private boolean isMatch = false;
-
+    private ProjectResponse projectResponse;
 
     private void doLoadingDialog() {
         mHandler.sendEmptyMessageDelayed(LOADING, 50);
@@ -190,7 +187,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 mScrollView.post(new Runnable() {
                     @Override
                     public void run() {
-                        if(mLayoutManager.findFirstCompletelyVisibleItemPosition() != 0){
+                        if (mLayoutManager.findFirstCompletelyVisibleItemPosition() != 0) {
                             mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
                         }
                     }
@@ -198,7 +195,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 return false;
             }
         });
-
 
 
         mTvAmount = view.findViewById(R.id.tv_amount);
@@ -311,184 +307,218 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             }
         }
         mParams.clear();
-        if(mProjectList != null){
+        if (mProjectList != null) {
             mProjectList.clear();
         }
-        mParams.put("AccessToken", ApiConfig.getAccessToken());
-        mParams.put("SessionUUID", ApiConfig.getSessionUUID());
-        Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(mMainActivity, new ApiCallback() {
-            @Override
-            public void onSuccess(final String res) {
-                Gson gson = new Gson();
-                ProjectResponse response = gson.fromJson(res, ProjectResponse.class);
-                if (Integer.parseInt(response.getResponseCode()) == 200) {
-                    mProjectList = response.getProjectList();
-                    if (mProjectList == null) {
-                        back2Login();
-                    }
-                    for (ProjectResponse.ProjectListBean project : mProjectList) {
-                        //项目名为空则直接跳过
-                        if (project.getProjectName().equals("")) {
-                            continue;
-                        }
-                        mProjectNameList.add(project.getProjectName());
-                    }
-                    mMainActivity.runOnUiThread(new Runnable() {
+
+        if (FileUtil.fileExist(mMainActivity.getCacheDir() + "/" + "projectCache-" + getStringFromSP("presentPlatform"))) {
+            Gson gson = new Gson();
+            projectResponse = gson.fromJson(FileUtil.getProjectCache(mMainActivity), ProjectResponse.class);
+            extractData();
+            //run a thread
+            LogUtil.e("projectFragment", "get data...");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mParams.put("AccessToken", ApiConfig.getAccessToken());
+                    mParams.put("SessionUUID", ApiConfig.getSessionUUID());
+                    Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(mMainActivity, new ApiCallback() {
                         @Override
-                        public void run() {
-                            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(mMainActivity, R.layout.item_select, mProjectNameList);
-                            arrayAdapter.setDropDownViewResource(R.layout.item_drop);
-                            mSpinner.setAdapter(arrayAdapter);
-                            ProjectFragment.sIsFirstBindListener = true;
+                        public void onSuccess(final String res) {
+                            FileUtil.saveProjectCache(mMainActivity, res);
+                            Gson gson = new Gson();
+                            projectResponse = gson.fromJson(res, ProjectResponse.class);
+                            extractData();
+                            LogUtil.e("projectFragment", "extract complete");
+                        }
+                        @Override
+                        public void onFailure(Exception e) {
+                            mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
+                        }
+                    });
+                }
+            }).start();
+        } else {
+            mParams.put("AccessToken", ApiConfig.getAccessToken());
+            mParams.put("SessionUUID", ApiConfig.getSessionUUID());
+            Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(mMainActivity, new ApiCallback() {
+                @Override
+                public void onSuccess(final String res) {
+                    FileUtil.saveProjectCache(mMainActivity, res);
+                    Gson gson = new Gson();
+                    projectResponse = gson.fromJson(res, ProjectResponse.class);
+                    extractData();
+                }
+                @Override
+                public void onFailure(Exception e) {
+                    mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
+                }
+            });
+        }
+    }
 
-                            if (mPresentProject.equals("")) {
-                                mPresentProject = mSpinner.getSelectedItem().toString();
-                                mMainActivity.setPresentProject(mPresentProject);
-                                for (ProjectResponse.ProjectListBean project : mProjectList) {
-                                    if (project.getProjectName().equals(mPresentProject)) {
-                                        mProjectStationStatus = project.getProjectStationStatus();
-                                        mProjectStationList = project.getStationList();
-                                        for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
-                                            mStationNameList.add(station.getStationName());
-                                            mStationUUIDList.add(station.getStationUUID());
-                                        }
-                                    }
-                                }
-                            } else {
-                                for (ProjectResponse.ProjectListBean project : mProjectList) {
-                                    if (project.getProjectName().equals(mPresentProject)) {
-                                        mProjectStationStatus = project.getProjectStationStatus();
-                                        mProjectStationList = project.getStationList();
-                                        mSpinner.setSelection(mProjectList.indexOf(project), true);
-                                        for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
-                                            mStationNameList.add(station.getStationName());
-                                            mStationUUIDList.add(station.getStationUUID());
-                                        }
-                                        isMatch = true;
-                                    }
-                                }
-                                if(!isMatch){
-                                    mPresentProject = mSpinner.getSelectedItem().toString();
-                                    mMainActivity.setPresentProject(mPresentProject);
-                                    for (ProjectResponse.ProjectListBean project : mProjectList) {
-                                        if (project.getProjectName().equals(mPresentProject)) {
-                                            mProjectStationStatus = project.getProjectStationStatus();
-                                            mProjectStationList = project.getStationList();
-                                            for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
-                                                mStationNameList.add(station.getStationName());
-                                                mStationUUIDList.add(station.getStationUUID());
-                                            }
-                                        }
-                                    }
-                                    isMatch = false;
+    private void extractData(){
+        if (Integer.parseInt(projectResponse.getResponseCode()) == 200) {
+            mProjectList = projectResponse.getProjectList();
+            if (mProjectList == null) {
+                back2Login();
+            }
+            for (ProjectResponse.ProjectListBean project : mProjectList) {
+                //项目名为空则直接跳过
+                if (project.getProjectName().equals("")) {
+                    continue;
+                }
+                mProjectNameList.add(project.getProjectName());
+            }
+            mMainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(mMainActivity, R.layout.item_select, mProjectNameList);
+                    arrayAdapter.setDropDownViewResource(R.layout.item_drop);
+                    mSpinner.setAdapter(arrayAdapter);
+                    ProjectFragment.sIsFirstBindListener = true;
+
+                    if (mPresentProject.equals("")) {
+                        mPresentProject = mSpinner.getSelectedItem().toString();
+                        mMainActivity.setPresentProject(mPresentProject);
+                        for (ProjectResponse.ProjectListBean project : mProjectList) {
+                            if (project.getProjectName().equals(mPresentProject)) {
+                                mProjectStationStatus = project.getProjectStationStatus();
+                                mProjectStationList = project.getStationList();
+                                for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
+                                    mStationNameList.add(station.getStationName());
+                                    mStationUUIDList.add(station.getStationUUID());
                                 }
                             }
-                            if (mProjectStationStatus == null) {
-                                back2Login();
-                                return;
-                            } else {
+                        }
+                    } else {
+                        for (ProjectResponse.ProjectListBean project : mProjectList) {
+                            if (project.getProjectName().equals(mPresentProject)) {
+                                mProjectStationStatus = project.getProjectStationStatus();
+                                mProjectStationList = project.getStationList();
+                                mSpinner.setSelection(mProjectList.indexOf(project), true);
+                                for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
+                                    mStationNameList.add(station.getStationName());
+                                    mStationUUIDList.add(station.getStationUUID());
+                                }
+                                isMatch = true;
+                            }
+                        }
+                        //isMatch解决切换平台时首页数据不匹配问题，以下为切换了平台后的逻辑
+                        if (!isMatch) {
+                            mPresentProject = mSpinner.getSelectedItem().toString();
+                            mMainActivity.setPresentProject(mPresentProject);
+                            for (ProjectResponse.ProjectListBean project : mProjectList) {
+                                if (project.getProjectName().equals(mPresentProject)) {
+                                    mProjectStationStatus = project.getProjectStationStatus();
+                                    mProjectStationList = project.getStationList();
+                                    for (ProjectResponse.ProjectListBean.StationListBean station : project.getStationList()) {
+                                        mStationNameList.add(station.getStationName());
+                                        mStationUUIDList.add(station.getStationUUID());
+                                    }
+                                }
+                            }
+                            isMatch = false;
+                        }
+                    }
+                    if (mProjectStationStatus == null) {
+                        back2Login();
+                        return;
+                    } else {
 //                                Log.e("mProjectStationStatus", mProjectStationStatus.toString());
-                                mTvAmount.setText(String.valueOf(mProjectStationStatus.getTotal()));
-                                mBtnAmount.setText("总数\n" + mProjectStationStatus.getTotal());
-                                mBtnOnline.setText("在线\n" + mProjectStationStatus.getOnline());
-                                mBtnWarning.setText("警告\n" + mProjectStationStatus.getWarning());
-                                mBtnError.setText("故障\n" + mProjectStationStatus.getError());
-                                mBtnOffline.setText("离线\n" + mProjectStationStatus.getOffline());
-                            }
-                            //初始化监测点数据
-                            initStationList();
+                        mTvAmount.setText(String.valueOf(mProjectStationStatus.getTotal()));
+                        mBtnAmount.setText("总数\n" + mProjectStationStatus.getTotal());
+                        mBtnOnline.setText("在线\n" + mProjectStationStatus.getOnline());
+                        mBtnWarning.setText("警告\n" + mProjectStationStatus.getWarning());
+                        mBtnError.setText("故障\n" + mProjectStationStatus.getError());
+                        mBtnOffline.setText("离线\n" + mProjectStationStatus.getOffline());
+                    }
+                    //初始化监测点数据
+                    initStationList();
 //                            mPointsAdapter = new MonitoringPointsAdapter(mPointList);
-                            ListUtil.sort(mPointList, true, "name", "uuid");
-                            mPointsAdapter.setData(mPointList);
-                            mRecyclerView.setAdapter(mPointsAdapter);
-                            mPointsAdapter.addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.item_footer_layout,null));
-                            mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(View view, int position) {
-                                    if (!LoginUtil.isNetworkUsable(mMainActivity)) {
-                                        return;
+                    ListUtil.sort(mPointList, true, "name", "uuid");
+                    mPointsAdapter.setData(mPointList);
+                    mRecyclerView.setAdapter(mPointsAdapter);
+                    mPointsAdapter.addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.item_footer_layout, null));
+                    mPointsAdapter.setOnItemClickListener(new MonitoringPointsAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+                            if (!LoginUtil.isNetworkUsable(mMainActivity)) {
+                                return;
+                            }
+                            switchFragment(mPresentProject, mStationNameList, position, mStationUUIDList);
+                            mMainActivity.getNavigationView().setSelectedItemId(mMainActivity.getNavigationView().getMenu().getItem(1).getItemId());
+                        }
+                    });
+
+                    navigate();
+
+                    mPointsAdapter.setOnAreaClickListener(new MonitoringPointsAdapter.OnAreaClickListener() {
+                        @Override
+                        public void onAreaClick(View view, int position) {
+                            for (ProjectResponse.ProjectListBean.StationListBean projectStation :
+                                    mProjectStationList) {
+                                if (mStationUUIDList.get(position).equals(projectStation.getStationUUID())) {
+                                    LatLng ll;
+                                    double latitude, longitude;
+                                    if (!"".equals(projectStation.getStationLatitude()) && !"".equals(projectStation.getStationLongitude())) {
+                                        latitude = Double.parseDouble(projectStation.getStationLatitude());
+                                        longitude = Double.parseDouble(projectStation.getStationLongitude());
+                                        LatLng sourcePoint = new LatLng(latitude, longitude);
+                                        CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
+                                        ll = converter.convert();
+                                    } else {
+                                        break;
                                     }
-                                    switchFragment(mPresentProject, mStationNameList, position, mStationUUIDList);
-                                    mMainActivity.getNavigationView().setSelectedItemId(mMainActivity.getNavigationView().getMenu().getItem(1).getItemId());
+                                    MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
+                                    mBaiduMap.animateMapStatus(update);
+                                    update = MapStatusUpdateFactory.zoomTo(18f);
+                                    mBaiduMap.animateMapStatus(update);
+                                    return;
                                 }
-                            });
-
-                            navigate();
-
-                            mPointsAdapter.setOnAreaClickListener(new MonitoringPointsAdapter.OnAreaClickListener() {
+                            }
+                            mMainActivity.runOnUiThread(new Runnable() {
                                 @Override
-                                public void onAreaClick(View view, int position) {
-                                    for(ProjectResponse.ProjectListBean.StationListBean projectStation :
-                                            mProjectStationList){
-                                        if(mStationUUIDList.get(position).equals(projectStation.getStationUUID())){
-                                            LatLng ll;
-                                            double latitude, longitude;
-                                            if (!"".equals(projectStation.getStationLatitude()) && !"".equals(projectStation.getStationLongitude())) {
-                                                latitude = Double.parseDouble(projectStation.getStationLatitude());
-                                                longitude = Double.parseDouble(projectStation.getStationLongitude());
-                                                LatLng sourcePoint = new LatLng(latitude, longitude);
-                                                CoordinateConverter converter = new CoordinateConverter().from(CoordinateConverter.CoordType.GPS).coord(sourcePoint);
-                                                ll = converter.convert();
-                                            }else{
-                                                break;
-                                            }
-                                            MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
-                                            mBaiduMap.animateMapStatus(update);
-                                            update = MapStatusUpdateFactory.zoomTo(18f);
-                                            mBaiduMap.animateMapStatus(update);
-                                            return;
-                                        }
-                                    }
-                                    mMainActivity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            showToast("监测点暂无位置数据");
-                                        }
-                                    });
-                                }
-                            });
-
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());
-                            Date date = new Date(System.currentTimeMillis());
-                            mTvTime.setText(simpleDateFormat.format(date));
-                            //设置地图marker覆盖物
-                            mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
-                                @Override
-                                public boolean onMarkerClick(Marker marker) {
-                                    View window = LayoutInflater.from(mMainActivity).inflate(R.layout.popupwindow_showinfo, null, false);
-                                    TextView tv_name, tv_type;
-                                    LinearLayout window_layout;
-                                    window_layout = window.findViewById(R.id.window_layout);
-                                    tv_name = window.findViewById(R.id.tv_name);
-                                    tv_type = window.findViewById(R.id.tv_type);
-                                    tv_name.setText("监测点名称：" + marker.getExtraInfo().get("stationName"));
-                                    tv_type.setText("监测点类型：" + marker.getExtraInfo().get("stationType"));
-                                    InfoWindow mInfoWindow = new InfoWindow(window, marker.getPosition(), -100);
-
-                                    mBaiduMap.showInfoWindow(mInfoWindow);
-                                    window_layout.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            mBaiduMap.hideInfoWindow();
-                                        }
-                                    });
-                                    return false;
+                                public void run() {
+                                    showToast("监测点暂无位置数据");
                                 }
                             });
                         }
                     });
-                }
-                else {
-                    back2Login();
-                }
-                mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
-            }
 
-            @Override
-            public void onFailure(Exception e) {
-                mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
-            }
-        });
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());
+                    Date date = new Date(System.currentTimeMillis());
+                    mTvTime.setText(simpleDateFormat.format(date));
+                    //设置地图marker覆盖物
+                    mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+                        @Override
+                        public boolean onMarkerClick(Marker marker) {
+                            View window = LayoutInflater.from(mMainActivity).inflate(R.layout.popupwindow_showinfo, null, false);
+                            TextView tv_name, tv_type;
+                            LinearLayout window_layout;
+                            window_layout = window.findViewById(R.id.window_layout);
+                            tv_name = window.findViewById(R.id.tv_name);
+                            tv_type = window.findViewById(R.id.tv_type);
+                            tv_name.setText("监测点名称：" + marker.getExtraInfo().get("stationName"));
+                            tv_type.setText("监测点类型：" + marker.getExtraInfo().get("stationType"));
+                            InfoWindow mInfoWindow = new InfoWindow(window, marker.getPosition(), -100);
+
+                            mBaiduMap.showInfoWindow(mInfoWindow);
+                            window_layout.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    mBaiduMap.hideInfoWindow();
+                                }
+                            });
+                            return false;
+                        }
+                    });
+                }
+            });
+        } else {
+            back2Login();
+        }
+        mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
     }
 
     private void back2Login() {
@@ -497,10 +527,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         sIsFirstBindListener = true;
         sIsReLogin = true;
         showToastSync("未请求到数据，请稍后再试！");
-//        Intent intent = new Intent(mMainActivity, LoginActivity.class);
-//        startActivity(intent);
-//        mMainActivity.finish();
-
     }
 
     private void initStationList() {
@@ -532,7 +558,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             } else if (statusCode >= 40 && statusCode <= 49) {
                 markerBitmap = BitmapDescriptorFactory
                         .fromResource(R.drawable.ic_mk_error);
-            }else{
+            } else {
                 markerBitmap = BitmapDescriptorFactory
                         .fromResource(R.drawable.ic_mk_unknown);
             }
@@ -568,7 +594,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         double latitude, longitude;
         LatLng ll;
         boolean hasData = false;
-        if ( mProjectStationStatus != null && mProjectStationStatus.getTotal() != 0) {
+        if (mProjectStationStatus != null && mProjectStationStatus.getTotal() != 0) {
             for (ProjectResponse.ProjectListBean.StationListBean projectStation : mProjectStationList) {
                 if (projectStation == null) {
                     continue;
@@ -588,7 +614,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
             }
         }
-        if(!hasData){
+        if (!hasData) {
             showToast("项目所有监测点暂无位置数据！");
         }
     }
@@ -718,6 +744,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
                 break;
             case R.id.iv_refresh:
+                FileUtil.fileDelete(mMainActivity.getCacheDir() + "/projectCache-" + getStringFromSP("presentPlatform"));
                 doLoadingDialog();
                 break;
         }
@@ -726,8 +753,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         mPointsAdapter.notifyDataSetChanged();
     }
 
-    private void clearAnimation(int drawable){
-        switch (drawable){
+    private void clearAnimation(int drawable) {
+        switch (drawable) {
             case R.id.btn_amount:
                 mBtnAmount.setBackgroundResource(R.drawable.btn_amount_bg);
                 mBtnAmount.animate().scaleX(1.0f).scaleY(1.0f).setDuration(10).start();
