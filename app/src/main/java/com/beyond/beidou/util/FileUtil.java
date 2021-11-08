@@ -13,11 +13,13 @@ import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
+import com.beyond.beidou.BaseActivity;
 import com.beyond.beidou.BuildConfig;
 import com.beyond.beidou.R;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -139,13 +141,13 @@ public class FileUtil {
         ZipOutputStream out = null;
         try {
             //传入源文件
-            File fileOrDirectory= new File(src);
-            File outFile= new File(dest);
+            File fileOrDirectory = new File(src);
+            File outFile = new File(dest);
             //传入压缩输出流
             //创建文件前几级目录
-            if (!outFile.exists()){
-                File parentFile=outFile.getParentFile();
-                if (!parentFile.exists()){
+            if (!outFile.exists()) {
+                File parentFile = outFile.getParentFile();
+                if (!parentFile.exists()) {
                     parentFile.mkdirs();
                 }
             }
@@ -153,62 +155,62 @@ public class FileUtil {
             out = new ZipOutputStream(new FileOutputStream(outFile));
             //判断是否是一个文件或目录
             //如果是文件则压缩
-            if (fileOrDirectory.isFile()){
-                zipFileOrDirectory(out,fileOrDirectory, "");
+            if (fileOrDirectory.isFile()) {
+                zipFileOrDirectory(out, fileOrDirectory, "");
             } else {
                 //否则列出目录中的所有文件递归进行压缩
 
-                File[]entries = fileOrDirectory.listFiles();
-                for (int i= 0; i < entries.length;i++) {
-                    zipFileOrDirectory(out,entries[i],fileOrDirectory.getName()+"/");//传入最外层目录名
+                File[] entries = fileOrDirectory.listFiles();
+                for (int i = 0; i < entries.length; i++) {
+                    zipFileOrDirectory(out, entries[i], fileOrDirectory.getName() + "/");//传入最外层目录名
                 }
             }
-        }catch(IOException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
-        }finally{
-            if (out!= null){
+        } finally {
+            if (out != null) {
                 try {
                     out.close();
-                }catch(IOException ex) {
+                } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }
         }
     }
 
-    public static void zipFileOrDirectory(ZipOutputStream out, File fileOrDirectory, String curPath)throws IOException {
+    public static void zipFileOrDirectory(ZipOutputStream out, File fileOrDirectory, String curPath) throws IOException {
         FileInputStream in = null;
         try {
             //判断是否为目录
-            if (!fileOrDirectory.isDirectory()){
-                byte[] buffer= new byte[4096];
+            if (!fileOrDirectory.isDirectory()) {
+                byte[] buffer = new byte[4096];
                 int bytes_read;
-                in= new FileInputStream(fileOrDirectory);//读目录中的子项
+                in = new FileInputStream(fileOrDirectory);//读目录中的子项
                 //归档压缩目录
                 ZipEntry entry = new ZipEntry(curPath + fileOrDirectory.getName());//压缩到压缩目录中的文件名字
                 //getName() 方法返回的路径名的名称序列的最后一个名字，这意味着表示此抽象路径名的文件或目录的名称被返回。
                 //将压缩目录写到输出流中
                 out.putNextEntry(entry);//out是带有最初传进的文件信息，一直添加子项归档目录信息
-                while ((bytes_read= in.read(buffer))!= -1) {
-                    out.write(buffer,0, bytes_read);
+                while ((bytes_read = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, bytes_read);
                 }
                 out.flush();
                 out.closeEntry();
             } else {
                 //列出目录中的所有文件
-                File[]entries = fileOrDirectory.listFiles();
-                for (int i= 0; i < entries.length;i++) {
+                File[] entries = fileOrDirectory.listFiles();
+                for (int i = 0; i < entries.length; i++) {
                     //递归压缩
-                    zipFileOrDirectory(out,entries[i],curPath + fileOrDirectory.getName()+ "/");//第一次传入的curPath是空字符串
+                    zipFileOrDirectory(out, entries[i], curPath + fileOrDirectory.getName() + "/");//第一次传入的curPath是空字符串
                 }//目录没有后缀所以直接可以加"/"
             }
-        }catch(IOException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
-        }finally{
-            if (in!= null){
+        } finally {
+            if (in != null) {
                 try {
                     in.close();
-                }catch(IOException ex) {
+                } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }
@@ -219,5 +221,61 @@ public class FileUtil {
 //        ZipOutputStream zipOutputStream= new FileOutputStream(new File(destPath));
     }
 
+    public static void saveProjectCache(BaseActivity activity, String projectInfo) {
+        File file = new File(activity.getCacheDir(), "projectCache-" + activity.getStringFromSP("presentPlatform"));
+        if (file.exists()) {
+            file.delete();
+        }
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(file);
+            fos.write(projectInfo.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static String getProjectCache(BaseActivity activity) {
+        File file = new File(activity.getCacheDir(), "projectCache-" + activity.getStringFromSP("presentPlatform"));
+        if (!file.exists()) {
+            return null;
+        } else {
+            FileInputStream fis = null;
+            try {
+                fis = new FileInputStream(file);
+                int length = fis.available();
+                byte[] bytes = new byte[length];
+                fis.read(bytes);
+                return new String(bytes, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if(fis != null){
+                    try{
+                        fis.close();
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static boolean fileExist(String filePath) {
+        return new File(filePath).exists();
+    }
+
+    public static void fileDelete(String filePath){
+        new File(filePath).delete();
+    }
 
 }
