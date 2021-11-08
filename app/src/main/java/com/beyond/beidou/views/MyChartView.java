@@ -31,9 +31,9 @@ public class MyChartView extends LineChartView {
             case MotionEvent.ACTION_MOVE:
                 mEndTime = System.currentTimeMillis();
                 mSpeed = Math.abs(event.getY() - mLastY) / (mEndTime - mStartTime);
-                LogUtil.e("ChartFragment 滑动冲突，speed: ",mSpeed+"");
+//                LogUtil.e("ChartFragment 滑动冲突，speed: ",mSpeed+"");
                 if (mSpeed < 1.5f) {
-                    LogUtil.e("ChartFragment 滑动冲突 ChartView处理","***");
+//                    LogUtil.e("ChartFragment 滑动冲突 ChartView处理","***");
                     getParent().requestDisallowInterceptTouchEvent(true);
                 }else {
                     getParent().requestDisallowInterceptTouchEvent(false);

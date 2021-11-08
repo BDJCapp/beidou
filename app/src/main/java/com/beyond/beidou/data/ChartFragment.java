@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -45,7 +44,6 @@ import com.google.gson.Gson;
 import com.zyao89.view.zloading.ZLoadingDialog;
 import com.zyao89.view.zloading.Z_TYPE;
 
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -101,6 +99,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private int mLastSelectedTimePosition;
     private static final int LOADING = 1;
     private static final int GET_DATA_SUCCESS = 200;
+    private static final int DELTAD_CHART = 10;
+    private static final int DELTAH_CHART = 11;
     private ZLoadingDialog mLoadingDlg;
     public Handler pHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -388,12 +388,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mDeltaHChartTimeTv.setText(time);
         mDeltaHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
-        List<AxisValue> yLabel = setDeltaDAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaD")).toString(), mDeltaDConvertData);
+        List<AxisValue> yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaD")).toString(), mDeltaDConvertData,DELTAD_CHART);
         convertLines(mDeltaDConvertData);
         setChart(mDeltaDChart, xAxisValues, yLabel, mDeltaDConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaH")).toString(), mDeltaHConvertData);
+//        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaH")).toString(), mDeltaHConvertData);
+        yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaH")).toString(), mDeltaHConvertData,DELTAH_CHART);
         convertLines(mDeltaHConvertData);
         setChart(mDeltaHChart, xAxisValues, yLabel, mDeltaHConvertAvg);
     }
@@ -558,7 +559,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     }
 
     //防止DeltaD数据异常导致卡死
-    public List<AxisValue> setDeltaDAxisYLabel(String yMin, List<PointValue> values) {
+    public List<AxisValue> setDeltaAxisYLabel(String yMin, List<PointValue> values, int chartType) {
         float chartValue;
         String tempString;
         String minSubNum;     //最小值的减数
@@ -580,10 +581,14 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             valueYMin = 0;
         }
 
-        if (valueYMax - valueYMin > 1000){
+        if (valueYMax - valueYMin > 100){
             mConvertYMax = valueYMin + 0.2f;
             mConvertYMin = valueYMin - 0.01f;
-            mDeltaDConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            if (chartType == DELTAD_CHART){
+                mDeltaDConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            }else {
+                mDeltaHConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            }
             minSubNum = "0.01";
         }else {
             mConvertYMax = valueYMax + 0.1f;

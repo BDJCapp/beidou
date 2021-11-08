@@ -95,7 +95,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                 final EditText mEtFileName = dialogView.findViewById(R.id.et_fileName);
                 String oldName = mFiles.get(position).getFileName();
                 mEtFileName.setText(oldName.substring(0, oldName.length() - 4));
-                final AlertDialog dialog = new AlertDialog.Builder(mMainActivity).setTitle("提示")
+                final AlertDialog dialog = new AlertDialog.Builder(mMainActivity).setTitle("重命名")
                         .setView(dialogView)
                         .setMessage("请输入新名字：").setPositiveButton("确定", null).setNegativeButton("取消", new DialogInterface.OnClickListener() {
                             @Override
@@ -123,6 +123,8 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                         EditText mEtFileName = dialogView.findViewById(R.id.et_fileName);
                         String oldName = mFiles.get(position).getFileName();
                         String newName = mEtFileName.getText().toString();
+                        String oldFilePath = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + oldName;
+                        String newFilePath = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + newName + ".xls";
                         if (TextUtils.isEmpty(newName)) {
                             showToast("名字不能为空");
                             return;
@@ -131,7 +133,13 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                             showToast("文件名过长");
                             return;
                         }
-                        fileRename(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + oldName, mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + newName + ".xls");
+                        if(new File(newFilePath).exists()){
+                            TextView mTvMsg = dialogView.findViewById(R.id.tv_msg);
+                            mEtFileName.setBackgroundResource(R.drawable.bg_edit_alert_file);
+                            mTvMsg.setText("已存在同名文件");
+                            return;
+                        }
+                        fileRename(oldFilePath, newFilePath);
                         dialog.dismiss();
                         onHiddenChanged(false);
                     }
