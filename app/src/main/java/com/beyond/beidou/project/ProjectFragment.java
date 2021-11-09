@@ -120,12 +120,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
 
     private void doLoadingDialog() {
         mHandler.sendEmptyMessageDelayed(LOADING, 50);
-        mDialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
-                .setLoadingColor(Color.BLACK)//颜色
-                .setHintText("加载中")
-                .setCancelable(false)
-                .setCanceledOnTouchOutside(false)
-                .show();
     }
 
     @Nullable
@@ -155,17 +149,20 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         //显示才刷新
-        if (!hidden) {
-            if (!mPresentProject.equals(mMainActivity.getPresentProject())) {
-                doLoadingDialog();
-            }
+        if (!hidden && (mMainActivity.isCacheUpdated || !mPresentProject.equals(mMainActivity.getPresentProject()))) {
+//            if (!mPresentProject.equals(mMainActivity.getPresentProject())) {
+//            doLoadingDialog();
+//            }
+            mHandler.sendEmptyMessageDelayed(LOADING, 50);
+            mMainActivity.isCacheUpdated = false;
         }
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        doLoadingDialog();
+//        doLoadingDialog();
+        mHandler.sendEmptyMessageDelayed(LOADING, 50);
     }
 
     public int initLayout() {
@@ -237,7 +234,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     sIsFirstBindListener = false;
                     return;
                 }
-                doLoadingDialog();
+//                doLoadingDialog();
+                mHandler.sendEmptyMessageDelayed(LOADING, 50);
             }
 
             @Override
@@ -290,37 +288,21 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void getData() {
-        if (FileUtil.fileExist(mMainActivity.getCacheDir() + "/" + "projectCache-" + getStringFromSP("presentPlatform"))) {
+        if (!sIsFirstLogin  && FileUtil.fileExist(mMainActivity.getCacheDir() + "/" + "projectCache-" + getStringFromSP("presentPlatform"))) {
             Gson gson = new Gson();
             projectResponse = gson.fromJson(FileUtil.getProjectCache(mMainActivity), ProjectResponse.class);
             extractData();
-            //run a thread
-            LogUtil.e("projectFragment", "get data...");
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mParams.put("AccessToken", ApiConfig.getAccessToken());
-                    mParams.put("SessionUUID", ApiConfig.getSessionUUID());
-                    Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(mMainActivity, new ApiCallback() {
-                        @Override
-                        public void onSuccess(final String res) {
-                            FileUtil.saveProjectCache(mMainActivity, res);
-                            Gson gson = new Gson();
-                            projectResponse = gson.fromJson(res, ProjectResponse.class);
-
-                            extractData();
-                            LogUtil.e("projectFragment", "extract complete");
-                        }
-                        @Override
-                        public void onFailure(Exception e) {
-                            mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
-                        }
-                    });
-                }
-            }).start();
+            mTvTime.setText(getStringFromSP("latestTime"));
         } else {
+            mDialog.setLoadingBuilder(Z_TYPE.ROTATE_CIRCLE)//设置类型
+                    .setLoadingColor(Color.BLACK)//颜色
+                    .setHintText("加载中")
+                    .setCancelable(false)
+                    .setCanceledOnTouchOutside(false)
+                    .show();
             mParams.put("AccessToken", ApiConfig.getAccessToken());
             mParams.put("SessionUUID", ApiConfig.getSessionUUID());
+
             Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(mMainActivity, new ApiCallback() {
                 @Override
                 public void onSuccess(final String res) {
@@ -328,6 +310,16 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     Gson gson = new Gson();
                     projectResponse = gson.fromJson(res, ProjectResponse.class);
                     extractData();
+                    mMainActivity.isCacheUpdated = true;
+                    mMainActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());
+                            Date date = new Date(System.currentTimeMillis());
+                            mTvTime.setText(simpleDateFormat.format(date));
+                            saveStringToSP("latestTime", simpleDateFormat.format(date));
+                        }
+                    });
                 }
                 @Override
                 public void onFailure(Exception e) {
@@ -337,7 +329,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         }
     }
 
-    private void extractData(){
+    private void extractData() {
         mProjectNameList.clear();
         mStationNameList.clear();
         mStationUUIDList.clear();
@@ -424,15 +416,28 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     if (mProjectStationStatus == null) {
                         back2Login();
                         return;
-                    } else {
-//                                Log.e("mProjectStationStatus", mProjectStationStatus.toString());
-                        mTvAmount.setText(String.valueOf(mProjectStationStatus.getTotal()));
-                        mBtnAmount.setText("总数\n" + mProjectStationStatus.getTotal());
-                        mBtnOnline.setText("在线\n" + mProjectStationStatus.getOnline());
-                        mBtnWarning.setText("警告\n" + mProjectStationStatus.getWarning());
-                        mBtnError.setText("故障\n" + mProjectStationStatus.getError());
-                        mBtnOffline.setText("离线\n" + mProjectStationStatus.getOffline());
                     }
+                    int total, online = 0, warning = 0, error = 0, offline = 0;
+                    for (ProjectResponse.ProjectListBean.StationListBean station : mProjectStationList) {
+                        int statusCode = Integer.parseInt(station.getStationStatus());
+                        if (statusCode >= 10 && statusCode <= 19) {
+                            online++;
+                        } else if (statusCode >= 20 && statusCode <= 29) {
+                            offline++;
+                        } else if (statusCode >= 30 && statusCode <= 39) {
+                            warning++;
+                        } else if (statusCode >= 40 && statusCode <= 49) {
+                            error++;
+                        }
+                    }
+                    total = online + warning + error + offline;
+                    mTvAmount.setText(String.valueOf(total));
+                    mBtnAmount.setText("总数\n" + total);
+                    mBtnOnline.setText("在线\n" + online);
+                    mBtnWarning.setText("警告\n" + warning);
+                    mBtnError.setText("故障\n" + error);
+                    mBtnOffline.setText("离线\n" + offline);
+
                     //初始化监测点数据
                     initStationList();
 //                            mPointsAdapter = new MonitoringPointsAdapter(mPointList);
@@ -486,9 +491,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                         }
                     });
 
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());
-                    Date date = new Date(System.currentTimeMillis());
-                    mTvTime.setText(simpleDateFormat.format(date));
                     //设置地图marker覆盖物
                     mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
                         @Override
@@ -745,7 +747,8 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 break;
             case R.id.iv_refresh:
                 FileUtil.fileDelete(mMainActivity.getCacheDir() + "/projectCache-" + getStringFromSP("presentPlatform"));
-                doLoadingDialog();
+//                doLoadingDialog();
+                mHandler.sendEmptyMessageDelayed(LOADING, 50);
                 break;
         }
         ListUtil.sort(mPointList, true, "name", "uuid");

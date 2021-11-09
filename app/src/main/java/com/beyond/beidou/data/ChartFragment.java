@@ -792,8 +792,26 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 LogUtil.e("请求点数据结束时间", sdfTwo.format(System.currentTimeMillis()));
                 LogUtil.e("请求数据的返回值",res);
                 Gson gson = new Gson();
-                GNSSFilterInfoResponse gnssFilterInfoResponse = gson.fromJson(res, GNSSFilterInfoResponse.class);
+                final GNSSFilterInfoResponse gnssFilterInfoResponse = gson.fromJson(res, GNSSFilterInfoResponse.class);
                 mContentResponse = gnssFilterInfoResponse.getContent();
+                //其他错误
+                if (!gnssFilterInfoResponse.getResponseCode().equals("200")){
+                    hasData = false;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mNChart.setVisibility(View.GONE);
+                            mEChart.setVisibility(View.GONE);
+                            mHChart.setVisibility(View.GONE);
+                            mDeltaDChart.setVisibility(View.GONE);
+                            mDeltaHChart.setVisibility(View.GONE);
+                            mHeartChart.setVisibility(View.GONE);
+                            showToast(gnssFilterInfoResponse.getResponseMsg());
+                        }
+                    });
+                    return;
+                }
+                //基准站没有数据
                 if (mContentResponse.size() == 0) {
                     hasData = false;
                     getActivity().runOnUiThread(new Runnable() {
@@ -805,7 +823,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             mDeltaDChart.setVisibility(View.GONE);
                             mDeltaHChart.setVisibility(View.GONE);
                             mHeartChart.setVisibility(View.GONE);
-                            showToast("监测点暂无数据");
+                            showToast("该监测点暂无数据");
                         }
                     });
                     return;

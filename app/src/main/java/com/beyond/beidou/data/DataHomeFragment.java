@@ -24,16 +24,18 @@ import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
 import com.beyond.beidou.adapter.DeviceListAdapter;
-import com.beyond.beidou.adapter.MonitoringPointsAdapter;
 import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.GetStationsResponse;
 import com.beyond.beidou.entites.ProjectResponse;
+import com.beyond.beidou.entites.StationBeanResponse;
+import com.beyond.beidou.util.FileUtil;
 import com.beyond.beidou.util.ListUtil;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.scwang.smart.refresh.header.ClassicsHeader;
 import com.scwang.smart.refresh.layout.SmartRefreshLayout;
 import com.scwang.smart.refresh.layout.api.RefreshLayout;
@@ -45,9 +47,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -60,7 +66,8 @@ public class DataHomeFragment extends BaseFragment {
     private ArrayList<String> mProjectNameList = new ArrayList<>();
     private Map<String,Object> mProjectName2UUID = new HashMap<>();
     private MainActivity mainActivity;
-    private static final int REQUEST_PROJECT = 1;
+    private Gson gson = new Gson();
+    private static final int REQUEST_INITDATA = 1;
     private static final int REQUEST_DEVICE = 2;
     private static final int LOADING_FINISH = 200;
     private static final int REQUEST_FAILED = 400;
@@ -68,8 +75,8 @@ public class DataHomeFragment extends BaseFragment {
         @Override
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
-                case REQUEST_PROJECT:
-                    getProjectsData();
+                case REQUEST_INITDATA:
+                    getInitData();
                     break;
                 case REQUEST_DEVICE:
                     getDevicesData(mProjectSp.getSelectedItem().toString());
@@ -87,8 +94,8 @@ public class DataHomeFragment extends BaseFragment {
     };
 
     private void doLoadingDialog(int type) {
-        if(type == REQUEST_PROJECT){
-            pHandler.sendEmptyMessageDelayed(REQUEST_PROJECT, 150);
+        if(type == REQUEST_INITDATA){
+            pHandler.sendEmptyMessageDelayed(REQUEST_INITDATA, 150);
         }else{
             pHandler.sendEmptyMessageDelayed(REQUEST_DEVICE, 150);
         }
@@ -120,18 +127,41 @@ public class DataHomeFragment extends BaseFragment {
         mDevicesRv = view.findViewById(R.id.rv_device);
         mPageRefreshLayout = view.findViewById(R.id.layout_refresh);
         mLoadingDlg = new ZLoadingDialog(getActivity());
-        doLoadingDialog(REQUEST_PROJECT);
+        doLoadingDialog(REQUEST_INITDATA);
         pageInit();
+        mProjectSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //切换工程从缓存拿数据
+                ((MainActivity)getActivity()).setPresentProject(mProjectSp.getSelectedItem().toString());
+                ProjectResponse projectResponse = gson.fromJson(FileUtil.getProjectCache(mainActivity), ProjectResponse.class);
+                for (ProjectResponse.ProjectListBean bean : projectResponse.getProjectList()) {
+                    if (bean.getProjectName().equals(mProjectSp.getSelectedItem().toString())){
+                        List<ProjectResponse.ProjectListBean.StationListBean> stations = bean.getStationList();
+                        setDeviceList(gson.toJson(stations));
+                        break;
+                    }
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
+        //缓存更新重新加载
+        if (!hidden && mainActivity.isCacheUpdated) {
+            setView(FileUtil.getProjectCache(mainActivity));
+            mainActivity.isCacheUpdated = false;
+        }
+        //工程首页改变选中工程，数据首页从缓存中拿数据统一选中工程
         if (mProjectSp.getSelectedItem() != null)
         {
             if (mainActivity.getNowFragment() == mainActivity.getDataFragment() && !mProjectSp.getSelectedItem().toString().equals(((MainActivity)getActivity()).getPresentProject())) {
+                //切换数据首页选中工程
                 mProjectSp.setSelection(mProjectNameList.indexOf(((MainActivity)getActivity()).getPresentProject()), true);
-                doLoadingDialog(REQUEST_DEVICE);
             }
         }
     }
@@ -145,49 +175,7 @@ public class DataHomeFragment extends BaseFragment {
         Api.config(ApiConfig.GET_PROJECTS, requestParams).postRequest(getActivity(), new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-                Gson gson = new Gson();
-                final ProjectResponse projectResponse = gson.fromJson(res, ProjectResponse.class);
-                for (int i = 0; i < projectResponse.getProjectList().size(); i++) {
-                    String projectName = projectResponse.getProjectList().get(i).getProjectName();
-                    mProjectNameList.add(projectName);
-                    mProjectName2UUID.put(projectName,projectResponse.getProjectList().get(i).getProjectUUID());
-
-                }
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        List<ProjectResponse.ProjectListBean.StationListBean> stationList = new ArrayList<>();
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.item_select, mProjectNameList);
-                        adapter.setDropDownViewResource(R.layout.item_drop);
-                        mProjectSp.setAdapter(adapter);
-
-                        //读取SP上次退出时选中的工程名，若没有。默认展示第一个工程
-                        final MainActivity activity = (MainActivity) getActivity();
-                        String presentProject = activity.getPresentProject();
-                        if (!TextUtils.isEmpty(presentProject)) {
-                            for (int i = 0; i < mProjectNameList.size(); i++) {
-                                if (presentProject.equals(mProjectNameList.get(i))) {
-                                    mProjectSp.setSelection(i, true);
-                                    stationList = projectResponse.getProjectList().get(i).getStationList();
-                                    setListByProjects(stationList);
-                                }
-                            }
-                        }
-
-                        mProjectSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                ((MainActivity)getActivity()).setPresentProject(mProjectSp.getSelectedItem().toString());
-                                doLoadingDialog(REQUEST_DEVICE);
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> parent) {
-                            }
-                        });
-                    }
-                });
+                setView(res);
             }
 
             @Override
@@ -196,6 +184,15 @@ public class DataHomeFragment extends BaseFragment {
                 pHandler.sendEmptyMessageDelayed(REQUEST_FAILED,0);
             }
         });
+    }
+
+    public void getInitData(){
+        String projectCache = FileUtil.getProjectCache(mainActivity);
+        if (projectCache == null){
+            getProjectsData();
+        }else {
+            setView(projectCache);
+        }
     }
 
     public void getDevicesData(String selectedProject) {
@@ -207,10 +204,9 @@ public class DataHomeFragment extends BaseFragment {
             jsonData.put("SessionUUID",ApiConfig.getSessionUUID());
             projectUUIDArray.put(0,mProjectName2UUID.get(selectedProject));
             jsonData.put("ProjectUUID",projectUUIDArray);
-
             jsonData.put("PageInfo",pageArray);
             JSONObject pageObject = new JSONObject();
-            //无法返回全部数据，先指定页面大小为100
+            //接口无法返回全部数据，当前先请求100个
             pageObject.put("PageSize", "100");
             pageArray.put(0,pageObject);
         } catch (JSONException e) {
@@ -219,10 +215,11 @@ public class DataHomeFragment extends BaseFragment {
         Api.config(ApiConfig.GET_STATIONS).postJsonString(getActivity(), jsonData.toString(), new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-                Gson gson = new Gson();
                 GetStationsResponse stationsResponse = gson.fromJson(res, GetStationsResponse.class);
                 List<GetStationsResponse.StationListBean> stationList = stationsResponse.getStationList();
-                setListByStations(stationList);
+                String stationListJson = gson.toJson(stationList);
+                setDeviceList(stationListJson);
+                updateCache(stationListJson);
             }
 
             @Override
@@ -232,8 +229,26 @@ public class DataHomeFragment extends BaseFragment {
         });
     }
 
-    //后续可以可与工程模块一起优化
-    public void setListByStations(final List<GetStationsResponse.StationListBean> stationList){
+    public void updateCache(String stationList){
+        ProjectResponse projectResponse = gson.fromJson(FileUtil.getProjectCache(mainActivity), ProjectResponse.class);
+        Type listType = new TypeToken<List<ProjectResponse.ProjectListBean.StationListBean>>() {}.getType();
+        List<ProjectResponse.ProjectListBean.StationListBean> stationListBean = gson.fromJson(stationList, listType);
+        for (ProjectResponse.ProjectListBean projectListBean : projectResponse.getProjectList()) {
+            if (projectListBean.getProjectName().equals(mProjectSp.getSelectedItem().toString())){
+                projectListBean.setStationList(stationListBean);
+                break;
+            }
+        }
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());
+        Date date = new Date(System.currentTimeMillis());
+        saveStringToSP("latestTime", simpleDateFormat.format(date));
+        FileUtil.saveProjectCache(mainActivity, gson.toJson(projectResponse));
+        mainActivity.isCacheUpdated = true;
+    }
+
+    public void setDeviceList(String stationListJson){
+        LogUtil.e("dataHome****","setDeviceList()");
+        List<StationBeanResponse> stationList = gson.fromJson(stationListJson, new TypeToken<List<StationBeanResponse>>() {}.getType());
         final ArrayList<String> deviceNames = new ArrayList<>();
         final List<String> deviceTypes = new ArrayList<>();
         final List<String> lastTimes = new ArrayList<>();
@@ -271,42 +286,38 @@ public class DataHomeFragment extends BaseFragment {
         pHandler.sendEmptyMessageDelayed(LOADING_FINISH,0);
     }
 
-    public void setListByProjects(List<ProjectResponse.ProjectListBean.StationListBean> stationList){
-        final ArrayList<String> deviceNames = new ArrayList<>();
-        final List<String> deviceTypes = new ArrayList<>();
-        final List<String> lastTimes = new ArrayList<>();
-        final List<String> deviceStatus = new ArrayList<>();
-        final ArrayList<String> stationUUIDList = new ArrayList<>();
-        //对返回数据按照StationName,StationUUID顺序进行升序排序
-        ListUtil.sort(stationList,true,"StationName","StationUUID");
-        for (int i = 0; i < stationList.size(); i++) {
-            deviceNames.add(stationList.get(i).getStationName());
-            deviceTypes.add(getStationType(stationList.get(i).getStationType()));
-            lastTimes.add(stationList.get(i).getStationLastTime());
-            deviceStatus.add(stationList.get(i).getStationStatus());
-            stationUUIDList.add(stationList.get(i).getStationUUID());
+    public void setView(String projectsResponse){
+        mProjectNameList.clear();
+        mProjectName2UUID.clear();
+        final ProjectResponse projectResponse = gson.fromJson(projectsResponse, ProjectResponse.class);
+        for (int i = 0; i < projectResponse.getProjectList().size(); i++) {
+            String projectName = projectResponse.getProjectList().get(i).getProjectName();
+            mProjectNameList.add(projectName);
+            mProjectName2UUID.put(projectName,projectResponse.getProjectList().get(i).getProjectUUID());
         }
+
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                DeviceListAdapter adapter = new DeviceListAdapter(deviceNames, deviceTypes, lastTimes, deviceStatus);
-                adapter.setLookDataListener(new DeviceListAdapter.onItemLookdataClockListener() {
-                    @Override
-                    public void onItemClick(View view, int position) {
-                        if (LoginUtil.isNetworkUsable(getActivity()))
-                        {
-                            switchFragment(mProjectSp.getSelectedItem().toString(), deviceNames, position, stationUUIDList);
+                List<ProjectResponse.ProjectListBean.StationListBean> stationList = new ArrayList<>();
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(mainActivity, R.layout.item_select, mProjectNameList);
+                adapter.setDropDownViewResource(R.layout.item_drop);
+                mProjectSp.setAdapter(adapter);
+                //读取SP上次退出时选中的工程名，若没有。默认展示第一个工程
+                final MainActivity activity = (MainActivity) getActivity();
+                String presentProject = activity.getPresentProject();
+                if (!TextUtils.isEmpty(presentProject)) {
+                    for (int i = 0; i < mProjectNameList.size(); i++) {
+                        if (presentProject.equals(mProjectNameList.get(i))) {
+                            mProjectSp.setSelection(i, true);
+                            stationList = projectResponse.getProjectList().get(i).getStationList();
+                            setDeviceList(gson.toJson(stationList));
+                            break;
                         }
                     }
-                });
-                mDevicesRv.setAdapter(adapter);
-                adapter.addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.item_footer_layout,null));
-                LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-                manager.setOrientation(RecyclerView.VERTICAL);
-                mDevicesRv.setLayoutManager(manager);
+                }
             }
         });
-        pHandler.sendEmptyMessageDelayed(LOADING_FINISH,0);
     }
 
     public String getStationType(String stationType) {

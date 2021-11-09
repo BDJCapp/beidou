@@ -56,6 +56,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private boolean isExit = false;
     private DownloadService.DownloadBinder downloadBinder;
     private Toast mToast;
+    public boolean isCacheUpdated = false;
 
     public void displayToast(String msg){
         mToast = Toast.makeText(this, msg, Toast.LENGTH_SHORT);
