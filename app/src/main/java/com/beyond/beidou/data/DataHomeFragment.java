@@ -212,6 +212,7 @@ public class DataHomeFragment extends BaseFragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
         Api.config(ApiConfig.GET_STATIONS).postJsonString(getActivity(), jsonData.toString(), new ApiCallback() {
             @Override
             public void onSuccess(String res) {
