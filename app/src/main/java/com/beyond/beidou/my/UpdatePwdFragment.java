@@ -113,6 +113,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                     dialog.show();
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
                 } else {
+
                     mParams.put("AccessToken", ApiConfig.getAccessToken());
                     mParams.put("SessionUUID", ApiConfig.getSessionUUID());
                     mParams.put("OldPassword", LoginUtil.DES3Encode(originalPwd, ApiConfig.getSessionUUID()));
