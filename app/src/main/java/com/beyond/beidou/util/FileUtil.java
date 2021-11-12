@@ -274,8 +274,8 @@ public class FileUtil {
         return new File(filePath).exists();
     }
 
-    public static void fileDelete(String filePath){
-        new File(filePath).delete();
+    public static boolean fileDelete(String filePath){
+        return new File(filePath).delete();
     }
 
 }

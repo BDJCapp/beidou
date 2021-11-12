@@ -1,17 +1,13 @@
 package com.beyond.beidou.project;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -44,15 +40,12 @@ import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.data.ChartFragment;
 import com.beyond.beidou.entites.MonitoringPoint;
 import com.beyond.beidou.entites.ProjectResponse;
-import com.beyond.beidou.login.LoginActivity;
 import com.google.gson.Gson;
 import com.yinglan.scrolllayout.ScrollLayout;
 import com.yinglan.scrolllayout.content.ContentScrollView;
 import com.zyao89.view.zloading.ZLoadingDialog;
 import com.zyao89.view.zloading.Z_TYPE;
 
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -288,7 +281,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void getData() {
-        if (!sIsFirstLogin  && FileUtil.fileExist(mMainActivity.getCacheDir() + "/" + "projectCache-" + getStringFromSP("presentPlatform"))) {
+        if (!sIsFirstLogin && FileUtil.fileExist(mMainActivity.getCacheDir() + "/" + "projectCache-" + getStringFromSP("presentPlatform"))) {
             Gson gson = new Gson();
             projectResponse = gson.fromJson(FileUtil.getProjectCache(mMainActivity), ProjectResponse.class);
             extractData();
@@ -306,9 +299,16 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
             Api.config(ApiConfig.GET_PROJECTS, mParams).postRequest(mMainActivity, new ApiCallback() {
                 @Override
                 public void onSuccess(final String res) {
+                    //测试请求失败的情况
+//                    onFailure(new Exception());
+//                    return;
                     FileUtil.saveProjectCache(mMainActivity, res);
                     Gson gson = new Gson();
                     projectResponse = gson.fromJson(res, ProjectResponse.class);
+                    if(projectResponse == null){
+                        onFailure(new Exception("response为空！"));
+                        return;
+                    }
                     extractData();
                     mMainActivity.isCacheUpdated = true;
                     mMainActivity.runOnUiThread(new Runnable() {
@@ -321,9 +321,14 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                         }
                     });
                 }
+
                 @Override
                 public void onFailure(Exception e) {
                     mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
+                    sIsFirstLogin = true;
+                    sIsFirstBindListener = true;
+                    sIsReLogin = true;
+                    showToastSync("请求数据失败，请重试！");
                 }
             });
         }
@@ -350,10 +355,11 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         if (mProjectList != null) {
             mProjectList.clear();
         }
-        if (Integer.parseInt(projectResponse.getResponseCode()) == 200) {
+//        projectResponse.setResponseCode("gg");
+        if (projectResponse.getResponseCode().equals("200")) {
             mProjectList = projectResponse.getProjectList();
             if (mProjectList == null) {
-                back2Login();
+                codeIncorrect();
             }
             for (ProjectResponse.ProjectListBean project : mProjectList) {
                 //项目名为空则直接跳过
@@ -414,7 +420,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                         }
                     }
                     if (mProjectStationStatus == null) {
-                        back2Login();
+                        codeIncorrect();
                         return;
                     }
                     int total, online = 0, warning = 0, error = 0, offline = 0;
@@ -518,17 +524,17 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                 }
             });
         } else {
-            back2Login();
+            codeIncorrect();
         }
         mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
     }
 
-    private void back2Login() {
+    private void codeIncorrect() {
         mHandler.sendEmptyMessageDelayed(LOADING_FINISH, 0);
         sIsFirstLogin = true;
         sIsFirstBindListener = true;
         sIsReLogin = true;
-        showToastSync("未请求到数据，请稍后再试！");
+        showToastSync(projectResponse.getResponseMsg());
     }
 
     private void initStationList() {

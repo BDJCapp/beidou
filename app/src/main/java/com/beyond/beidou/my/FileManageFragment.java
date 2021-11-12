@@ -5,9 +5,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
-import android.text.Selection;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
@@ -15,6 +13,7 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,6 +32,7 @@ import com.beyond.beidou.util.LogUtil;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FileManageFragment extends BaseFragment implements View.OnClickListener {
@@ -90,64 +90,28 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
         });
         mFileAdapter.setOnItemLongClickListener(new FileManagerAdapter.OnItemLongClickListener() {
             @Override
-            public void onItemLongClickListener(final View view, final int position) {
-                final View dialogView = LayoutInflater.from(mMainActivity).inflate(R.layout.dialog_file, (ViewGroup) view, false);
-                final EditText mEtFileName = dialogView.findViewById(R.id.et_fileName);
-                String oldName = mFiles.get(position).getFileName();
-                mEtFileName.setText(oldName.substring(0, oldName.length() - 4));
-                final AlertDialog dialog = new AlertDialog.Builder(mMainActivity).setTitle("重命名")
-                        .setView(dialogView)
-                        .setMessage("请输入新名字：").setPositiveButton("确定", null).setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        }).setCancelable(false).create();
-                dialog.show();
-
-                mEtFileName.postDelayed(new Runnable() {
+            public void onItemLongClickListener(final View view,final int position) {
+                PopupMenu popupMenu = new PopupMenu(mMainActivity, view);
+                popupMenu.getMenuInflater().inflate(R.menu.mu_item, popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
-                    public void run() {
-                        mEtFileName.requestFocus();
-                        mEtFileName.selectAll();
-                        InputMethodManager manager = ((InputMethodManager)mMainActivity.getSystemService(Context.INPUT_METHOD_SERVICE));
-                        if (manager != null) {
-                            manager.showSoftInput(mEtFileName, 0);
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.mu_share:
+                                FileUtil.shareFile(mMainActivity, mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + mFiles.get(position).getFileName());
+                                break;
+                            case R.id.mu_rename:
+                                renameDialog((ViewGroup) view, position);
+                                break;
+                            case R.id.mu_delete:
+                                delFileItem(position, mFiles.get(position).getFileName());
+                                break;
                         }
+                        return false;
                     }
-                }, 300);
-
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        EditText mEtFileName = dialogView.findViewById(R.id.et_fileName);
-                        String oldName = mFiles.get(position).getFileName();
-                        String newName = mEtFileName.getText().toString();
-                        String oldFilePath = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + oldName;
-                        String newFilePath = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + newName + ".xls";
-                        if (TextUtils.isEmpty(newName)) {
-                            showToast("名字不能为空");
-                            return;
-                        }
-                        if (newName.length() > 204) {
-                            showToast("文件名过长");
-                            return;
-                        }
-                        if(new File(newFilePath).exists()){
-                            TextView mTvMsg = dialogView.findViewById(R.id.tv_msg);
-                            mEtFileName.setBackgroundResource(R.drawable.bg_edit_alert_file);
-                            mTvMsg.setText("已存在同名文件");
-                            return;
-                        }
-                        fileRename(oldFilePath, newFilePath);
-                        dialog.dismiss();
-                        onHiddenChanged(false);
-                    }
-
                 });
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
-                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#0075E3"));
-
+                popupMenu.setGravity(Gravity.END);
+                popupMenu.show();
             }
         });
         mRecyclerView.setAdapter(mFileAdapter);
@@ -226,7 +190,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         this.mMenu = menu;
-        inflater.inflate(R.menu.mu_file, menu);
+        inflater.inflate(R.menu.mu_edit, menu);
     }
 
     @Override
@@ -264,7 +228,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
 
     private void showPopupWindow() {
         mMainActivity.getNavigationView().setVisibility(View.INVISIBLE);
-        View contentView = LayoutInflater.from(mMainActivity).inflate(R.layout.popupwindow_file, null);
+        View contentView = LayoutInflater.from(mMainActivity).inflate(R.layout.popupwindow_edit, null);
         mPopupWindow = new PopupWindow(contentView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, false);
         Button mDeleteButton = contentView.findViewById(R.id.pop_btn_delete);
         mDeleteButton.setOnClickListener(this);
@@ -301,7 +265,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                     showToast("未选中删除的文件");
                     break;
                 }
-                deleteFiles(deleteList);
+                delFiles(deleteList);
                 break;
             case R.id.pop_btn_share:
                 List<String> shareFilePaths = new ArrayList<>();
@@ -330,10 +294,12 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
         sIsSettingsSelected = false;
         mMainActivity.invalidateOptionsMenu();
         mRecyclerView.setAdapter(mFileAdapter);
-        mPopupWindow.dismiss();
+        if (mPopupWindow != null) {
+            mPopupWindow.dismiss();
+        }
     }
 
-    private void deleteFiles(final List<String> fileList) {
+    private void delFiles(final List<String> fileList) {
         if (fileList.isEmpty()) {
             return;
         }
@@ -341,13 +307,11 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                 .setMessage("确定要删除" + fileList.size() + "个文件吗？").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        popWindowDismiss();
-
                         String prefix = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/";
                         File file = null;
+                        boolean flag = true;
                         for (String fileName : fileList) {
-                            file = new File(prefix + fileName);
-                            file.delete();
+                            flag = FileUtil.fileDelete(prefix + fileName);
                         }
                         mFiles.clear();
                         for (int i = 0; i < mFilesSelect.size(); i++) {
@@ -357,8 +321,12 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                                 mFiles.add(new FileItem(mFilesSelect.get(i).getFileName()));
                             }
                         }
+                        if(flag){
+                            showToast("删除成功");
+                        }else{
+                            showToast("删除失败");
+                        }
                         popWindowDismiss();
-
                         dialog.dismiss();
                     }
                 }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -368,6 +336,91 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                     }
                 }).setCancelable(false).create();
         dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#0075E3"));
+    }
+
+    private void delFileItem(final int position, final String fileName) {
+        AlertDialog dialog = new AlertDialog.Builder(mMainActivity).setTitle("提示")
+                .setMessage("确定要删除该文件吗？").setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        boolean flag = FileUtil.fileDelete(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + fileName);
+                        mFiles.remove(position);
+                        if(flag){
+                            showToast("删除成功");
+                        }else{
+                            showToast("删除失败");
+                        }
+                        popWindowDismiss();
+                        dialog.dismiss();
+                    }
+                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).setCancelable(false).create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#0075E3"));
+    }
+
+    private void renameDialog(ViewGroup view, final int position){
+        final View dialogView = LayoutInflater.from(mMainActivity).inflate(R.layout.dialog_file, view, false);
+        final EditText mEtFileName = dialogView.findViewById(R.id.et_fileName);
+        String oldName = mFiles.get(position).getFileName();
+        mEtFileName.setText(oldName.substring(0, oldName.length() - 4));
+        final AlertDialog dialog = new AlertDialog.Builder(mMainActivity).setTitle("重命名")
+                .setView(dialogView)
+                .setMessage("请输入新名字：").setPositiveButton("确定", null).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).setCancelable(false).create();
+        dialog.show();
+
+        mEtFileName.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mEtFileName.requestFocus();
+                mEtFileName.selectAll();
+                InputMethodManager manager = ((InputMethodManager)mMainActivity.getSystemService(Context.INPUT_METHOD_SERVICE));
+                if (manager != null) {
+                    manager.showSoftInput(mEtFileName, 0);
+                }
+            }
+        }, 300);
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText mEtFileName = dialogView.findViewById(R.id.et_fileName);
+                String oldName = mFiles.get(position).getFileName();
+                String newName = mEtFileName.getText().toString();
+                String oldFilePath = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + oldName;
+                String newFilePath = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + newName + ".xls";
+                if (TextUtils.isEmpty(newName)) {
+                    showToast("名字不能为空");
+                    return;
+                }
+                if (newName.length() > 204) {
+                    showToast("文件名过长");
+                    return;
+                }
+                if(new File(newFilePath).exists()){
+                    TextView mTvMsg = dialogView.findViewById(R.id.tv_msg);
+                    mEtFileName.setBackgroundResource(R.drawable.bg_edit_alert_file);
+                    mTvMsg.setText("已存在同名文件");
+                    return;
+                }
+                fileRename(oldFilePath, newFilePath);
+                dialog.dismiss();
+                onHiddenChanged(false);
+            }
+
+        });
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#0075E3"));
     }

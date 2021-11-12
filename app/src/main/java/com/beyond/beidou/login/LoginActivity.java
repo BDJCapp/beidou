@@ -297,7 +297,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
 
             @Override
             public void onFailure(Exception e) {
-                Toast.makeText(LoginActivity.this, "网络请求失败，请检查网络连接，稍后再试", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "请求失败，请检查网络连接，稍后再试", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -335,7 +335,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                         }
                     }
                 } else {
-                    Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "需要获取所需权限!", Toast.LENGTH_SHORT).show();
                     finish();
                 }
         }

@@ -32,7 +32,6 @@ import com.beyond.beidou.entites.ProjectResponse;
 import com.beyond.beidou.entites.StationBeanResponse;
 import com.beyond.beidou.util.FileUtil;
 import com.beyond.beidou.util.ListUtil;
-import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -87,7 +86,7 @@ public class DataHomeFragment extends BaseFragment {
                     break;
                 case REQUEST_FAILED:
                     mLoadingDlg.dismiss();
-                    showToast("网络请求失败，请检查网络连接，稍后再试");
+                    showToast("请求失败，请检查网络连接，稍后再试");
                     break;
             }
         }
@@ -175,12 +174,16 @@ public class DataHomeFragment extends BaseFragment {
         Api.config(ApiConfig.GET_PROJECTS, requestParams).postRequest(getActivity(), new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-                setView(res);
+                ProjectResponse projectResponse = gson.fromJson(res, ProjectResponse.class);
+                if ("200".equals(projectResponse.getResponseCode())){
+                    setView(res);
+                }else {
+                    showToastSync(projectResponse.getResponseMsg());
+                }
             }
 
             @Override
             public void onFailure(Exception e) {
-                LogUtil.e("获取工程网络请求失败", e.getMessage());
                 pHandler.sendEmptyMessageDelayed(REQUEST_FAILED,0);
             }
         });
@@ -200,8 +203,8 @@ public class DataHomeFragment extends BaseFragment {
         JSONArray projectUUIDArray = new JSONArray();
         JSONArray pageArray = new JSONArray();
         try {
-            jsonData.put("AccessToken",ApiConfig.getAccessToken());
-            jsonData.put("SessionUUID",ApiConfig.getSessionUUID());
+            jsonData.put("AccessToken", ApiConfig.getAccessToken());
+            jsonData.put("SessionUUID", ApiConfig.getSessionUUID());
             projectUUIDArray.put(0,mProjectName2UUID.get(selectedProject));
             jsonData.put("ProjectUUID",projectUUIDArray);
             jsonData.put("PageInfo",pageArray);
@@ -212,15 +215,19 @@ public class DataHomeFragment extends BaseFragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         Api.config(ApiConfig.GET_STATIONS).postJsonString(getActivity(), jsonData.toString(), new ApiCallback() {
             @Override
             public void onSuccess(String res) {
                 GetStationsResponse stationsResponse = gson.fromJson(res, GetStationsResponse.class);
-                List<GetStationsResponse.StationListBean> stationList = stationsResponse.getStationList();
-                String stationListJson = gson.toJson(stationList);
-                setDeviceList(stationListJson);
-                updateCache(stationListJson);
+                if ("200".equals(stationsResponse.getResponseCode()))
+                {
+                    List<GetStationsResponse.StationListBean> stationList = stationsResponse.getStationList();
+                    String stationListJson = gson.toJson(stationList);
+                    setDeviceList(stationListJson);
+                    updateCache(stationListJson);
+                }else {
+                    showToastSync(stationsResponse.getResponseMsg());
+                }
             }
 
             @Override
@@ -248,7 +255,6 @@ public class DataHomeFragment extends BaseFragment {
     }
 
     public void setDeviceList(String stationListJson){
-        LogUtil.e("dataHome****","setDeviceList()");
         List<StationBeanResponse> stationList = gson.fromJson(stationListJson, new TypeToken<List<StationBeanResponse>>() {}.getType());
         final ArrayList<String> deviceNames = new ArrayList<>();
         final List<String> deviceTypes = new ArrayList<>();

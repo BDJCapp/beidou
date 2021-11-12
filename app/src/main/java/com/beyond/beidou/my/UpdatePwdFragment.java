@@ -26,6 +26,7 @@ import com.beyond.beidou.api.ApiConfig;
 import com.beyond.beidou.entites.LoginResponse;
 import com.beyond.beidou.login.LoginActivity;
 import com.beyond.beidou.project.ProjectFragment;
+import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 import com.google.gson.Gson;
 
@@ -45,11 +46,6 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
     private Activity mMainActivity = null;
 
     public UpdatePwdFragment() {
-    }
-
-    public static UpdatePwdFragment newInstance() {
-        UpdatePwdFragment fragment = new UpdatePwdFragment();
-        return fragment;
     }
 
     @Override
@@ -126,11 +122,15 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                         public void onSuccess(String res) {
                             Gson gson = new Gson();
                             final LoginResponse response = gson.fromJson(res, LoginResponse.class);
-                            if (Integer.parseInt(response.getResponseCode()) == 400412) {
+                            if (response == null) {
+                                onFailure(new Exception("response为空！"));
+                                return;
+                            }
+                            if (response.getResponseCode().equals("400412")) {
                                 mMainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        AlertDialog dialog1= new AlertDialog.Builder(getContext()).setTitle("提示")
+                                        AlertDialog dialog1 = new AlertDialog.Builder(mMainActivity).setTitle("提示")
                                                 .setMessage("原密码错误！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                                     @Override
                                                     public void onClick(DialogInterface dialog, int which) {
@@ -141,11 +141,11 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                         dialog1.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
                                     }
                                 });
-                            }else if (Integer.parseInt(response.getResponseCode()) == 200) {
+                            } else if (response.getResponseCode().equals("200")) {
                                 mMainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        AlertDialog dialog2 = new AlertDialog.Builder(getContext()).setTitle("提示").setCancelable(false)
+                                        AlertDialog dialog2 = new AlertDialog.Builder(mMainActivity).setTitle("提示").setCancelable(false)
                                                 .setMessage("修改成功，请重新登录！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                                     @Override
                                                     public void onClick(DialogInterface dialog, int which) {
@@ -154,18 +154,18 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                                         saveStringToSP("lastProjectName", activity.getPresentProject());
                                                         ProjectFragment.sIsReLogin = true;
                                                         logOut(getStringFromSP("userName"), ApiConfig.getAccessToken(), ApiConfig.getSessionUUID());
+                                                        LogUtil.e("position", "logout complete");
                                                     }
                                                 }).create();
                                         dialog2.show();
                                         dialog2.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
                                     }
                                 });
-                            }
-                            else if (Integer.parseInt(response.getResponseCode()) == 400) {
+                            } else if (response.getResponseCode().equals("400")) {
                                 mMainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        AlertDialog dialog = new AlertDialog.Builder(getContext()).setTitle("提示")
+                                        AlertDialog dialog = new AlertDialog.Builder(mMainActivity).setTitle("提示")
                                                 .setMessage("密码太简单，请重新修改！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                                     @Override
                                                     public void onClick(DialogInterface dialog, int which) {
@@ -176,28 +176,14 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
                                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
                                     }
                                 });
-                            }
-                            else{
-                                mMainActivity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        AlertDialog dialog = new AlertDialog.Builder(mMainActivity).setTitle("提示")
-                                                .setMessage(response.getResponseMsg()).setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        dialog.dismiss();
-                                                    }
-                                                }).create();
-                                        dialog.show();
-                                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#0075E3"));
-                                    }
-                                });
+                            } else {
+                                showToastSync(response.getResponseMsg());
                             }
                         }
 
                         @Override
                         public void onFailure(Exception e) {
-
+                            showToastSync("请求数据失败，请重试！");
                         }
                     });
                 }
@@ -206,23 +192,27 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
     }
 
     private void logOut(String userName, String AccessToken, String SessionUUID) {
-        Log.e("logout  ", "position 2");
         LoginUtil.logout(mMainActivity, userName, SessionUUID, AccessToken, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
                 try {
-
                     JSONObject object = new JSONObject(res);
-                    String responseCode = object.getString("ResponseCode");
-                    Log.e("log out response ", responseCode);
-                    ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
-                    while (!LoginUtil.getAccessToken(mMainActivity)) {
+                    if (object == null) {
+                        onFailure(new Exception("response为空"));
+                        return;
                     }
-                    while (!LoginUtil.getSessionId(mMainActivity)) {
+                    if (object.getString("ResponseCode").equals("205")) {
+                        ApiConfig.setSessionUUID("00000000-0000-0000-0000-000000000000");
+                        while (!LoginUtil.getAccessToken(mMainActivity)) {
+                        }
+                        while (!LoginUtil.getSessionId(mMainActivity)) {
+                        }
+                        Intent intent = new Intent(mMainActivity, LoginActivity.class);
+                        startActivity(intent);
+                        mMainActivity.finish();
+                    }else{
+                        showToastSync(object.getString("ResponseMsg"));
                     }
-                    Intent intent = new Intent(mMainActivity, LoginActivity.class);
-                    startActivity(intent);
-                    mMainActivity.finish();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -230,7 +220,7 @@ public class UpdatePwdFragment extends BaseFragment implements View.OnClickListe
 
             @Override
             public void onFailure(Exception e) {
-
+                showToastSync("请求数据失败，请重试！");
             }
 
         });

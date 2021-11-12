@@ -89,7 +89,11 @@ public class UserInfoFragment extends BaseFragment {
             public void onSuccess(String res) {
                 Gson gson = new Gson();
                 GetUserInfoResponse response = gson.fromJson(res, GetUserInfoResponse.class);
-                if (Integer.parseInt(response.getResponseCode()) == 200) {
+                if(response == null) {
+                    onFailure(new Exception("response为空"));
+                    return;
+                }
+                if (response.getResponseCode().equals("200")) {
                     for(final GetUserInfoResponse.UserListBean user : response.getUserList()){
                         if(userName.equals(user.getUserName())){
                             mMainActivity.runOnUiThread(new Runnable() {
@@ -106,19 +110,13 @@ public class UserInfoFragment extends BaseFragment {
                         }
                     }
                 }else{
-                    mMainActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showToast("未获取到用户信息，请重新操作");
-                            mIvBack.callOnClick();
-                        }
-                    });
+                    showToastSync(response.getResponseMsg());
                 }
             }
 
             @Override
             public void onFailure(Exception e) {
-
+                showToastSync("请求数据失败，请重试！");
             }
         });
 

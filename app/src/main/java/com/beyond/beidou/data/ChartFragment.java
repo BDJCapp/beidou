@@ -1065,23 +1065,24 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         api.postRequestFormBody(getActivity(), body, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-                LogUtil.e("导出报表返回值",res);
-                String url = api.parseJSONObject(res, "ReportFilePath");
                 String responseCode = api.parseJSONObject(res,"ResponseCode");
-
-                MainActivity mainActivity = (MainActivity) getActivity();
-                if (mainActivity != null && "200".equals(responseCode)) {
-                    mainActivity.getDownloadBinder().startDownload(url);
-                } else {
-                    String responseMsg = api.parseJSONObject(res,"ResponseMsg");
-                    showToastSync("导出失败," + responseMsg);
+                String responseMsg = api.parseJSONObject(res,"ResponseMsg");
+                if ("200".equals(responseCode)){
+                    String url = api.parseJSONObject(res, "ReportFilePath");
+                    MainActivity mainActivity = (MainActivity) getActivity();
+                    if (mainActivity != null) {
+                        mainActivity.getDownloadBinder().startDownload(url);
+                    } else {
+                        showToastSync("导出失败," + responseMsg);
+                    }
+                }else {
+                    showToastSync(responseMsg);
                 }
             }
 
             @Override
             public void onFailure(Exception e) {
-                LogUtil.e("downloadReport network failure", e.toString());
-                showToastSync("服务器连接超时，请稍后再试");
+                showToastSync("请求失败，请检查网络连接，稍后再试");
             }
         });
     }
