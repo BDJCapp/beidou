@@ -501,7 +501,9 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
                     mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
                         @Override
                         public boolean onMarkerClick(Marker marker) {
-                            View window = LayoutInflater.from(mMainActivity).inflate(R.layout.popupwindow_showinfo, null, false);
+                            View window = LayoutInflater.from(mMainActivity).inflate(R.layout.popupwindow_showinfo,
+                                    null,
+                                    false);
                             TextView tv_name, tv_type;
                             LinearLayout window_layout;
                             window_layout = window.findViewById(R.id.window_layout);

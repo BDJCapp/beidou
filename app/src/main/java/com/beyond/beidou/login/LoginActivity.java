@@ -307,14 +307,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
         }
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.READ_PHONE_STATE);
-        }
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
             permissionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         }
         if(!permissionList.isEmpty()){
             String [] permissions = permissionList.toArray(new String[permissionList.size()]);
@@ -370,34 +364,35 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
         if ("".equals(account))
         {
             Toast.makeText(getApplicationContext(),"请输入账号",Toast.LENGTH_SHORT).show();
-        }else if (Character.isLetter(account.charAt(0)))
-        {
-            //用户名
-            if (!LoginUtil.checkAccount(account,LoginUtil.LOGINBYPWD))
-            {
-                isCorrect = false;
-                LogUtil.e("LoginActivity Account","用户名格式错误");
-            }
-        }else if (account.contains("@"))
-        {
-            //邮箱
-            if (!LoginUtil.checkAccount(account,LoginUtil.LOGINBYEMAIL))
-            {
-                isCorrect = false;
-                LogUtil.e("LoginActivity Account","邮箱格式错误");
-            }
-        }else {
-            //手机号
-            if (!LoginUtil.checkAccount(account,LoginUtil.LOGINBYPHONE))
-            {
-                isCorrect = false;
-                LogUtil.e("LoginActivity Account","手机号格式错误");
-            }
         }
-        if (!isCorrect)
-        {
-            Toast.makeText(getApplicationContext(),"请输入正确的用户名密码",Toast.LENGTH_SHORT).show();
-        }
+//        else if (Character.isLetter(account.charAt(0)))
+//        {
+//            //用户名
+//            if (!LoginUtil.checkAccount(account,LoginUtil.LOGINBYPWD))
+//            {
+//                isCorrect = false;
+//                LogUtil.e("LoginActivity Account","用户名格式错误");
+//            }
+//        }else if (account.contains("@"))
+//        {
+//            //邮箱
+//            if (!LoginUtil.checkAccount(account,LoginUtil.LOGINBYEMAIL))
+//            {
+//                isCorrect = false;
+//                LogUtil.e("LoginActivity Account","邮箱格式错误");
+//            }
+//        }else {
+//            //手机号
+//            if (!LoginUtil.checkAccount(account,LoginUtil.LOGINBYPHONE))
+//            {
+//                isCorrect = false;
+//                LogUtil.e("LoginActivity Account","手机号格式错误");
+//            }
+//        }
+//        if (!isCorrect)
+//        {
+//            Toast.makeText(getApplicationContext(),"请输入正确的用户名密码",Toast.LENGTH_SHORT).show();
+//        }
         return isCorrect;
     }
 

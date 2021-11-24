@@ -22,7 +22,7 @@
     <item
         android:id="@+id/mu_setting"
         android:orderInCategory="100"
-        android:title="编辑"
+        android:title="管理"
         app:showAsAction="ifRoom" />
 
     <item
