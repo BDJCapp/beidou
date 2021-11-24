@@ -75,7 +75,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             downloadBinder = (DownloadService.DownloadBinder) iBinder;
-
             final DownloadService service = downloadBinder.getService();
             service.setDownLoadExcelSuccess(new DownloadService.DownLoadExcelSuccess() {
                 @Override
@@ -88,7 +87,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                                 public void onClick(View v) {
                                     LogUtil.e("获取的FilePath", service.getFilePath());
                                     FileUtil.openExcelFile(getApplicationContext(), service.getFilePath());
-//                                    FileUtil.openDownload(getApplicationContext(),service.getFilePath());
                                 }
                             })
                             .setActionTextColor(getResources().getColor(R.color.main_blue));
@@ -99,6 +97,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                     TextView messageView = snackBarView.findViewById(com.google.android.material.R.id.snackbar_text);
                     messageView.setMaxLines(4);
                     snackbar.show();
+                    //如果FileManageFragment不为空，刷新文件列表
+                    if (getFileManageFragment() != null){
+                        getFileManageFragment().onHiddenChanged(false);
+                    }
                 }
             });
         }
