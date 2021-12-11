@@ -530,6 +530,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         bResponseEmin = bResponseEmin.subtract(new BigDecimal("0.02"));
         bResponseEMax = bResponseEMax.add(new BigDecimal("0.02"));
 
+
         convertEMin = Double.parseDouble(String.valueOf(bResponseEmin));
         convertEMax = Double.parseDouble(String.valueOf(bResponseEMax));
         double tempDouble = Double.parseDouble(String.valueOf(bResponseEmin));
