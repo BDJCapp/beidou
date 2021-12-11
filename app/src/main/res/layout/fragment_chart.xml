@@ -296,6 +296,185 @@
             />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        android:padding="5dp"
+        android:orientation="vertical"
+        android:id="@+id/layout_chartDN"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_svg_linechart"
+                android:id="@+id/img_icChartDN"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_chartNameDN"
+                android:text="DN"
+                android:textSize="18dp"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/img_icChartDN"
+                android:layout_marginLeft="10dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_coordinateSystemDN"
+                android:text="暂无"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_chartNameDN"
+                android:layout_toLeftOf="@+id/tv_chartTimeDN"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_chartTimeDN"
+                android:text="数据"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_chartNameDN"
+                android:layout_alignParentRight="true"
+                />
+        </RelativeLayout>
+
+        <com.beyond.beidou.views.MyChartView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/chart_DN"
+            android:layout_marginTop="20dp"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        android:padding="5dp"
+        android:orientation="vertical"
+        android:id="@+id/layout_chartDE"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_svg_linechart"
+                android:id="@+id/img_icChartDE"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_chartNameDE"
+                android:text="DE"
+                android:textSize="18dp"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/img_icChartDE"
+                android:layout_marginLeft="10dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_coordinateSystemDE"
+                android:text="暂无"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_chartNameDE"
+                android:layout_toLeftOf="@+id/tv_chartTimeDE"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_chartTimeDE"
+                android:text="数据"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_chartNameDE"
+                android:layout_alignParentRight="true"
+                />
+        </RelativeLayout>
+
+        <com.beyond.beidou.views.MyChartView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/chart_DE"
+            android:layout_marginTop="20dp"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        android:padding="5dp"
+        android:orientation="vertical"
+        android:id="@+id/layout_chartDH"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_svg_linechart"
+                android:id="@+id/img_icChartDH"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_chartNameDH"
+                android:text="DH"
+                android:textSize="18dp"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/img_icChartDH"
+                android:layout_marginLeft="10dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_coordinateSystemDH"
+                android:text="暂无"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_chartNameDH"
+                android:layout_toLeftOf="@+id/tv_chartTimeDH"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_chartTimeDH"
+                android:text="数据"
+                android:textSize="10sp"
+                android:textColor="@color/text_gray"
+                android:layout_below="@+id/tv_chartNameDH"
+                android:layout_alignParentRight="true"
+                />
+        </RelativeLayout>
+
+        <com.beyond.beidou.views.MyChartView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/chart_DH"
+            android:layout_marginTop="20dp"
+            />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

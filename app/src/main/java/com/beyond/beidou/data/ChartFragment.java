@@ -25,6 +25,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.beyond.beidou.BaseFragment;
+import com.beyond.beidou.entites.GetGraphicDataResponse;
 import com.beyond.beidou.my.FileManageFragment;
 import com.beyond.beidou.views.MyDialog;
 import com.beyond.beidou.MainActivity;
@@ -33,7 +34,6 @@ import com.beyond.beidou.R;
 import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
-import com.beyond.beidou.entites.GNSSFilterInfoResponse;
 import com.beyond.beidou.util.DateUtil;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
@@ -66,27 +66,41 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private Toolbar toolbar;
     private Spinner mDeviceSp;
     private MySpinner mTimeSp;
-    private LineChartView mNChart, mEChart, mHChart, mDeltaDChart, mDeltaHChart, mHeartChart;
-    private TextView mNChartNameTv, mEChartNameTv, mHChartNameTv, mDeltaDChartNameTv, mDeltaHChartNameTv, mHeartChartNameTv;
-    private TextView mNChartCooTv, mEChartCooTv, mHChartCooTv, mDeltaDChartCooTv, mDeltaHChartCooTv, mHeartChartCooTv;
-    private TextView mNChartTimeTv, mEChartTimeTv, mHChartTimeTv, mDeltaDChartTimeTv, mDeltaHChartTimeTv, mHeartChartTimeTv;
+    private LineChartView mNChart, mEChart, mHChart, mDNChart,mDEChart,mDHChart,mDeltaDChart, mDeltaHChart, mHeartChart;
+    private TextView mNChartNameTv, mEChartNameTv, mHChartNameTv, mDNChartNameTv,mDEChartNameTv,mDHChartNameTv,mDeltaDChartNameTv, mDeltaHChartNameTv, mHeartChartNameTv;
+    private TextView mNChartCooTv, mEChartCooTv, mHChartCooTv, mDNChartCooTv,mDEChartCooTv,mDHChartCooTv,mDeltaDChartCooTv, mDeltaHChartCooTv, mHeartChartCooTv;
+    private TextView mNChartTimeTv, mEChartTimeTv, mHChartTimeTv, mDNChartTimeTv,mDEChartTimeTv,mDHChartTimeTv,mDeltaDChartTimeTv, mDeltaHChartTimeTv, mHeartChartTimeTv;
     private TextView mTitleTv;
     private TextView mDownLoadExcelTv;
     private float mConvertYMax;
     private float mConvertYMin;
-    private float mNConvertAvg, mEConvertAvg, mHConvertAvg, mDeltaDConvertAvg, mDeltaHConvertAvg;
+    private float mFILNConvertAvg, mFILEConvertAvg, mFILHConvertAvg, mFILDNConvertAvg,mFILDEConvertAvg,mFILDHConvertAvg,mFILDeltaDConvertAvg, mFILDeltaHConvertAvg;
     private List<Object> mMaxResponse = new ArrayList<>();
     private List<Object> mMinResponse = new ArrayList<>();
     private List<Object> mAvgResponse = new ArrayList<>();
     private ScrollView mChartsSv;
     private ImageView mBackIv;
-    private List<PointValue> mNConvertData = new ArrayList<>();
-    private List<PointValue> mEConvertData = new ArrayList<>();
-    private List<PointValue> mHConvertData = new ArrayList<>();
-    private List<PointValue> mDeltaDConvertData = new ArrayList<>();
-    private List<PointValue> mDeltaHConvertData = new ArrayList<>();
+    private List<PointValue> mFILNConvertData = new ArrayList<>();
+    private List<PointValue> mFILEConvertData = new ArrayList<>();
+    private List<PointValue> mFILHConvertData = new ArrayList<>();
+    private List<PointValue> mFILDNConvertData = new ArrayList<>();
+    private List<PointValue> mFILDEConvertData = new ArrayList<>();
+    private List<PointValue> mFILDHConvertData = new ArrayList<>();
+    private List<PointValue> mFILDeltaDConvertData = new ArrayList<>();
+    private List<PointValue> mFILDeltaHConvertData = new ArrayList<>();
+
+    private List<PointValue> mESTNConvertData = new ArrayList<>();
+    private List<PointValue> mESTEConvertData = new ArrayList<>();
+    private List<PointValue> mESTHConvertData = new ArrayList<>();
+    private List<PointValue> mESTDNConvertData = new ArrayList<>();
+    private List<PointValue> mESTDEConvertData = new ArrayList<>();
+    private List<PointValue> mESTDHConvertData = new ArrayList<>();
+    private List<PointValue> mESTDeltaDConvertData = new ArrayList<>();
+    private List<PointValue> mESTDeltaHConvertData = new ArrayList<>();
     private List<List<Object>> mContentResponse = new ArrayList<>();
-    private List<List<PointValue>> mChartLines = new ArrayList<>();
+    private List<List<PointValue>> mFilChartLines = new ArrayList<>();
+    private List<List<PointValue>> mEstChartLines = new ArrayList<>();
+
     private int mInterval, mMaxInterval;
     private boolean isFirstTimeSelectTime = true;
     private ArrayList<String> mStationUUIDList = new ArrayList<>();
@@ -107,7 +121,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
                 case LOADING:
-                    getData("GNSSFilterInfo", mStationUUIDList.get(mDeviceSp.getSelectedItemPosition()), mStartTime, mEndTime, mDeltaTime);
+                    getData(mStationUUIDList.get(mDeviceSp.getSelectedItemPosition()), mStartTime, mEndTime, mDeltaTime);
                     break;
                 case GET_DATA_SUCCESS:
                     drawChart();
@@ -226,6 +240,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mNChart = view.findViewById(R.id.chart_X);
         mEChart = view.findViewById(R.id.chart_Y);
         mHChart = view.findViewById(R.id.chart_H);
+        mDNChart = view.findViewById(R.id.chart_DN);
+        mDEChart = view.findViewById(R.id.chart_DE);
+        mDHChart = view.findViewById(R.id.chart_DH);
         mDeltaDChart = view.findViewById(R.id.chart_DeltaD);
         mDeltaHChart = view.findViewById(R.id.chart_DeltaH);
         mHeartChart = view.findViewById(R.id.chart_Heart);
@@ -241,6 +258,18 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mHChartNameTv = view.findViewById(R.id.tv_chartNameH);
         mHChartCooTv = view.findViewById(R.id.tv_coordinateSystemH);
         mHChartTimeTv = view.findViewById(R.id.tv_chartTimeH);
+
+        mDNChartNameTv = view.findViewById(R.id.tv_chartNameDN);
+        mDNChartCooTv = view.findViewById(R.id.tv_coordinateSystemDN);
+        mDNChartTimeTv = view.findViewById(R.id.tv_chartTimeDN);
+
+        mDEChartNameTv = view.findViewById(R.id.tv_chartNameDE);
+        mDEChartCooTv = view.findViewById(R.id.tv_coordinateSystemDE);
+        mDEChartTimeTv = view.findViewById(R.id.tv_chartTimeDE);
+
+        mDHChartNameTv = view.findViewById(R.id.tv_chartNameDH);
+        mDHChartCooTv = view.findViewById(R.id.tv_coordinateSystemDH);
+        mDHChartTimeTv = view.findViewById(R.id.tv_chartTimeDH);
 
         mDeltaDChartNameTv = view.findViewById(R.id.tv_DeltaDChartName);
         mDeltaDChartCooTv = view.findViewById(R.id.tv_coordinateSystemDeltaD);
@@ -360,21 +389,58 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mHChartTimeTv.setText(time);
         mHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
-        List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoN")).toString(), mNConvertData);
-        convertLines(mNConvertData);
-        setChart(mNChart, xAxisValues, yLabel, mNConvertAvg);
+        List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoN")).toString(), mFILNConvertData);
+        convertLines(mFILNConvertData,mFilChartLines);
+        convertLines(mESTNConvertData,mEstChartLines);
+        setChart(mNChart, xAxisValues, yLabel, mFILNConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoE")).toString(), mEConvertData);
-        convertLines(mEConvertData);
-        setChart(mEChart, xAxisValues, yLabel, mEConvertAvg);
+        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoE")).toString(), mFILEConvertData);
+        convertLines(mFILEConvertData,mFilChartLines);
+        convertLines(mESTEConvertData,mEstChartLines);
+        setChart(mEChart, xAxisValues, yLabel, mFILEConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoH")).toString(), mHConvertData);
-        convertLines(mHConvertData);
-        setChart(mHChart, xAxisValues, yLabel, mHConvertAvg);
+        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoH")).toString(), mFILHConvertData);
+        convertLines(mFILHConvertData,mFilChartLines);
+        convertLines(mESTHConvertData,mEstChartLines);
+        setChart(mHChart, xAxisValues, yLabel, mFILHConvertAvg);
     }
 
+    /**
+     * 绘制DN,DE,DH图表
+     */
+    public void drawDChart(String selectedTime) {
+        String time = mStartTime + "~" + mEndTime;
+        mDNChartNameTv.setText("DN");
+        mDNChartTimeTv.setText(time);
+        mDNChartCooTv.setText(R.string.CoordinateSystem);
+
+        mDEChartNameTv.setText("DE");
+        mDEChartTimeTv.setText(time);
+        mDEChartCooTv.setText(R.string.CoordinateSystem);
+
+        mDHChartNameTv.setText("DH");
+        mDHChartTimeTv.setText(time);
+        mDHChartCooTv.setText(R.string.CoordinateSystem);
+        List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
+        List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDN")).toString(), mFILDNConvertData);
+        convertLines(mFILDNConvertData,mFilChartLines);
+        convertLines(mESTDNConvertData,mEstChartLines);
+        setChart(mDNChart, xAxisValues, yLabel, mFILDNConvertAvg);
+
+        xAxisValues = setXAxisValues(selectedTime);
+        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDE")).toString(), mFILDEConvertData);
+        convertLines(mFILDEConvertData,mFilChartLines);
+        convertLines(mESTDEConvertData,mEstChartLines);
+        setChart(mDEChart, xAxisValues, yLabel, mFILDEConvertAvg);
+
+        xAxisValues = setXAxisValues(selectedTime);
+        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDH")).toString(), mFILDHConvertData);
+        convertLines(mFILDHConvertData,mFilChartLines);
+        convertLines(mESTDHConvertData,mEstChartLines);
+        setChart(mDHChart, xAxisValues, yLabel, mFILDHConvertAvg);
+    }
 
     /**
      * 绘制位移图表
@@ -388,15 +454,16 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mDeltaHChartTimeTv.setText(time);
         mDeltaHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
-        List<AxisValue> yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaD")).toString(), mDeltaDConvertData,DELTAD_CHART);
-        convertLines(mDeltaDConvertData);
-        setChart(mDeltaDChart, xAxisValues, yLabel, mDeltaDConvertAvg);
+        List<AxisValue> yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaD")).toString(), mFILDeltaDConvertData,DELTAD_CHART);
+        convertLines(mFILDeltaDConvertData,mFilChartLines);
+        convertLines(mESTDeltaDConvertData,mEstChartLines);
+        setChart(mDeltaDChart, xAxisValues, yLabel, mFILDeltaDConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
-//        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaH")).toString(), mDeltaHConvertData);
-        yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSFilterInfoDeltaH")).toString(), mDeltaHConvertData,DELTAH_CHART);
-        convertLines(mDeltaHConvertData);
-        setChart(mDeltaHChart, xAxisValues, yLabel, mDeltaHConvertAvg);
+        yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaH")).toString(), mFILDeltaHConvertData,DELTAH_CHART);
+        convertLines(mFILDeltaHConvertData,mFilChartLines);
+        convertLines(mESTDeltaHConvertData,mEstChartLines);
+        setChart(mDeltaHChart, xAxisValues, yLabel, mFILDeltaHConvertAvg);
     }
 
     public void drawHeartChart() {
@@ -451,8 +518,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     }
 
     public void convertHeartChartData(List<List<Object>> contentList, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, List<PointValue> pointValues) {
-        int nIndex = mTitleIndex.get("GNSSFilterInfoN");
-        int eIndex = mTitleIndex.get("GNSSFilterInfoE");
+        int nIndex = mTitleIndex.get("GNSSPJKFIRInfoN");
+        int eIndex = mTitleIndex.get("GNSSPJKFIRInfoE");
         double convertEMin, convertEMax, convertNMin, convertNMax;
         DecimalFormat df = new DecimalFormat("#.00");
         String space = "0.01";
@@ -585,9 +652,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             mConvertYMax = valueYMin + 0.2f;
             mConvertYMin = valueYMin - 0.01f;
             if (chartType == DELTAD_CHART){
-                mDeltaDConvertAvg = (mConvertYMax + mConvertYMin) / 2;
-            }else {
-                mDeltaHConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+                mFILDeltaDConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            }else if (chartType == DELTAH_CHART){
+                mFILDeltaHConvertAvg = (mConvertYMax + mConvertYMin) / 2;
             }
             minSubNum = "0.01";
         }else {
@@ -666,8 +733,14 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     public void setChart(LineChartView chartView, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, float convertAverage) {
         String selectedTime = mTimeSp.getSelectedItem().toString();
         List<Line> lines = new ArrayList<>();
-        for (int i = 0; i < mChartLines.size(); i++) {
-            Line line = new Line(mChartLines.get(i)).setColor(Color.parseColor("#2196F3")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
+        //绿色：#3CB371；蓝色：#2196F3
+        for (int i = 0; i < mFilChartLines.size(); i++) {
+            Line line = new Line(mFilChartLines.get(i)).setColor(Color.parseColor("#00FF00")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
+            lines.add(line);
+        }
+
+        for (int i = 0; i < mEstChartLines.size(); i++) {
+            Line line = new Line(mEstChartLines.get(i)).setColor(Color.parseColor("#0000FF")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
             lines.add(line);
         }
 
@@ -710,6 +783,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         //经过计算：1dp = 0.015875cm；600dp = 9.525cm，所以设置当前窗口显示9个刻度即可保证一格为1cm
         currentWindow.bottom = convertAverage - 0.05f;
         currentWindow.top = convertAverage + 0.04f;
+        LogUtil.e("window convertAverage bottom top",convertAverage + "**" + currentWindow.bottom+"**"+currentWindow.top);
         switch (mTimeSp.getSelectedItem().toString()) {
             case "最近1小时":
                 maxWindow.right = 60 + (float) (60 / 24);
@@ -789,13 +863,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         Api.config(ApiConfig.GET_GRAPHIC_DATA).postRequestFormBodySync(getActivity(), getChartDataBody, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-                LogUtil.e("请求点数据结束时间", sdfTwo.format(System.currentTimeMillis()));
+//                LogUtil.e("请求点数据结束时间", sdfTwo.format(System.currentTimeMillis()));
                 LogUtil.e("请求数据的返回值",res);
                 Gson gson = new Gson();
-                final GNSSFilterInfoResponse gnssFilterInfoResponse = gson.fromJson(res, GNSSFilterInfoResponse.class);
-                mContentResponse = gnssFilterInfoResponse.getContent();
+                final GetGraphicDataResponse graphicDataResponse = gson.fromJson(res, GetGraphicDataResponse.class);
+                mContentResponse = graphicDataResponse.getContent();
                 //其他错误
-                if (!gnssFilterInfoResponse.getResponseCode().equals("200")){
+                if (!graphicDataResponse.getResponseCode().equals("200")){
                     hasData = false;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -803,10 +877,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             mNChart.setVisibility(View.GONE);
                             mEChart.setVisibility(View.GONE);
                             mHChart.setVisibility(View.GONE);
+                            mDNChart.setVisibility(View.GONE);
+                            mDEChart.setVisibility(View.GONE);
+                            mDHChart.setVisibility(View.GONE);
                             mDeltaDChart.setVisibility(View.GONE);
                             mDeltaHChart.setVisibility(View.GONE);
                             mHeartChart.setVisibility(View.GONE);
-                            showToast(gnssFilterInfoResponse.getResponseMsg());
+                            showToast(graphicDataResponse.getResponseMsg());
                         }
                     });
                     return;
@@ -820,6 +897,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             mNChart.setVisibility(View.GONE);
                             mEChart.setVisibility(View.GONE);
                             mHChart.setVisibility(View.GONE);
+                            mDNChart.setVisibility(View.GONE);
+                            mDEChart.setVisibility(View.GONE);
+                            mDHChart.setVisibility(View.GONE);
                             mDeltaDChart.setVisibility(View.GONE);
                             mDeltaHChart.setVisibility(View.GONE);
                             mHeartChart.setVisibility(View.GONE);
@@ -830,91 +910,143 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 }
 
                 //设置返回Json各字段的下标，防止因返回顺序变化导致获取错误数据
-                List<String> titleResponse = gnssFilterInfoResponse.getTitle();
+                List<String> titleResponse = graphicDataResponse.getTitle();
                 for (int i = 0; i < titleResponse.size(); i++) {
                     switch (titleResponse.get(i)) {
                         case "DataTimestamp":
                             mTitleIndex.put("DataTimestamp", i);
                             break;
-                        case "GNSSFilterInfoN":
-                            mTitleIndex.put("GNSSFilterInfoN", i);
+                        case "GNSSPJKFIRInfoN":
+                            mTitleIndex.put("GNSSPJKFIRInfoN", i);
                             break;
-                        case "GNSSFilterInfoE":
-                            mTitleIndex.put("GNSSFilterInfoE", i);
+                        case "GNSSPJKFIRInfoE":
+                            mTitleIndex.put("GNSSPJKFIRInfoE", i);
                             break;
-                        case "GNSSFilterInfoH":
-                            mTitleIndex.put("GNSSFilterInfoH", i);
+                        case "GNSSPJKFIRInfoH":
+                            mTitleIndex.put("GNSSPJKFIRInfoH", i);
                             break;
-                        case "GNSSFilterInfoDeltaD":
-                            mTitleIndex.put("GNSSFilterInfoDeltaD", i);
+                        case "GNSSPJKFIRInfoDN":
+                            mTitleIndex.put("GNSSPJKFIRInfoDN", i);
                             break;
-                        case "GNSSFilterInfoDeltaH":
-                            mTitleIndex.put("GNSSFilterInfoDeltaH", i);
+                        case "GNSSPJKFIRInfoDE":
+                            mTitleIndex.put("GNSSPJKFIRInfoDE", i);
+                            break;
+                        case "GNSSPJKFIRInfoDH":
+                            mTitleIndex.put("GNSSPJKFIRInfoDH", i);
+                            break;
+                        case "GNSSPJKFIRInfoDeltaD":
+                            mTitleIndex.put("GNSSPJKFIRInfoDeltaD", i);
+                            break;
+                        case "GNSSPJKFIRInfoDeltaH":
+                            mTitleIndex.put("GNSSPJKFIRInfoDeltaH", i);
                             break;
                     }
                 }
                 int timeStampIndex = mTitleIndex.get("DataTimestamp");
-                int nIndex = mTitleIndex.get("GNSSFilterInfoN");
-                int eIndex = mTitleIndex.get("GNSSFilterInfoE");
-                int hIndex = mTitleIndex.get("GNSSFilterInfoH");
-                int deltaDIndex = mTitleIndex.get("GNSSFilterInfoDeltaD");
-                int deltaHIndex = mTitleIndex.get("GNSSFilterInfoDeltaH");
-
-                mMaxResponse = gnssFilterInfoResponse.getMax();
-                mMinResponse = gnssFilterInfoResponse.getMin();
-                mAvgResponse = gnssFilterInfoResponse.getAverage();
-                mInterval = gnssFilterInfoResponse.getData().getInterval();
-                mMaxInterval = gnssFilterInfoResponse.getData().getMaxInterval();
-                List<List<String>> xResponseData = new ArrayList<>();
-                List<List<String>> yResponseData = new ArrayList<>();
-                List<List<String>> hResponseData = new ArrayList<>();
-                List<List<String>> deltaDResponseData = new ArrayList<>();
-                List<List<String>> deltaHResponseData = new ArrayList<>();
-                //数据提取
-                LogUtil.e("返回数据的数量", String.valueOf(mContentResponse.size()));
-                for (List<Object> responseData : mContentResponse) {
-                    List<String> nValue = new ArrayList<>();
-                    List<String> eValue = new ArrayList<>();
-                    List<String> hValue = new ArrayList<>();
-                    List<String> deltaDValue = new ArrayList<>();
-                    List<String> deltaHValue = new ArrayList<>();
-                    //时间
-                    nValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
-                    eValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
-                    hValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
-                    deltaDValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
-                    deltaHValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
-                    //数值
-                    nValue.add(String.valueOf(responseData.get(nIndex)));
-                    eValue.add(String.valueOf(responseData.get(eIndex)));
-                    hValue.add(String.valueOf(responseData.get(hIndex)));
-                    deltaDValue.add(String.valueOf(responseData.get(deltaDIndex)));
-                    deltaHValue.add(String.valueOf(responseData.get(deltaHIndex)));
-                    //添加到各自的数据列表中
-                    xResponseData.add(nValue);
-                    yResponseData.add(eValue);
-                    hResponseData.add(hValue);
-                    deltaDResponseData.add(deltaDValue);
-                    deltaHResponseData.add(deltaHValue);
-                }
-                mNConvertData = convertData(xResponseData, mMinResponse.get(nIndex).toString(), startTime, mAvgResponse.get(nIndex).toString());
-                mEConvertData = convertData(yResponseData, mMinResponse.get(eIndex).toString(), startTime, mAvgResponse.get(eIndex).toString());
-                mHConvertData = convertData(hResponseData, mMinResponse.get(hIndex).toString(), startTime, mAvgResponse.get(hIndex).toString());
-                mDeltaDConvertData = convertData(deltaDResponseData, mMinResponse.get(deltaDIndex).toString(), startTime, mAvgResponse.get(deltaDIndex).toString());
-                mDeltaHConvertData = convertData(deltaHResponseData, mMinResponse.get(deltaHIndex).toString(), startTime, mAvgResponse.get(deltaHIndex).toString());
-                mNConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(nIndex).toString()) - Double.parseDouble(mMinResponse.get(nIndex).toString()));
-                mEConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(eIndex).toString()) - Double.parseDouble(mMinResponse.get(eIndex).toString()));
-                mHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(hIndex).toString()) - Double.parseDouble(mMinResponse.get(hIndex).toString()));
-                mDeltaDConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaDIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaDIndex).toString()));
-                mDeltaHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaHIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaHIndex).toString()));
-                LogUtil.e("getData执行结束", "*********");
-                hasData = true;
+                int nIndex = mTitleIndex.get("GNSSPJKFIRInfoN");
+                int eIndex = mTitleIndex.get("GNSSPJKFIRInfoE");
+                int hIndex = mTitleIndex.get("GNSSPJKFIRInfoH");
+                int dnIndex = mTitleIndex.get("GNSSPJKFIRInfoDN");
+                int deIndex = mTitleIndex.get("GNSSPJKFIRInfoDE");
+                int dhIndex = mTitleIndex.get("GNSSPJKFIRInfoDH");
+                int deltaDIndex = mTitleIndex.get("GNSSPJKFIRInfoDeltaD");
+                int deltaHIndex = mTitleIndex.get("GNSSPJKFIRInfoDeltaH");
+                initChartData(graphicDataResponse,timeStampIndex,nIndex,eIndex,hIndex,dnIndex,deIndex,dhIndex,deltaDIndex,deltaHIndex,startTime,graphicType);
             }
 
             @Override
             public void onFailure(Exception e) {
             }
         });
+    }
+
+    public void initChartData(GetGraphicDataResponse graphicDataResponse,int timeStampIndex,int nIndex,int eIndex,int hIndex,int dnIndex,int deIndex,int dhIndex,int deltaDIndex,int deltaHIndex,String startTime,String graphicType){
+        List<List<String>> xResponseData = new ArrayList<>();
+        List<List<String>> yResponseData = new ArrayList<>();
+        List<List<String>> hResponseData = new ArrayList<>();
+        List<List<String>> dnResponseData = new ArrayList<>();
+        List<List<String>> deResponseData = new ArrayList<>();
+        List<List<String>> dhResponseData = new ArrayList<>();
+        List<List<String>> deltaDResponseData = new ArrayList<>();
+        List<List<String>> deltaHResponseData = new ArrayList<>();
+        //数据提取
+        LogUtil.e("返回数据的数量", String.valueOf(mContentResponse.size()));
+        for (List<Object> responseData : mContentResponse) {
+            List<String> nValue = new ArrayList<>();
+            List<String> eValue = new ArrayList<>();
+            List<String> hValue = new ArrayList<>();
+            List<String> dnValue = new ArrayList<>();
+            List<String> deValue = new ArrayList<>();
+            List<String> dhValue = new ArrayList<>();
+            List<String> deltaDValue = new ArrayList<>();
+            List<String> deltaHValue = new ArrayList<>();
+            //时间
+            nValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+            eValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+            hValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+            dnValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+            deValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+            dhValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+            deltaDValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+            deltaHValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
+            //数值
+            nValue.add(String.valueOf(responseData.get(nIndex)));
+            eValue.add(String.valueOf(responseData.get(eIndex)));
+            hValue.add(String.valueOf(responseData.get(hIndex)));
+            dnValue.add(String.valueOf(responseData.get(dnIndex)));
+            deValue.add(String.valueOf(responseData.get(deIndex)));
+            dhValue.add(String.valueOf(responseData.get(dhIndex)));
+            deltaDValue.add(String.valueOf(responseData.get(deltaDIndex)));
+            deltaHValue.add(String.valueOf(responseData.get(deltaHIndex)));
+            //添加到各自的数据列表中
+            xResponseData.add(nValue);
+            yResponseData.add(eValue);
+            hResponseData.add(hValue);
+            dnResponseData.add(dnValue);
+            deResponseData.add(deValue);
+            dhResponseData.add(dhValue);
+            deltaDResponseData.add(deltaDValue);
+            deltaHResponseData.add(deltaHValue);
+        }
+        if ("GNSSPJKFIRInfo".equals(graphicType))
+        {
+            mMaxResponse = graphicDataResponse.getMax();
+            mMinResponse = graphicDataResponse.getMin();
+            mAvgResponse = graphicDataResponse.getAverage();
+            mInterval = graphicDataResponse.getData().getInterval();
+            mMaxInterval = graphicDataResponse.getData().getMaxInterval();
+            mFILNConvertData = convertData(xResponseData, mMinResponse.get(nIndex).toString(), startTime, mAvgResponse.get(nIndex).toString());
+            mFILEConvertData = convertData(yResponseData, mMinResponse.get(eIndex).toString(), startTime, mAvgResponse.get(eIndex).toString());
+            mFILHConvertData = convertData(hResponseData, mMinResponse.get(hIndex).toString(), startTime, mAvgResponse.get(hIndex).toString());
+            mFILDNConvertData = convertData(dnResponseData, mMinResponse.get(dnIndex).toString(), startTime, mAvgResponse.get(dnIndex).toString());
+            mFILDEConvertData = convertData(deResponseData, mMinResponse.get(deIndex).toString(), startTime, mAvgResponse.get(deIndex).toString());
+            mFILDHConvertData = convertData(dhResponseData, mMinResponse.get(dhIndex).toString(), startTime, mAvgResponse.get(dhIndex).toString());
+            mFILDeltaDConvertData = convertData(deltaDResponseData, mMinResponse.get(deltaDIndex).toString(), startTime, mAvgResponse.get(deltaDIndex).toString());
+            mFILDeltaHConvertData = convertData(deltaHResponseData, mMinResponse.get(deltaHIndex).toString(), startTime, mAvgResponse.get(deltaHIndex).toString());
+
+            mFILNConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(nIndex).toString()) - Double.parseDouble(mMinResponse.get(nIndex).toString()));
+            mFILEConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(eIndex).toString()) - Double.parseDouble(mMinResponse.get(eIndex).toString()));
+            mFILHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(hIndex).toString()) - Double.parseDouble(mMinResponse.get(hIndex).toString()));
+            mFILDNConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(dnIndex).toString()) - Double.parseDouble(mMinResponse.get(dnIndex).toString()));
+            mFILDEConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deIndex).toString()) - Double.parseDouble(mMinResponse.get(deIndex).toString()));
+            mFILDHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(dhIndex).toString()) - Double.parseDouble(mMinResponse.get(dhIndex).toString()));
+            mFILDeltaDConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaDIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaDIndex).toString()));
+            mFILDeltaHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaHIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaHIndex).toString()));
+            LogUtil.e("getData执行结束", "获取滤波数据++++++");
+            hasData = true;
+        }else if ("GNSSPJKESTInfo".equals(graphicType)){
+            mESTNConvertData = convertData(xResponseData, mMinResponse.get(nIndex).toString(), startTime, mAvgResponse.get(nIndex).toString());
+            mESTEConvertData = convertData(yResponseData, mMinResponse.get(eIndex).toString(), startTime, mAvgResponse.get(eIndex).toString());
+            mESTHConvertData = convertData(hResponseData, mMinResponse.get(hIndex).toString(), startTime, mAvgResponse.get(hIndex).toString());
+            mESTDNConvertData = convertData(dnResponseData, mMinResponse.get(dnIndex).toString(), startTime, mAvgResponse.get(dnIndex).toString());
+            mESTDEConvertData = convertData(deResponseData, mMinResponse.get(deIndex).toString(), startTime, mAvgResponse.get(deIndex).toString());
+            mESTDHConvertData = convertData(dhResponseData, mMinResponse.get(dhIndex).toString(), startTime, mAvgResponse.get(dhIndex).toString());
+            mESTDeltaDConvertData = convertData(deltaDResponseData, mMinResponse.get(deltaDIndex).toString(), startTime, mAvgResponse.get(deltaDIndex).toString());
+            mESTDeltaHConvertData = convertData(deltaHResponseData, mMinResponse.get(deltaHIndex).toString(), startTime, mAvgResponse.get(deltaHIndex).toString());
+            LogUtil.e("getData执行结束", "获取估计数据*******");
+            hasData = true;
+        }
+
     }
 
     /**
@@ -955,43 +1087,44 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      * 判断转换后的数据有几段，并转换成线数据。
      * @param values 转换后的数据
      */
-    public void convertLines(List<PointValue> values) {
+    public void convertLines(List<PointValue> values,List<List<PointValue>> chartLines) {
         if (values.size() == 1) {
             return;
         }
         float space = values.get(1).getX() - values.get(0).getX();
         float maxSpace = space * 2;
         float tempSpace;
-        mChartLines.clear();
+        chartLines.clear();
         List<PointValue> tempLines = new ArrayList<>();
         tempLines.add(new PointValue(values.get(0).getX(), values.get(0).getY()));   //加入第一个数据
         for (int i = 1; i < values.size(); i++) {
-            tempSpace = mNConvertData.get(i).getX() - mNConvertData.get(i - 1).getX();
+            tempSpace = mFILNConvertData.get(i).getX() - mFILNConvertData.get(i - 1).getX();
             if (tempSpace > maxSpace) {
-                mChartLines.add(tempLines);
+                chartLines.add(tempLines);
                 tempLines = new ArrayList<>();  //注意此处清空数据的方法。如果用clear()方法清空，那么所有使用该列表的数据都空了。
             }
             space = tempSpace;
             maxSpace = space * 2;
             tempLines.add(new PointValue(values.get(i).getX(), values.get(i).getY()));
         }
-        mChartLines.add(tempLines);   //将最后一段数据加入
+        chartLines.add(tempLines);   //将最后一段数据加入
     }
 
     /**
      * 同步获取数据
      *
-     * @param graphicType 图表数据类型
+     *
      * @param stationUUID 设备ID
      * @param startTime   开始时间
      * @param endTime     结束时间
      */
-    public void getData(final String graphicType, final String stationUUID, final String startTime, final String endTime, final String deltaTime) {
+    public void getData( final String stationUUID, final String startTime, final String endTime, final String deltaTime) {
         Thread httpThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                requestChartDataSync(graphicType, stationUUID, startTime, endTime, deltaTime);
-                pHandler.sendEmptyMessageDelayed(200,0);
+                requestChartDataSync("GNSSPJKFIRInfo", stationUUID, startTime, endTime, deltaTime);
+                requestChartDataSync("GNSSPJKESTInfo", stationUUID, startTime, endTime, deltaTime);
+                pHandler.sendEmptyMessageDelayed(GET_DATA_SUCCESS,0);
             }
         });
         httpThread.start();
@@ -1089,11 +1222,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
     public void drawChart() {
         if (hasData) {
-            LogUtil.e("position", "111111");
             drawXYHChart(mTimeSp.getSelectedItem().toString());
-            LogUtil.e("position", "22222");
+            drawDChart(mTimeSp.getSelectedItem().toString());
             drawDeltaChart(mTimeSp.getSelectedItem().toString());
-            LogUtil.e("position", "333333");
             drawHeartChart();
         }
         if (mLoadingDlg != null)
