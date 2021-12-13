@@ -66,15 +66,15 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private Toolbar toolbar;
     private Spinner mDeviceSp;
     private MySpinner mTimeSp;
-    private LineChartView mNChart, mEChart, mHChart, mDNChart,mDEChart,mDHChart,mDeltaDChart, mDeltaHChart, mHeartChart;
-    private TextView mNChartNameTv, mEChartNameTv, mHChartNameTv, mDNChartNameTv,mDEChartNameTv,mDHChartNameTv,mDeltaDChartNameTv, mDeltaHChartNameTv, mHeartChartNameTv;
-    private TextView mNChartCooTv, mEChartCooTv, mHChartCooTv, mDNChartCooTv,mDEChartCooTv,mDHChartCooTv,mDeltaDChartCooTv, mDeltaHChartCooTv, mHeartChartCooTv;
-    private TextView mNChartTimeTv, mEChartTimeTv, mHChartTimeTv, mDNChartTimeTv,mDEChartTimeTv,mDHChartTimeTv,mDeltaDChartTimeTv, mDeltaHChartTimeTv, mHeartChartTimeTv;
+    private LineChartView mNChart, mEChart, mHChart,  mDeltaDChart, mDeltaHChart, mHeartChart;
+    private TextView mNChartNameTv, mEChartNameTv, mHChartNameTv, mDeltaDChartNameTv, mDeltaHChartNameTv, mHeartChartNameTv;
+    private TextView mNChartCooTv, mEChartCooTv, mHChartCooTv, mDeltaDChartCooTv, mDeltaHChartCooTv, mHeartChartCooTv;
+    private TextView mNChartTimeTv, mEChartTimeTv, mHChartTimeTv,  mDeltaDChartTimeTv, mDeltaHChartTimeTv, mHeartChartTimeTv;
     private TextView mTitleTv;
     private TextView mDownLoadExcelTv;
     private float mConvertYMax;
     private float mConvertYMin;
-    private float mFILNConvertAvg, mFILEConvertAvg, mFILHConvertAvg, mFILDNConvertAvg,mFILDEConvertAvg,mFILDHConvertAvg,mFILDeltaDConvertAvg, mFILDeltaHConvertAvg;
+    private float mFILNConvertAvg, mFILEConvertAvg, mFILHConvertAvg, mDeltaDConvertAvg, mDeltaHConvertAvg;
     private List<Object> mMaxResponse = new ArrayList<>();
     private List<Object> mMinResponse = new ArrayList<>();
     private List<Object> mAvgResponse = new ArrayList<>();
@@ -83,21 +83,16 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private List<PointValue> mFILNConvertData = new ArrayList<>();
     private List<PointValue> mFILEConvertData = new ArrayList<>();
     private List<PointValue> mFILHConvertData = new ArrayList<>();
-    private List<PointValue> mFILDNConvertData = new ArrayList<>();
-    private List<PointValue> mFILDEConvertData = new ArrayList<>();
-    private List<PointValue> mFILDHConvertData = new ArrayList<>();
-    private List<PointValue> mFILDeltaDConvertData = new ArrayList<>();
-    private List<PointValue> mFILDeltaHConvertData = new ArrayList<>();
+//    private List<PointValue> mFILDeltaDConvertData = new ArrayList<>();
+//    private List<PointValue> mFILDeltaHConvertData = new ArrayList<>();
 
     private List<PointValue> mESTNConvertData = new ArrayList<>();
     private List<PointValue> mESTEConvertData = new ArrayList<>();
     private List<PointValue> mESTHConvertData = new ArrayList<>();
-    private List<PointValue> mESTDNConvertData = new ArrayList<>();
-    private List<PointValue> mESTDEConvertData = new ArrayList<>();
-    private List<PointValue> mESTDHConvertData = new ArrayList<>();
     private List<PointValue> mESTDeltaDConvertData = new ArrayList<>();
     private List<PointValue> mESTDeltaHConvertData = new ArrayList<>();
-    private List<List<Object>> mContentResponse = new ArrayList<>();
+    private List<List<Object>> mFILContentResponse = new ArrayList<>();
+    private List<List<Object>> mESTContentResponse = new ArrayList<>();
     private List<List<PointValue>> mFilChartLines = new ArrayList<>();
     private List<List<PointValue>> mEstChartLines = new ArrayList<>();
 
@@ -178,24 +173,23 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     @Override
     public void onHiddenChanged(boolean hidden) {
         if (!hidden) {
-            ((MainActivity)getActivity()).setSupportActionBar(toolbar);
+            ((MainActivity) getActivity()).setSupportActionBar(toolbar);
         }
     }
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.mu_download,menu);
+        inflater.inflate(R.menu.mu_download, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.mu_download:
-                if (LoginUtil.isNetworkUsable(getActivity()))
-                {
-                    MainActivity activity = (MainActivity)getActivity();
-                    if (activity != null){
+                if (LoginUtil.isNetworkUsable(getActivity())) {
+                    MainActivity activity = (MainActivity) getActivity();
+                    if (activity != null) {
                         activity.displayToast("正在导出...");
                     }
                     downLoadExcel();
@@ -241,9 +235,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mNChart = view.findViewById(R.id.chart_X);
         mEChart = view.findViewById(R.id.chart_Y);
         mHChart = view.findViewById(R.id.chart_H);
-        mDNChart = view.findViewById(R.id.chart_DN);
-        mDEChart = view.findViewById(R.id.chart_DE);
-        mDHChart = view.findViewById(R.id.chart_DH);
         mDeltaDChart = view.findViewById(R.id.chart_DeltaD);
         mDeltaHChart = view.findViewById(R.id.chart_DeltaH);
         mHeartChart = view.findViewById(R.id.chart_Heart);
@@ -259,18 +250,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mHChartNameTv = view.findViewById(R.id.tv_chartNameH);
         mHChartCooTv = view.findViewById(R.id.tv_coordinateSystemH);
         mHChartTimeTv = view.findViewById(R.id.tv_chartTimeH);
-
-        mDNChartNameTv = view.findViewById(R.id.tv_chartNameDN);
-        mDNChartCooTv = view.findViewById(R.id.tv_coordinateSystemDN);
-        mDNChartTimeTv = view.findViewById(R.id.tv_chartTimeDN);
-
-        mDEChartNameTv = view.findViewById(R.id.tv_chartNameDE);
-        mDEChartCooTv = view.findViewById(R.id.tv_coordinateSystemDE);
-        mDEChartTimeTv = view.findViewById(R.id.tv_chartTimeDE);
-
-        mDHChartNameTv = view.findViewById(R.id.tv_chartNameDH);
-        mDHChartCooTv = view.findViewById(R.id.tv_coordinateSystemDH);
-        mDHChartTimeTv = view.findViewById(R.id.tv_chartTimeDH);
 
         mDeltaDChartNameTv = view.findViewById(R.id.tv_DeltaDChartName);
         mDeltaDChartCooTv = view.findViewById(R.id.tv_coordinateSystemDeltaD);
@@ -289,15 +268,49 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
         mChartsSv = view.findViewById(R.id.sv_charts);
 
-        //解决Menu不显示，因为主题为NoAction
+//        mChartsSv.setOnTouchListener(new View.OnTouchListener() {
+//                    private int lastY = 0;
+//                    private int touchEventId = -9983761;
+//
+//                    Handler handler = new Handler() {
+//                        @Override
+//                        public void handleMessage(Message msg) {
+//                            super.handleMessage(msg);
+//                            View scroller = (View)msg.obj;
+//                            if(msg.what==touchEventId) {
+//                                if(lastY ==scroller.getScrollY()) {
+//                                    handleStop(scroller);
+//                                }else {
+//                                    LogUtil.e("++++","****");
+//                                    handler.sendMessageDelayed(handler.obtainMessage(touchEventId,scroller), 5);
+//                                    lastY = scroller.getScrollY();
+//                                }
+//                            }
+//                        }
+//                    };
+//                    @Override
+//                    public boolean onTouch(View v, MotionEvent event) {
+//                        if(event.getAction() == MotionEvent.ACTION_UP) {
+//                            handler.sendMessageDelayed(handler.obtainMessage(touchEventId,v), 5);
+//                        }
+//                        return false;
+//                    }
+//                    //这里写真正的事件
+//                    private void handleStop(Object view) {
+//                        LogUtil.e("CHartFra","ScrollView滑动停止");
+//                    }
+//                });
+
+
+        //        //解决Menu不显示，因为主题为NoActio
+
         toolbar = view.findViewById(R.id.tb_chart);
-        ((MainActivity)getActivity()).setSupportActionBar(toolbar);
+        ((MainActivity) getActivity()).setSupportActionBar(toolbar);
 
         mTimeSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, final int position, long id) {
-                if (LoginUtil.isNetworkUsable(getActivity()))
-                {
+                if (LoginUtil.isNetworkUsable(getActivity())) {
                     if (isFirstTimeSelectTime) {
                         isFirstTimeSelectTime = false;
                         return;
@@ -309,15 +322,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             public void onPositiveClick() {
                                 mStartTime = mTimePickerDlg.getStartTime();
                                 mEndTime = mTimePickerDlg.getEndTime();
-                                if (mStartTime.equals("") | mEndTime.equals("") | DateUtil.calcHourOffset(mStartTime, mEndTime) <= 0)
-                                {
+                                if (mStartTime.equals("") | mEndTime.equals("") | DateUtil.calcHourOffset(mStartTime, mEndTime) <= 0) {
                                     showToast("请选择正确的时间区间！");
-                                }
-                                else if (DateUtil.calcHourOffset(mStartTime, mEndTime) >= 8784)
-                                {
+                                } else if (DateUtil.calcHourOffset(mStartTime, mEndTime) >= 8784) {
                                     showToast("最大查询间隔为两年，请重新选择");
-                                }
-                                else {
+                                } else {
                                     mTimePickerDlg.dismiss();
                                     refresh();
                                     mLastSelectedTimePosition = position;
@@ -327,8 +336,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             @Override
                             public void onNegativeClick() {
                                 mTimePickerDlg.dismiss();
-                                if (mLastSelectedTimePosition != 7)
-                                {
+                                if (mLastSelectedTimePosition != 7) {
                                     mTimeSp.setSelection(mLastSelectedTimePosition);
                                 }
                             }
@@ -345,7 +353,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             }
                         });
                         mTimePickerDlg.show();
-                    }else {
+                    } else {
                         refresh();
                         mLastSelectedTimePosition = position;
                     }
@@ -360,8 +368,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mDeviceSp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (LoginUtil.isNetworkUsable(getActivity()))
-                {
+                if (LoginUtil.isNetworkUsable(getActivity())) {
                     refresh();
                 }
             }
@@ -391,56 +398,21 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
         List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoN")).toString(), mFILNConvertData);
-        convertLines(mFILNConvertData,mFilChartLines);
-        convertLines(mESTNConvertData,mEstChartLines);
-        setChart(mNChart, xAxisValues, yLabel, mFILNConvertAvg);
+        convertLines(mFILNConvertData, mFilChartLines);
+        convertLines(mESTNConvertData, mEstChartLines);
+        setLineChart(mNChart, xAxisValues, yLabel, mFILNConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
         yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoE")).toString(), mFILEConvertData);
-        convertLines(mFILEConvertData,mFilChartLines);
-        convertLines(mESTEConvertData,mEstChartLines);
-        setChart(mEChart, xAxisValues, yLabel, mFILEConvertAvg);
+        convertLines(mFILEConvertData, mFilChartLines);
+        convertLines(mESTEConvertData, mEstChartLines);
+        setLineChart(mEChart, xAxisValues, yLabel, mFILEConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
         yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoH")).toString(), mFILHConvertData);
-        convertLines(mFILHConvertData,mFilChartLines);
-        convertLines(mESTHConvertData,mEstChartLines);
-        setChart(mHChart, xAxisValues, yLabel, mFILHConvertAvg);
-    }
-
-    /**
-     * 绘制DN,DE,DH图表
-     */
-    public void drawDChart(String selectedTime) {
-        String time = mStartTime + "~" + mEndTime;
-        mDNChartNameTv.setText("DN");
-        mDNChartTimeTv.setText(time);
-        mDNChartCooTv.setText(R.string.CoordinateSystem);
-
-        mDEChartNameTv.setText("DE");
-        mDEChartTimeTv.setText(time);
-        mDEChartCooTv.setText(R.string.CoordinateSystem);
-
-        mDHChartNameTv.setText("DH");
-        mDHChartTimeTv.setText(time);
-        mDHChartCooTv.setText(R.string.CoordinateSystem);
-        List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
-        List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDN")).toString(), mFILDNConvertData);
-        convertLines(mFILDNConvertData,mFilChartLines);
-        convertLines(mESTDNConvertData,mEstChartLines);
-        setChart(mDNChart, xAxisValues, yLabel, mFILDNConvertAvg);
-
-        xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDE")).toString(), mFILDEConvertData);
-        convertLines(mFILDEConvertData,mFilChartLines);
-        convertLines(mESTDEConvertData,mEstChartLines);
-        setChart(mDEChart, xAxisValues, yLabel, mFILDEConvertAvg);
-
-        xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDH")).toString(), mFILDHConvertData);
-        convertLines(mFILDHConvertData,mFilChartLines);
-        convertLines(mESTDHConvertData,mEstChartLines);
-        setChart(mDHChart, xAxisValues, yLabel, mFILDHConvertAvg);
+        convertLines(mFILHConvertData, mFilChartLines);
+        convertLines(mESTHConvertData, mEstChartLines);
+        setLineChart(mHChart, xAxisValues, yLabel, mFILHConvertAvg);
     }
 
     /**
@@ -455,16 +427,14 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mDeltaHChartTimeTv.setText(time);
         mDeltaHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
-        List<AxisValue> yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaD")).toString(), mFILDeltaDConvertData,DELTAD_CHART);
-        convertLines(mFILDeltaDConvertData,mFilChartLines);
-        convertLines(mESTDeltaDConvertData,mEstChartLines);
-        setChart(mDeltaDChart, xAxisValues, yLabel, mFILDeltaDConvertAvg);
+        List<AxisValue> yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaD")).toString(), mESTDeltaDConvertData, DELTAD_CHART);
+        convertLines(mESTDeltaDConvertData, mEstChartLines);
+        setLineChart(mDeltaDChart, xAxisValues, yLabel, mDeltaDConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaH")).toString(), mFILDeltaHConvertData,DELTAH_CHART);
-        convertLines(mFILDeltaHConvertData,mFilChartLines);
-        convertLines(mESTDeltaHConvertData,mEstChartLines);
-        setChart(mDeltaHChart, xAxisValues, yLabel, mFILDeltaHConvertAvg);
+        yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaH")).toString(), mESTDeltaHConvertData, DELTAH_CHART);
+        convertLines(mESTDeltaHConvertData, mEstChartLines);
+        setLineChart(mDeltaHChart, xAxisValues, yLabel, mDeltaHConvertAvg);
     }
 
     public void drawHeartChart() {
@@ -474,16 +444,16 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mHeartChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> nAxisValues = new ArrayList<>();
         List<AxisValue> eAxisValues = new ArrayList<>();
-        List<PointValue> pointValues = new ArrayList<>();
-        convertHeartChartData(mContentResponse, nAxisValues, eAxisValues, pointValues);
-        setHeartChart(mHeartChart, pointValues, nAxisValues, eAxisValues);
-
+        List<PointValue> mEstPointValues = new ArrayList<>();
+        convertHeartChartData( mESTContentResponse, nAxisValues, eAxisValues,  mEstPointValues);
+        setHeartChart(mHeartChart, mEstPointValues, nAxisValues, eAxisValues);
     }
 
-    public void setHeartChart(LineChartView chartView, List<PointValue> values, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues) {
-        Line line = new Line(values).setColor(Color.parseColor("#2196F3")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
+    public void setHeartChart(LineChartView chartView,  List<PointValue> estValues, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues) {
+        Line estLine = new Line(estValues).setColor(Color.parseColor("#0000ff")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
+
         List<Line> lines = new ArrayList<>();
-        lines.add(line);
+        lines.add(estLine);
 
         LineChartData data = new LineChartData();
         data.setLines(lines);
@@ -518,9 +488,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
     }
 
-    public void convertHeartChartData(List<List<Object>> contentList, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, List<PointValue> pointValues) {
-        int nIndex = mTitleIndex.get("GNSSPJKFIRInfoN");
-        int eIndex = mTitleIndex.get("GNSSPJKFIRInfoE");
+    public void convertHeartChartData(List<List<Object>> estContentList, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues,  List<PointValue> estPointValues) {
+        int nIndex, eIndex;
+        nIndex = mTitleIndex.get("GNSSPJKFIRInfoN");
+        eIndex = mTitleIndex.get("GNSSPJKFIRInfoE");
+
         double convertEMin, convertEMax, convertNMin, convertNMax;
         DecimalFormat df = new DecimalFormat("#.00");
         String space = "0.01";
@@ -573,10 +545,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         minuendN1 = minuendN1.subtract(new BigDecimal("0.02"));
         BigDecimal minuendE1 = new BigDecimal(df.format(Double.parseDouble(mMinResponse.get(eIndex).toString())));
         minuendE1 = minuendE1.subtract(new BigDecimal("0.02"));
-        for (List<Object> content : contentList) {
+
+        for (List<Object> content : estContentList) {
             tempN = Double.parseDouble(content.get(nIndex).toString()) - Double.parseDouble(minuendN1.toString());
             tempE = Double.parseDouble(content.get(eIndex).toString()) - Double.parseDouble(minuendE1.toString());
-            pointValues.add(new PointValue(Float.parseFloat(String.valueOf(tempE)), Float.parseFloat(String.valueOf(tempN))));
+            estPointValues.add(new PointValue(Float.parseFloat(String.valueOf(tempE)), Float.parseFloat(String.valueOf(tempN))));
         }
     }
 
@@ -597,7 +570,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         }
 
         //结果出现是0.005时，在浮点运算时会四舍五入为0.01，影响运算结果
-        if (Math.abs(valueYMin - 0.005) < 0.0001){
+        if (Math.abs(valueYMin - 0.005) < 0.0001) {
             valueYMin = 0;
         }
 
@@ -645,20 +618,20 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         }
 
         //结果出现是0.005时，在浮点运算时会四舍五入为0.01，影响运算结果
-        if (Math.abs(valueYMin - 0.005) < 0.0001){
+        if (Math.abs(valueYMin - 0.005) < 0.0001) {
             valueYMin = 0;
         }
 
-        if (valueYMax - valueYMin > 100){
+        if (valueYMax - valueYMin > 100) {
             mConvertYMax = valueYMin + 0.2f;
             mConvertYMin = valueYMin - 0.01f;
-            if (chartType == DELTAD_CHART){
-                mFILDeltaDConvertAvg = (mConvertYMax + mConvertYMin) / 2;
-            }else if (chartType == DELTAH_CHART){
-                mFILDeltaHConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            if (chartType == DELTAD_CHART) {
+                mDeltaDConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            } else if (chartType == DELTAH_CHART) {
+                mDeltaHConvertAvg = (mConvertYMax + mConvertYMin) / 2;
             }
             minSubNum = "0.01";
-        }else {
+        } else {
             mConvertYMax = valueYMax + 0.1f;
             mConvertYMin = valueYMin - 0.1f;
             minSubNum = "0.1";
@@ -731,15 +704,15 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      * @param xAxisValues X轴标签（时间）
      * @param yAxisValues Y轴标签
      */
-    public void setChart(LineChartView chartView, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, float convertAverage) {
+    public void setLineChart(LineChartView chartView, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, float convertAverage) {
         String selectedTime = mTimeSp.getSelectedItem().toString();
         List<Line> lines = new ArrayList<>();
-        //绿色：#3CB371；蓝色：#2196F3
-        for (int i = 0; i < mFilChartLines.size(); i++) {
-            Line line = new Line(mFilChartLines.get(i)).setColor(Color.parseColor("#00FF00")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
-            lines.add(line);
+        if (chartView != mDeltaDChart && chartView != mDeltaHChart){
+            for (int i = 0; i < mFilChartLines.size(); i++) {
+                Line line = new Line(mFilChartLines.get(i)).setColor(Color.parseColor("#00FF00")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
+                lines.add(line);
+            }
         }
-
         for (int i = 0; i < mEstChartLines.size(); i++) {
             Line line = new Line(mEstChartLines.get(i)).setColor(Color.parseColor("#0000FF")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
             lines.add(line);
@@ -784,7 +757,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         //经过计算：1dp = 0.015875cm；600dp = 9.525cm，所以设置当前窗口显示9个刻度即可保证一格为1cm
         currentWindow.bottom = convertAverage - 0.05f;
         currentWindow.top = convertAverage + 0.04f;
-        LogUtil.e("window convertAverage bottom top",convertAverage + "**" + currentWindow.bottom+"**"+currentWindow.top);
+        LogUtil.e("window convertAverage bottom top", convertAverage + "**" + currentWindow.bottom + "**" + currentWindow.top);
         switch (mTimeSp.getSelectedItem().toString()) {
             case "最近1小时":
                 maxWindow.right = 60 + (float) (60 / 24);
@@ -816,10 +789,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 break;
             case "自定义时间":
                 int hourOffSet = DateUtil.calcHourOffset(mStartTime, DateUtil.getLabelEndTime());
-                maxWindow.right = 60 * hourOffSet + (float)(60 * hourOffSet / 24);
-                if(hourOffSet > 7 * 24){
+                maxWindow.right = 60 * hourOffSet + (float) (60 * hourOffSet / 24);
+                if (hourOffSet > 7 * 24) {
                     maxWindow.left = DateUtil.getOffSet();
-                }else{
+                } else {
                     maxWindow.left = 0f;
                 }
         }
@@ -835,12 +808,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             case R.id.img_chart_back:
                 FragmentManager fm = getFragmentManager();
                 MainActivity activity = (MainActivity) getActivity();
-                if (activity.getDataFragment() == null){
+                if (activity.getDataFragment() == null) {
                     fm.beginTransaction().remove(activity.getChartFragment()).commit();
                     activity.setChartFragment(null);
                     activity.getNavigationView().setSelectedItemId(activity.getNavigationView().getMenu().getItem(1).getItemId());
-                }
-                else {
+                } else {
                     fm.beginTransaction().hide(activity.getChartFragment()).show(activity.getDataFragment()).remove(activity.getChartFragment()).commit();
                     activity.setChartFragment(null);
                 }
@@ -865,12 +837,18 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             @Override
             public void onSuccess(String res) {
 //                LogUtil.e("请求点数据结束时间", sdfTwo.format(System.currentTimeMillis()));
-                LogUtil.e("请求数据的返回值",res);
+                LogUtil.e("请求数据的返回值", res);
                 Gson gson = new Gson();
                 final GetGraphicDataResponse graphicDataResponse = gson.fromJson(res, GetGraphicDataResponse.class);
-                mContentResponse = graphicDataResponse.getContent();
+
+                if ("GNSSPJKFIRInfo".equals(graphicType)) {
+                    mFILContentResponse = graphicDataResponse.getContent();
+                } else {
+                    mESTContentResponse = graphicDataResponse.getContent();
+                }
+
                 //其他错误
-                if (!graphicDataResponse.getResponseCode().equals("200")){
+                if (!graphicDataResponse.getResponseCode().equals("200")) {
                     hasData = false;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -878,9 +856,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             mNChart.setVisibility(View.GONE);
                             mEChart.setVisibility(View.GONE);
                             mHChart.setVisibility(View.GONE);
-                            mDNChart.setVisibility(View.GONE);
-                            mDEChart.setVisibility(View.GONE);
-                            mDHChart.setVisibility(View.GONE);
                             mDeltaDChart.setVisibility(View.GONE);
                             mDeltaHChart.setVisibility(View.GONE);
                             mHeartChart.setVisibility(View.GONE);
@@ -890,7 +865,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     return;
                 }
                 //基准站没有数据
-                if (mContentResponse.size() == 0) {
+                if (mFILContentResponse.size() == 0) {
                     hasData = false;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -898,9 +873,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             mNChart.setVisibility(View.GONE);
                             mEChart.setVisibility(View.GONE);
                             mHChart.setVisibility(View.GONE);
-                            mDNChart.setVisibility(View.GONE);
-                            mDEChart.setVisibility(View.GONE);
-                            mDHChart.setVisibility(View.GONE);
                             mDeltaDChart.setVisibility(View.GONE);
                             mDeltaHChart.setVisibility(View.GONE);
                             mHeartChart.setVisibility(View.GONE);
@@ -926,15 +898,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                         case "GNSSPJKFIRInfoH":
                             mTitleIndex.put("GNSSPJKFIRInfoH", i);
                             break;
-                        case "GNSSPJKFIRInfoDN":
-                            mTitleIndex.put("GNSSPJKFIRInfoDN", i);
-                            break;
-                        case "GNSSPJKFIRInfoDE":
-                            mTitleIndex.put("GNSSPJKFIRInfoDE", i);
-                            break;
-                        case "GNSSPJKFIRInfoDH":
-                            mTitleIndex.put("GNSSPJKFIRInfoDH", i);
-                            break;
                         case "GNSSPJKFIRInfoDeltaD":
                             mTitleIndex.put("GNSSPJKFIRInfoDeltaD", i);
                             break;
@@ -943,16 +906,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                             break;
                     }
                 }
-                int timeStampIndex = mTitleIndex.get("DataTimestamp");
-                int nIndex = mTitleIndex.get("GNSSPJKFIRInfoN");
-                int eIndex = mTitleIndex.get("GNSSPJKFIRInfoE");
-                int hIndex = mTitleIndex.get("GNSSPJKFIRInfoH");
-                int dnIndex = mTitleIndex.get("GNSSPJKFIRInfoDN");
-                int deIndex = mTitleIndex.get("GNSSPJKFIRInfoDE");
-                int dhIndex = mTitleIndex.get("GNSSPJKFIRInfoDH");
-                int deltaDIndex = mTitleIndex.get("GNSSPJKFIRInfoDeltaD");
-                int deltaHIndex = mTitleIndex.get("GNSSPJKFIRInfoDeltaH");
-                initChartData(graphicDataResponse,timeStampIndex,nIndex,eIndex,hIndex,dnIndex,deIndex,dhIndex,deltaDIndex,deltaHIndex,startTime,graphicType);
+
+                initChartData(graphicDataResponse, startTime, graphicType);
             }
 
             @Override
@@ -961,56 +916,46 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         });
     }
 
-    public void initChartData(GetGraphicDataResponse graphicDataResponse,int timeStampIndex,int nIndex,int eIndex,int hIndex,int dnIndex,int deIndex,int dhIndex,int deltaDIndex,int deltaHIndex,String startTime,String graphicType){
+    public void initChartData(GetGraphicDataResponse graphicDataResponse, String startTime, String graphicType) {
+        int timeStampIndex = mTitleIndex.get("DataTimestamp");
+        int nIndex = mTitleIndex.get("GNSSPJKFIRInfoN");
+        int eIndex = mTitleIndex.get("GNSSPJKFIRInfoE");
+        int hIndex = mTitleIndex.get("GNSSPJKFIRInfoH");
+        int deltaDIndex = mTitleIndex.get("GNSSPJKFIRInfoDeltaD");
+        int deltaHIndex = mTitleIndex.get("GNSSPJKFIRInfoDeltaH");
         List<List<String>> xResponseData = new ArrayList<>();
         List<List<String>> yResponseData = new ArrayList<>();
         List<List<String>> hResponseData = new ArrayList<>();
-        List<List<String>> dnResponseData = new ArrayList<>();
-        List<List<String>> deResponseData = new ArrayList<>();
-        List<List<String>> dhResponseData = new ArrayList<>();
         List<List<String>> deltaDResponseData = new ArrayList<>();
         List<List<String>> deltaHResponseData = new ArrayList<>();
         //数据提取
-        LogUtil.e("返回数据的数量", String.valueOf(mContentResponse.size()));
-        for (List<Object> responseData : mContentResponse) {
+        LogUtil.e("返回数据的数量", String.valueOf(graphicDataResponse.getContent().size()));
+        for (List<Object> responseData : graphicDataResponse.getContent()) {
             List<String> nValue = new ArrayList<>();
             List<String> eValue = new ArrayList<>();
             List<String> hValue = new ArrayList<>();
-            List<String> dnValue = new ArrayList<>();
-            List<String> deValue = new ArrayList<>();
-            List<String> dhValue = new ArrayList<>();
             List<String> deltaDValue = new ArrayList<>();
             List<String> deltaHValue = new ArrayList<>();
             //时间
             nValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
             eValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
             hValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
-            dnValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
-            deValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
-            dhValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
             deltaDValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
             deltaHValue.add(String.valueOf(Math.round((double) responseData.get(timeStampIndex))));
             //数值
             nValue.add(String.valueOf(responseData.get(nIndex)));
             eValue.add(String.valueOf(responseData.get(eIndex)));
             hValue.add(String.valueOf(responseData.get(hIndex)));
-            dnValue.add(String.valueOf(responseData.get(dnIndex)));
-            deValue.add(String.valueOf(responseData.get(deIndex)));
-            dhValue.add(String.valueOf(responseData.get(dhIndex)));
             deltaDValue.add(String.valueOf(responseData.get(deltaDIndex)));
             deltaHValue.add(String.valueOf(responseData.get(deltaHIndex)));
             //添加到各自的数据列表中
             xResponseData.add(nValue);
             yResponseData.add(eValue);
             hResponseData.add(hValue);
-            dnResponseData.add(dnValue);
-            deResponseData.add(deValue);
-            dhResponseData.add(dhValue);
             deltaDResponseData.add(deltaDValue);
             deltaHResponseData.add(deltaHValue);
         }
-        if ("GNSSPJKFIRInfo".equals(graphicType))
-        {
+        if ("GNSSPJKFIRInfo".equals(graphicType)) {
             mMaxResponse = graphicDataResponse.getMax();
             mMinResponse = graphicDataResponse.getMin();
             mAvgResponse = graphicDataResponse.getAverage();
@@ -1019,29 +964,20 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             mFILNConvertData = convertData(xResponseData, mMinResponse.get(nIndex).toString(), startTime, mAvgResponse.get(nIndex).toString());
             mFILEConvertData = convertData(yResponseData, mMinResponse.get(eIndex).toString(), startTime, mAvgResponse.get(eIndex).toString());
             mFILHConvertData = convertData(hResponseData, mMinResponse.get(hIndex).toString(), startTime, mAvgResponse.get(hIndex).toString());
-            mFILDNConvertData = convertData(dnResponseData, mMinResponse.get(dnIndex).toString(), startTime, mAvgResponse.get(dnIndex).toString());
-            mFILDEConvertData = convertData(deResponseData, mMinResponse.get(deIndex).toString(), startTime, mAvgResponse.get(deIndex).toString());
-            mFILDHConvertData = convertData(dhResponseData, mMinResponse.get(dhIndex).toString(), startTime, mAvgResponse.get(dhIndex).toString());
-            mFILDeltaDConvertData = convertData(deltaDResponseData, mMinResponse.get(deltaDIndex).toString(), startTime, mAvgResponse.get(deltaDIndex).toString());
-            mFILDeltaHConvertData = convertData(deltaHResponseData, mMinResponse.get(deltaHIndex).toString(), startTime, mAvgResponse.get(deltaHIndex).toString());
+//            mFILDeltaDConvertData = convertData(deltaDResponseData, mMinResponse.get(deltaDIndex).toString(), startTime, mAvgResponse.get(deltaDIndex).toString());
+//            mFILDeltaHConvertData = convertData(deltaHResponseData, mMinResponse.get(deltaHIndex).toString(), startTime, mAvgResponse.get(deltaHIndex).toString());
 
             mFILNConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(nIndex).toString()) - Double.parseDouble(mMinResponse.get(nIndex).toString()));
             mFILEConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(eIndex).toString()) - Double.parseDouble(mMinResponse.get(eIndex).toString()));
             mFILHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(hIndex).toString()) - Double.parseDouble(mMinResponse.get(hIndex).toString()));
-            mFILDNConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(dnIndex).toString()) - Double.parseDouble(mMinResponse.get(dnIndex).toString()));
-            mFILDEConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deIndex).toString()) - Double.parseDouble(mMinResponse.get(deIndex).toString()));
-            mFILDHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(dhIndex).toString()) - Double.parseDouble(mMinResponse.get(dhIndex).toString()));
-            mFILDeltaDConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaDIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaDIndex).toString()));
-            mFILDeltaHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaHIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaHIndex).toString()));
+            mDeltaDConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaDIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaDIndex).toString()));
+            mDeltaHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaHIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaHIndex).toString()));
             LogUtil.e("getData执行结束", "获取滤波数据++++++");
             hasData = true;
-        }else if ("GNSSPJKESTInfo".equals(graphicType)){
+        } else if ("GNSSPJKESTInfo".equals(graphicType)) {
             mESTNConvertData = convertData(xResponseData, mMinResponse.get(nIndex).toString(), startTime, mAvgResponse.get(nIndex).toString());
             mESTEConvertData = convertData(yResponseData, mMinResponse.get(eIndex).toString(), startTime, mAvgResponse.get(eIndex).toString());
             mESTHConvertData = convertData(hResponseData, mMinResponse.get(hIndex).toString(), startTime, mAvgResponse.get(hIndex).toString());
-            mESTDNConvertData = convertData(dnResponseData, mMinResponse.get(dnIndex).toString(), startTime, mAvgResponse.get(dnIndex).toString());
-            mESTDEConvertData = convertData(deResponseData, mMinResponse.get(deIndex).toString(), startTime, mAvgResponse.get(deIndex).toString());
-            mESTDHConvertData = convertData(dhResponseData, mMinResponse.get(dhIndex).toString(), startTime, mAvgResponse.get(dhIndex).toString());
             mESTDeltaDConvertData = convertData(deltaDResponseData, mMinResponse.get(deltaDIndex).toString(), startTime, mAvgResponse.get(deltaDIndex).toString());
             mESTDeltaHConvertData = convertData(deltaHResponseData, mMinResponse.get(deltaHIndex).toString(), startTime, mAvgResponse.get(deltaHIndex).toString());
             LogUtil.e("getData执行结束", "获取估计数据*******");
@@ -1086,9 +1022,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     /**
      * 返回的数据可能是不连续的
      * 判断转换后的数据有几段，并转换成线数据。
+     *
      * @param values 转换后的数据
      */
-    public void convertLines(List<PointValue> values,List<List<PointValue>> chartLines) {
+    public void convertLines(List<PointValue> values, List<List<PointValue>> chartLines) {
         if (values.size() == 1) {
             return;
         }
@@ -1114,18 +1051,17 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     /**
      * 同步获取数据
      *
-     *
      * @param stationUUID 设备ID
      * @param startTime   开始时间
      * @param endTime     结束时间
      */
-    public void getData( final String stationUUID, final String startTime, final String endTime, final String deltaTime) {
+    public void getData(final String stationUUID, final String startTime, final String endTime, final String deltaTime) {
         Thread httpThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 requestChartDataSync("GNSSPJKFIRInfo", stationUUID, startTime, endTime, deltaTime);
                 requestChartDataSync("GNSSPJKESTInfo", stationUUID, startTime, endTime, deltaTime);
-                pHandler.sendEmptyMessageDelayed(GET_DATA_SUCCESS,0);
+                pHandler.sendEmptyMessageDelayed(GET_DATA_SUCCESS, 0);
             }
         });
         httpThread.start();
@@ -1176,6 +1112,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 //一年
                 mStartTime = sdf.format(DateUtil.getBeginDayOfYear());
                 mEndTime = sdf.format(DateUtil.getEndDayOfYear());
+//                mDeltaTime = "86400";  //365min
                 mDeltaTime = "21900";  //365min
                 break;
             case 7:
@@ -1199,9 +1136,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         api.postRequestFormBody(getActivity(), body, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-                String responseCode = api.parseJSONObject(res,"ResponseCode");
-                String responseMsg = api.parseJSONObject(res,"ResponseMsg");
-                if ("200".equals(responseCode)){
+                String responseCode = api.parseJSONObject(res, "ResponseCode");
+                String responseMsg = api.parseJSONObject(res, "ResponseMsg");
+                if ("200".equals(responseCode)) {
                     String url = api.parseJSONObject(res, "ReportFilePath");
                     MainActivity mainActivity = (MainActivity) getActivity();
                     if (mainActivity != null) {
@@ -1209,7 +1146,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     } else {
                         showToastSync("导出失败," + responseMsg);
                     }
-                }else {
+                } else {
                     showToastSync(responseMsg);
                 }
             }
@@ -1224,12 +1161,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     public void drawChart() {
         if (hasData) {
             drawXYHChart(mTimeSp.getSelectedItem().toString());
-            drawDChart(mTimeSp.getSelectedItem().toString());
             drawDeltaChart(mTimeSp.getSelectedItem().toString());
             drawHeartChart();
         }
-        if (mLoadingDlg != null)
-        {
+        if (mLoadingDlg != null) {
             mLoadingDlg.cancel();
         }
     }
@@ -1273,4 +1208,5 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         }
     }
+
 }

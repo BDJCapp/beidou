@@ -3,9 +3,6 @@ package com.beyond.beidou.views;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-
-import com.beyond.beidou.util.LogUtil;
-
 import lecho.lib.hellocharts.view.LineChartView;
 
 public class MyChartView extends LineChartView {
