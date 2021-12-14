@@ -18,4 +18,6 @@
     <color name="main_bac">#f8f8f8</color>
     <color name="main_yellow">#FEC62E</color>
     <color name="main_red">#E53935</color>
+    <color name="filter_line">#32FF32</color>
+    <color name="estimate_line">#1E00FF</color>
 </resources>

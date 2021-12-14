@@ -27,6 +27,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.entites.GetGraphicDataResponse;
 import com.beyond.beidou.my.FileManageFragment;
+import com.beyond.beidou.util.FileUtil;
 import com.beyond.beidou.views.MyDialog;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.views.MySpinner;
@@ -85,6 +86,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private List<PointValue> mFILHConvertData = new ArrayList<>();
 //    private List<PointValue> mFILDeltaDConvertData = new ArrayList<>();
 //    private List<PointValue> mFILDeltaHConvertData = new ArrayList<>();
+
 
     private List<PointValue> mESTNConvertData = new ArrayList<>();
     private List<PointValue> mESTEConvertData = new ArrayList<>();
@@ -709,12 +711,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         List<Line> lines = new ArrayList<>();
         if (chartView != mDeltaDChart && chartView != mDeltaHChart){
             for (int i = 0; i < mFilChartLines.size(); i++) {
-                Line line = new Line(mFilChartLines.get(i)).setColor(Color.parseColor("#00FF00")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
+                Line line = new Line(mFilChartLines.get(i)).setColor(getResources().getColor(R.color.filter_line)).setCubic(false).setPointRadius(0).setStrokeWidth(2);
                 lines.add(line);
             }
         }
         for (int i = 0; i < mEstChartLines.size(); i++) {
-            Line line = new Line(mEstChartLines.get(i)).setColor(Color.parseColor("#0000FF")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
+            Line line = new Line(mEstChartLines.get(i)).setColor(getResources().getColor(R.color.estimate_line)).setCubic(false).setPointRadius(0).setStrokeWidth(2);
             lines.add(line);
         }
 
@@ -970,16 +972,24 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             mFILNConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(nIndex).toString()) - Double.parseDouble(mMinResponse.get(nIndex).toString()));
             mFILEConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(eIndex).toString()) - Double.parseDouble(mMinResponse.get(eIndex).toString()));
             mFILHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(hIndex).toString()) - Double.parseDouble(mMinResponse.get(hIndex).toString()));
-            mDeltaDConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaDIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaDIndex).toString()));
-            mDeltaHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaHIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaHIndex).toString()));
+//            mDeltaDConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaDIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaDIndex).toString()));
+//            mDeltaHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaHIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaHIndex).toString()));
             LogUtil.e("getData执行结束", "获取滤波数据++++++");
             hasData = true;
         } else if ("GNSSPJKESTInfo".equals(graphicType)) {
+            mMaxResponse.set(deltaDIndex,graphicDataResponse.getMax().get(deltaDIndex));
+            mMaxResponse.set(deltaHIndex,graphicDataResponse.getMax().get(deltaHIndex));
+            mMinResponse.set(deltaDIndex,graphicDataResponse.getMin().get(deltaDIndex));
+            mMinResponse.set(deltaHIndex,graphicDataResponse.getMin().get(deltaHIndex));
+            mAvgResponse.set(deltaDIndex,graphicDataResponse.getAverage().get(deltaDIndex));
+            mAvgResponse.set(deltaHIndex,graphicDataResponse.getAverage().get(deltaHIndex));
             mESTNConvertData = convertData(xResponseData, mMinResponse.get(nIndex).toString(), startTime, mAvgResponse.get(nIndex).toString());
             mESTEConvertData = convertData(yResponseData, mMinResponse.get(eIndex).toString(), startTime, mAvgResponse.get(eIndex).toString());
             mESTHConvertData = convertData(hResponseData, mMinResponse.get(hIndex).toString(), startTime, mAvgResponse.get(hIndex).toString());
             mESTDeltaDConvertData = convertData(deltaDResponseData, mMinResponse.get(deltaDIndex).toString(), startTime, mAvgResponse.get(deltaDIndex).toString());
             mESTDeltaHConvertData = convertData(deltaHResponseData, mMinResponse.get(deltaHIndex).toString(), startTime, mAvgResponse.get(deltaHIndex).toString());
+            mDeltaDConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaDIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaDIndex).toString()));
+            mDeltaHConvertAvg = (float) (Double.parseDouble(mAvgResponse.get(deltaHIndex).toString()) - Double.parseDouble(mMinResponse.get(deltaHIndex).toString()));
             LogUtil.e("getData执行结束", "获取估计数据*******");
             hasData = true;
         }
@@ -1124,27 +1134,35 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     }
 
     public void downLoadExcel() {
+        MainActivity mainActivity = (MainActivity) getActivity();
+        String projectUUID= FileUtil.getProjectUUIDByName(mainActivity, mainActivity.getPresentProject());
         //获取URL
         FormBody body = new FormBody.Builder()
                 .add("AccessToken", ApiConfig.getAccessToken())
                 .add("SessionUUID", ApiConfig.getSessionUUID())
                 .add("StationUUID", mStationUUIDList.get(mDeviceSp.getSelectedItemPosition()))
+                .add("ProjectUUID", projectUUID)
                 .add("StartTime", mStartTime)
                 .add("EndTime", mEndTime)
                 .build();
-        final Api api = Api.config(ApiConfig.GET_STATION_REPORT);
+
+        final Api api = Api.config(ApiConfig.GET_PROJECT_REPORT);
         api.postRequestFormBody(getActivity(), body, new ApiCallback() {
             @Override
             public void onSuccess(String res) {
-                String responseCode = api.parseJSONObject(res, "ResponseCode");
-                String responseMsg = api.parseJSONObject(res, "ResponseMsg");
+                String responseCode = api.parseSimpleJson(res, "ResponseCode");
+                String responseMsg = api.parseSimpleJson(res, "ResponseMsg");
                 if ("200".equals(responseCode)) {
-                    String url = api.parseJSONObject(res, "ReportFilePath");
-                    MainActivity mainActivity = (MainActivity) getActivity();
-                    if (mainActivity != null) {
-                        mainActivity.getDownloadBinder().startDownload(url);
-                    } else {
-                        showToastSync("导出失败," + responseMsg);
+                    String url = api.parseNestedJson(res, "ReportFileInfo","ReportExcel");
+                    if (url != null){
+                        MainActivity mainActivity = (MainActivity) getActivity();
+                        if (mainActivity != null) {
+                            mainActivity.getDownloadBinder().startDownload(url);
+                        } else {
+                            showToastSync("导出失败," + responseMsg);
+                        }
+                    }else {
+                        showToastSync("当前文件路径为空，请稍后再试");
                     }
                 } else {
                     showToastSync(responseMsg);

@@ -66,7 +66,7 @@ public class Api {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final String result = response.body().string();
-                String responseCode = parseJSONObject(result,"ResponseCode");
+                String responseCode = parseSimpleJson(result,"ResponseCode");
                 if (!responseCodeHandling(context,responseCode))
                 {
                     LoginUtil.updateSessionExpireTimestamp(context); //每次调用接口都会更新session过期时间
@@ -92,7 +92,7 @@ public class Api {
             Response response = client.newCall(request).execute();
             if(response.isSuccessful()){
                 String responseText = response.body().string();
-                String responseCode = parseJSONObject(responseText,"ResponseCode");
+                String responseCode = parseSimpleJson(responseText,"ResponseCode");
                 if (!responseCodeHandling(context,responseCode))
                 {
                     LoginUtil.updateSessionExpireTimestamp(context);
@@ -122,7 +122,7 @@ public class Api {
             public void onResponse(Call call, Response response) throws IOException {
                 final String result = response.body().string();
 
-                String responseCode = parseJSONObject(result,"ResponseCode");
+                String responseCode = parseSimpleJson(result,"ResponseCode");
                 if (!responseCodeHandling(context,responseCode))
                 {
                     LoginUtil.updateSessionExpireTimestamp(context);
@@ -146,7 +146,7 @@ public class Api {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 final String result = response.body().string();
-                String responseCode = parseJSONObject(result,"ResponseCode");
+                String responseCode = parseSimpleJson(result,"ResponseCode");
                 if (context instanceof StartActivity)
                 {
                     callback.onSuccess(result);
@@ -172,7 +172,7 @@ public class Api {
             if (response.isSuccessful())
             {
                 String responseText = response.body().string();
-                String responseCode = parseJSONObject(responseText,"ResponseCode");
+                String responseCode = parseSimpleJson(responseText,"ResponseCode");
                 //如果返回的结果不正确，不调用Success。维持原状，提示用户重新操作
                 if (!responseCodeHandling(context,responseCode))
                 {
@@ -185,12 +185,25 @@ public class Api {
         }
     }
 
-    public String parseJSONObject(String response,String key)
+    public String parseSimpleJson(String response, String key)
     {
         String returnValue = null;
         try {
             JSONObject object = new JSONObject(response);
             returnValue = object.getString(key);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return returnValue;
+    }
+
+    public String parseNestedJson(String response,String outerKey,String innerKey)
+    {
+        String returnValue = null;
+        try {
+            JSONObject object = new JSONObject(response);
+            JSONObject innerObject = (JSONObject)object.get(outerKey);
+            returnValue = innerObject.getString(innerKey);
         } catch (JSONException e) {
             e.printStackTrace();
         }

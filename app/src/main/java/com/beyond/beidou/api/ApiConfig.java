@@ -41,6 +41,7 @@ public class ApiConfig {
     public static final String LOGOUT = "doLogout.php";
     public static final String SET_PASSWORD = "setPassword.php";
     public static final String GET_STATION_REPORT = "getStationReport.php";
+    public static final String GET_PROJECT_REPORT = "getProjectReport.php";
     public static final String GET_USER_INFORMATION = "getUserInformation.php";
 
     public static void setBaseUrl(String baseUrl) {

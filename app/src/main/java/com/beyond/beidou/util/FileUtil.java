@@ -16,7 +16,9 @@ import androidx.core.content.FileProvider;
 import com.beyond.beidou.BaseActivity;
 import com.beyond.beidou.BuildConfig;
 import com.beyond.beidou.R;
+import com.beyond.beidou.entites.ProjectResponse;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -265,6 +267,18 @@ public class FileUtil {
                         e.printStackTrace();
                     }
                 }
+            }
+        }
+        return null;
+    }
+
+    public static String getProjectUUIDByName(BaseActivity activity,String projectName) {
+        String projectCache = getProjectCache(activity);
+        ProjectResponse projectResponse = new Gson().fromJson(projectCache, ProjectResponse.class);
+        for (int i = 0; i < projectResponse.getProjectList().size(); i++) {
+            if (projectName.equals(projectResponse.getProjectList().get(i).getProjectName()))
+            {
+                return projectResponse.getProjectList().get(i).getProjectUUID();
             }
         }
         return null;
