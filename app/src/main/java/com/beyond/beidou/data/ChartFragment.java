@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -44,6 +46,10 @@ import com.bigkoo.pickerview.view.TimePickerView;
 import com.google.gson.Gson;
 import com.zyao89.view.zloading.ZLoadingDialog;
 import com.zyao89.view.zloading.Z_TYPE;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -84,9 +90,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private List<PointValue> mFILNConvertData = new ArrayList<>();
     private List<PointValue> mFILEConvertData = new ArrayList<>();
     private List<PointValue> mFILHConvertData = new ArrayList<>();
-//    private List<PointValue> mFILDeltaDConvertData = new ArrayList<>();
-//    private List<PointValue> mFILDeltaHConvertData = new ArrayList<>();
-
 
     private List<PointValue> mESTNConvertData = new ArrayList<>();
     private List<PointValue> mESTEConvertData = new ArrayList<>();
@@ -110,8 +113,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private int mLastSelectedTimePosition;
     private static final int LOADING = 1;
     private static final int GET_DATA_SUCCESS = 200;
-    private static final int DELTAD_CHART = 10;
-    private static final int DELTAH_CHART = 11;
+    private static final int N_CHART = 10;
+    private static final int E_CHART = 11;
+    private static final int H_CHART = 12;
+    private static final int DELTAD_CHART = 13;
+    private static final int DELTAH_CHART = 14;
     private ZLoadingDialog mLoadingDlg;
     public Handler pHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -126,7 +132,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             }
         }
     };
-
+    boolean existException = false;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -399,19 +405,19 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mHChartTimeTv.setText(time);
         mHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
-        List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoN")).toString(), mFILNConvertData);
+        List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoN")).toString(), mFILNConvertData,N_CHART);
         convertLines(mFILNConvertData, mFilChartLines);
         convertLines(mESTNConvertData, mEstChartLines);
         setLineChart(mNChart, xAxisValues, yLabel, mFILNConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoE")).toString(), mFILEConvertData);
+        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoE")).toString(), mFILEConvertData,E_CHART);
         convertLines(mFILEConvertData, mFilChartLines);
         convertLines(mESTEConvertData, mEstChartLines);
         setLineChart(mEChart, xAxisValues, yLabel, mFILEConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoH")).toString(), mFILHConvertData);
+        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoH")).toString(), mFILHConvertData,H_CHART);
         convertLines(mFILHConvertData, mFilChartLines);
         convertLines(mESTHConvertData, mEstChartLines);
         setLineChart(mHChart, xAxisValues, yLabel, mFILHConvertAvg);
@@ -429,29 +435,30 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mDeltaHChartTimeTv.setText(time);
         mDeltaHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
-        List<AxisValue> yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaD")).toString(), mESTDeltaDConvertData, DELTAD_CHART);
+        List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaD")).toString(), mESTDeltaDConvertData, DELTAD_CHART);
         convertLines(mESTDeltaDConvertData, mEstChartLines);
         setLineChart(mDeltaDChart, xAxisValues, yLabel, mDeltaDConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
-        yLabel = setDeltaAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaH")).toString(), mESTDeltaHConvertData, DELTAH_CHART);
+        yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaH")).toString(), mESTDeltaHConvertData, DELTAH_CHART);
         convertLines(mESTDeltaHConvertData, mEstChartLines);
         setLineChart(mDeltaHChart, xAxisValues, yLabel, mDeltaHConvertAvg);
     }
 
     public void drawHeartChart() {
         String time = mStartTime + "~" + mEndTime;
+        ArrayList edgeList = new ArrayList();
         mHeartChartNameTv.setText("心型图");
         mHeartChartTimeTv.setText(time);
         mHeartChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> nAxisValues = new ArrayList<>();
         List<AxisValue> eAxisValues = new ArrayList<>();
         List<PointValue> mEstPointValues = new ArrayList<>();
-        convertHeartChartData( mESTContentResponse, nAxisValues, eAxisValues,  mEstPointValues);
-        setHeartChart(mHeartChart, mEstPointValues, nAxisValues, eAxisValues);
+        convertHeartChartData( mESTContentResponse, nAxisValues, eAxisValues,  mEstPointValues, edgeList);
+        setHeartChart(mHeartChart, mEstPointValues, nAxisValues, eAxisValues, edgeList);
     }
 
-    public void setHeartChart(LineChartView chartView,  List<PointValue> estValues, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues) {
+    public void setHeartChart(LineChartView chartView,  List<PointValue> estValues, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, ArrayList<Double> edgeList) {
         Line estLine = new Line(estValues).setColor(Color.parseColor("#0000ff")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
 
         List<Line> lines = new ArrayList<>();
@@ -481,35 +488,78 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mHeartChart.setVisibility(View.VISIBLE);
 
         Viewport viewport = chartView.getMaximumViewport();
-        viewport.top = viewport.top + 0.02f;
-        viewport.bottom = viewport.bottom - 0.02f;
-        viewport.left = viewport.left - 0.02f;
-        viewport.right = viewport.right + 0.02f;
+        if(existException){
+            viewport.top = edgeList.get(3).floatValue();
+            viewport.bottom = edgeList.get(2).floatValue();
+            viewport.left = edgeList.get(0).floatValue();
+            viewport.right = edgeList.get(1).floatValue();
+            existException = false;
+        }else{
+            viewport.top += 0.02f;
+            viewport.bottom -= 0.02f;
+            viewport.left -= 0.02f;
+            viewport.right += 0.02f;
+        }
         chartView.setMaximumViewport(viewport);
         chartView.setCurrentViewport(viewport);
 
     }
 
-    public void convertHeartChartData(List<List<Object>> estContentList, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues,  List<PointValue> estPointValues) {
+    public void convertHeartChartData(List<List<Object>> estContentList, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues,  List<PointValue> estPointValues, ArrayList<Double> edgeList) {
         int nIndex, eIndex;
         nIndex = mTitleIndex.get("GNSSPJKFIRInfoN");
         eIndex = mTitleIndex.get("GNSSPJKFIRInfoE");
+
+        double mEMin, mEMax, mNMin, mNMax;
+        if(!TextUtils.isEmpty(estContentList.get(0).get(eIndex).toString()) && !TextUtils.isEmpty(estContentList.get(0).get(nIndex).toString())){
+            mEMin = mEMax = Double.parseDouble(estContentList.get(0).get(eIndex).toString());
+            mNMin = mNMax = Double.parseDouble(estContentList.get(0).get(nIndex).toString());
+        }else{
+            mEMin = mEMax = mNMax = mNMin = 0;
+        }
+        for (List<Object> list : estContentList) {
+            double mETmp = Double.parseDouble(list.get(eIndex).toString());
+            double mNTmp = Double.parseDouble(list.get(nIndex).toString());
+            if(mEMin > mETmp){
+                mEMin = mETmp;
+            }
+            if(mEMax < mETmp){
+                mEMax = mETmp;
+            }
+
+            if(mNMin > mNTmp){
+                mNMin = mNTmp;
+            }
+            if(mNMax < mNTmp){
+                mNMax = mNTmp;
+            }
+        }
 
         double convertEMin, convertEMax, convertNMin, convertNMax;
         DecimalFormat df = new DecimalFormat("#.00");
         String space = "0.01";
         BigDecimal bSpace = new BigDecimal(space);
-        BigDecimal bResponseEmin = new BigDecimal(df.format(Double.parseDouble(mMinResponse.get(eIndex).toString())));
-        BigDecimal bResponseEMax = new BigDecimal(df.format(Double.parseDouble(mMaxResponse.get(eIndex).toString())));
+
+        double bResponseEminTmp = mEMin;
+        double bResponseEmaxTmp = mEMax;
+
+        if(bResponseEmaxTmp - bResponseEminTmp > 100){
+            bResponseEmaxTmp = bResponseEminTmp + 0.2;
+            existException = true;
+        }
+
+        BigDecimal bResponseEmin = new BigDecimal(df.format(bResponseEminTmp));
+        BigDecimal bResponseEMax = new BigDecimal(df.format(bResponseEmaxTmp));
 
         bResponseEmin = bResponseEmin.subtract(new BigDecimal("0.02"));
         bResponseEMax = bResponseEMax.add(new BigDecimal("0.02"));
+
 
         convertEMin = Double.parseDouble(String.valueOf(bResponseEmin));
         convertEMax = Double.parseDouble(String.valueOf(bResponseEMax));
         double tempDouble = Double.parseDouble(String.valueOf(bResponseEmin));
         String tempString = String.valueOf(convertEMin);
-        BigDecimal strEMin = new BigDecimal(df.format(Double.parseDouble(mMinResponse.get(eIndex).toString())));
+        BigDecimal strEMin = new BigDecimal(df.format(bResponseEminTmp));
         strEMin = strEMin.subtract(new BigDecimal("0.02"));
         while (tempDouble <= convertEMax) {
             AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertEMin)));
@@ -521,8 +571,16 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             tempDouble = Double.parseDouble(String.valueOf(bResponseEmin));
         }
 
-        BigDecimal bResponseNMin = new BigDecimal(df.format(Double.parseDouble(mMinResponse.get(nIndex).toString())));
-        BigDecimal bResponseNMax = new BigDecimal(df.format(Double.parseDouble(mMaxResponse.get(nIndex).toString())));
+        double bResponseNMinTmp = mNMin;
+        double bResponseNMaxTmp = mNMax;
+
+        if(bResponseNMaxTmp - bResponseNMinTmp > 100){
+            bResponseNMaxTmp = bResponseNMinTmp + 0.2;
+            existException = true;
+        }
+
+        BigDecimal bResponseNMin = new BigDecimal(df.format(bResponseNMinTmp));
+        BigDecimal bResponseNMax = new BigDecimal(df.format(bResponseNMaxTmp));
 
         bResponseNMin = bResponseNMin.subtract(new BigDecimal("0.02"));
         bResponseNMax = bResponseNMax.add(new BigDecimal("0.02"));
@@ -531,7 +589,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         convertNMax = Double.parseDouble(String.valueOf(bResponseNMax));
         tempDouble = Double.parseDouble(String.valueOf(bResponseNMin));
         tempString = String.valueOf(convertNMin);
-        BigDecimal strNMin = new BigDecimal(df.format(Double.parseDouble(mMinResponse.get(nIndex).toString())));
+        BigDecimal strNMin = new BigDecimal(df.format(bResponseNMinTmp));
         strNMin = strNMin.subtract(new BigDecimal("0.02"));
         while (tempDouble <= convertNMax) {
             AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertNMin)));
@@ -542,10 +600,11 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             tempString = String.valueOf(strNMin);
             tempDouble = Double.parseDouble(String.valueOf(bResponseNMin));
         }
+
         double tempE, tempN;
-        BigDecimal minuendN1 = new BigDecimal(df.format(Double.parseDouble(mMinResponse.get(nIndex).toString())));
+        BigDecimal minuendN1 = new BigDecimal(df.format(mNMin));
         minuendN1 = minuendN1.subtract(new BigDecimal("0.02"));
-        BigDecimal minuendE1 = new BigDecimal(df.format(Double.parseDouble(mMinResponse.get(eIndex).toString())));
+        BigDecimal minuendE1 = new BigDecimal(df.format(mEMin));
         minuendE1 = minuendE1.subtract(new BigDecimal("0.02"));
 
         for (List<Object> content : estContentList) {
@@ -553,56 +612,15 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             tempE = Double.parseDouble(content.get(eIndex).toString()) - Double.parseDouble(minuendE1.toString());
             estPointValues.add(new PointValue(Float.parseFloat(String.valueOf(tempE)), Float.parseFloat(String.valueOf(tempN))));
         }
+
+        edgeList.add(-0.02);
+        edgeList.add(bResponseEmaxTmp - bResponseEminTmp + 0.02);
+        edgeList.add(-0.02);
+        edgeList.add(bResponseNMaxTmp - bResponseNMinTmp + 0.02);
     }
 
-    public List<AxisValue> setAxisYLabel(String yMin, List<PointValue> values) {
-        String tempString;
-        float chartValue;
-        List<AxisValue> axisValues = new ArrayList<>();
-        float valueYMax = values.get(0).getY();
-        float valueYMin = values.get(0).getY();
-        for (PointValue pointValue : values) {
-            //确定最大最小值
-            if (pointValue.getY() >= valueYMax) {
-                valueYMax = pointValue.getY();
-            }
-            if (pointValue.getY() <= valueYMin) {
-                valueYMin = pointValue.getY();
-            }
-        }
 
-        //结果出现是0.005时，在浮点运算时会四舍五入为0.01，影响运算结果
-        if (Math.abs(valueYMin - 0.005) < 0.0001) {
-            valueYMin = 0;
-        }
-
-        String space = "0.01";     //每格大小为0.01m
-        mConvertYMax = valueYMax + 0.1f;
-        mConvertYMin = valueYMin - 0.1f;
-
-        //保证convertYmin和yMin是真实值。这样即使转成只有两位小数，也是对应的。
-        DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
-        BigDecimal b_ymin = new BigDecimal(df.format(mConvertYMin));
-        BigDecimal tempYmin = new BigDecimal(df.format(Double.parseDouble(yMin)));
-        BigDecimal b_space = new BigDecimal(space);
-        chartValue = mConvertYMin;
-        tempYmin = tempYmin.subtract(new BigDecimal("0.1"));
-        BigDecimal s_yMin = new BigDecimal(df.format(tempYmin));  //传入格式化后的最小值
-
-        while (chartValue <= mConvertYMax) {
-            b_ymin = b_ymin.add(b_space);
-            s_yMin = s_yMin.add(b_space);
-            tempString = String.valueOf(s_yMin);
-            chartValue = Float.parseFloat(String.valueOf(b_ymin));
-            AxisValue axisValue = new AxisValue(chartValue);
-            axisValue.setLabel(tempString);
-            axisValues.add(axisValue);
-        }
-        return axisValues;
-    }
-
-    //防止DeltaD数据异常导致卡死
-    public List<AxisValue> setDeltaAxisYLabel(String yMin, List<PointValue> values, int chartType) {
+    public List<AxisValue> setAxisYLabel(String yMin, List<PointValue> values, int chartType) {
         float chartValue;
         String tempString;
         String minSubNum;     //最小值的减数
@@ -624,6 +642,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             valueYMin = 0;
         }
 
+        //防止数据波动过大导致卡死
         if (valueYMax - valueYMin > 100) {
             mConvertYMax = valueYMin + 0.2f;
             mConvertYMin = valueYMin - 0.01f;
@@ -631,6 +650,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 mDeltaDConvertAvg = (mConvertYMax + mConvertYMin) / 2;
             } else if (chartType == DELTAH_CHART) {
                 mDeltaHConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            }else if (chartType == N_CHART) {
+                mFILNConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            }else if (chartType == E_CHART) {
+                mFILEConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            }else if (chartType == H_CHART) {
+                mFILHConvertAvg = (mConvertYMax + mConvertYMin) / 2;
             }
             minSubNum = "0.01";
         } else {
@@ -1110,20 +1135,22 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                 //一周
                 mStartTime = sdf.format(DateUtil.getBeginDayOfWeek());
                 mEndTime = sdf.format(DateUtil.getEndDayOfWeek());
-                mDeltaTime = "420";  //7min
+//                mDeltaTime = "420";  //7min
+                mDeltaTime = "300";  //5min
                 break;
             case 5:
                 //一月
                 mStartTime = sdf.format(DateUtil.getBeginDayOfMonth());
                 mEndTime = sdf.format(DateUtil.getEndDayOfMonth());
-                mDeltaTime = "1800";  //30min
+//                mDeltaTime = "1800";  //30min
+                mDeltaTime = "7200";  //2h
                 break;
             case 6:
                 //一年
                 mStartTime = sdf.format(DateUtil.getBeginDayOfYear());
                 mEndTime = sdf.format(DateUtil.getEndDayOfYear());
-//                mDeltaTime = "86400";  //365min
-                mDeltaTime = "21900";  //365min
+//                mDeltaTime = "21900";  //365min
+                mDeltaTime = "86400";  //16h
                 break;
             case 7:
                 //自定义
@@ -1136,18 +1163,22 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     public void downLoadExcel() {
         MainActivity mainActivity = (MainActivity) getActivity();
         String projectUUID= FileUtil.getProjectUUIDByName(mainActivity, mainActivity.getPresentProject());
-        //获取URL
-        FormBody body = new FormBody.Builder()
-                .add("AccessToken", ApiConfig.getAccessToken())
-                .add("SessionUUID", ApiConfig.getSessionUUID())
-                .add("StationUUID", mStationUUIDList.get(mDeviceSp.getSelectedItemPosition()))
-                .add("ProjectUUID", projectUUID)
-                .add("StartTime", mStartTime)
-                .add("EndTime", mEndTime)
-                .build();
+        JSONObject jsonData = new JSONObject();
+        JSONArray stationUUIDArray = new JSONArray();
+        try {
+            stationUUIDArray.put(0,mStationUUIDList.get(mDeviceSp.getSelectedItemPosition()));
+            jsonData.put("AccessToken", ApiConfig.getAccessToken());
+            jsonData.put("SessionUUID", ApiConfig.getSessionUUID());
+            jsonData.put("StationUUID", stationUUIDArray);
+            jsonData.put("ProjectUUID", projectUUID);
+            jsonData.put("StartTime", mStartTime);
+            jsonData.put("EndTime", mEndTime);
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         final Api api = Api.config(ApiConfig.GET_PROJECT_REPORT);
-        api.postRequestFormBody(getActivity(), body, new ApiCallback() {
+        api.postJsonString(getActivity(), jsonData.toString(), new ApiCallback() {
             @Override
             public void onSuccess(String res) {
                 String responseCode = api.parseSimpleJson(res, "ResponseCode");

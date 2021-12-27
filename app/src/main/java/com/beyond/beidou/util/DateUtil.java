@@ -326,20 +326,35 @@ public class DateUtil {
             startDate = paramsFormat.parse(startTime);
             endDate = paramsFormat.parse(endTime);
             long interval = (endDate.getTime() - startDate.getTime()) / (60 * 60 * 1000);
-            if (interval <= 24) {
+//            if (interval <= 24) {
+//                deltaTime = "60";   //1min
+//            } else if (interval <= 3 * 24) {
+//                deltaTime = "180";  //3min
+//            } else if (interval <= 7 * 24) {
+//                deltaTime = "420";  //7min
+//            } else if (interval <= 30 * 24) {
+//                deltaTime = "1800";
+//            } else if (interval <= 180 * 24) {
+//                deltaTime = "10800";
+//            } else if (interval <= 365 * 24) {
+//                deltaTime = "21900";
+//            } else if (interval <= 730 * 24) {
+//                deltaTime = "43800";
+//            }
+            if (interval <= 2 * 24) {
                 deltaTime = "60";   //1min
-            } else if (interval <= 3 * 24) {
-                deltaTime = "180";  //3min
-            } else if (interval <= 7 * 24) {
-                deltaTime = "420";  //7min
+            }  else if (interval <= 7 * 24) {
+                deltaTime = "300";  //5min
             } else if (interval <= 30 * 24) {
-                deltaTime = "1800";
+                deltaTime = "7200"; //2h
+            } else if (interval <= 90 * 24) {
+                deltaTime = "28800"; //8h
             } else if (interval <= 180 * 24) {
-                deltaTime = "10800";
+                deltaTime = "57600"; //16h
             } else if (interval <= 365 * 24) {
-                deltaTime = "21900";
+                deltaTime = "86400"; //24h
             } else if (interval <= 730 * 24) {
-                deltaTime = "43800";
+                deltaTime = "86400"; //24h
             }
         } catch (ParseException e) {
             e.printStackTrace();

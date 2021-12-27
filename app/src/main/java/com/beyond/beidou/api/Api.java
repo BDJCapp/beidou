@@ -42,6 +42,9 @@ public class Api {
 
     public static Api config(String url){
         client = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS) //连接超时
+                .readTimeout(30, TimeUnit.SECONDS) //读超时
+                .writeTimeout(30, TimeUnit.SECONDS) //写超时
                 .build();
         requestUrl = ApiConfig.BASE_URL + url;
         return api;

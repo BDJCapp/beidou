@@ -23,8 +23,8 @@ public class ApiConfig {
     public static final String FIRST_BASE_URL = "http://39.107.99.169/bdjc/API/";  //第一平台，南京
     public static final String SECOND_BASE_URL = "http://39.96.80.62/bdjc/API/";   //第二平台，北京和平里，实验室
     public static final String THIRD_BASE_URL = "http://172.18.7.86/dist/API/";    //第三平台，测试
-//    public static final String FOURTH_BASE_URL = "http://140.210.9.229/bdjc/API/";    //第四平台，海淀
-    public static final String FOURTH_BASE_URL = "http://140.210.9.229/test/API/";    //第四测试平台，海淀
+    public static final String FOURTH_BASE_URL = "http://140.210.9.229/bdjc/API/";    //第四平台，海淀
+//    public static final String FOURTH_BASE_URL = "http://140.210.9.229/test/API/";    //第四测试平台，海淀
     public static String BASE_URL = SECOND_BASE_URL;
 
     public static String SessionUUID = "00000000-0000-0000-0000-000000000000";
