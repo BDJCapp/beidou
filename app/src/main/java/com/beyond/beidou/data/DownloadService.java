@@ -18,6 +18,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
+import com.beyond.beidou.util.FileUtil;
 import com.beyond.beidou.util.LogUtil;
 
 import java.io.File;
@@ -85,13 +86,19 @@ public class DownloadService extends Service {
             return DownloadService.this;
         }
 
-        public void startDownload(String url){
+        public void startDownload(String url,String userName){
             if (downloadTask == null){
                 downloadUrl = url;
-                String fileName = downloadUrl.substring(downloadUrl.lastIndexOf("/"));
                 //获取应用外部存储Download路径
-                String directory = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath();
-                filePath = directory + fileName;
+                String directory = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" +  userName;
+                if (!FileUtil.filePathIsExist(directory)){
+                    cancelDownload();
+                    return;
+                }
+                String fileName = downloadUrl.substring(downloadUrl.lastIndexOf("/"),downloadUrl.lastIndexOf(".xls"));
+//                filePath = directory + fileName;
+                filePath = FileUtil.getDownloadFilePath(directory,fileName,".xls");
+                LogUtil.e("*******文件路径",filePath);
                 downloadTask = new DownloadTask(filePath,listener);
                 //在Service中执行该任务
                 downloadTask.execute(downloadUrl);

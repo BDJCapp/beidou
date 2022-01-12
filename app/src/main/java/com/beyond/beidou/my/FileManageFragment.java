@@ -85,7 +85,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
         mFileAdapter.setOnItemClickListener(new FileManagerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                FileUtil.openExcelFile(mMainActivity, mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + mFiles.get(position).getFileName());
+                FileUtil.openExcelFile(mMainActivity, mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + getStringFromSP("userName") + "/" + mFiles.get(position).getFileName());
             }
         });
         mFileAdapter.setOnItemLongClickListener(new FileManagerAdapter.OnItemLongClickListener() {
@@ -98,7 +98,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.mu_share:
-                                FileUtil.shareFile(mMainActivity, mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + mFiles.get(position).getFileName());
+                                FileUtil.shareFile(mMainActivity, mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + getStringFromSP("userName") + "/" + mFiles.get(position).getFileName());
                                 break;
                             case R.id.mu_rename:
                                 renameDialog((ViewGroup) view, position);
@@ -152,7 +152,11 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
 
     private void getFileNames() {
         mFiles.clear();
-        String path = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath();
+        String path = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + getStringFromSP("userName");
+        if (!FileUtil.filePathIsExist(path)){
+            showToastSync("存储路径错误");
+            return;
+        }
         File file = new File(path);
         File[] files = file.listFiles(new FileFilter() {
             @Override
@@ -271,7 +275,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                 List<String> shareFilePaths = new ArrayList<>();
                 for (FileSelectItem file : mFilesSelect) {
                     if (file.isSelect()) {
-                        shareFilePaths.add(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + file.getFileName());
+                        shareFilePaths.add(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + getStringFromSP("userName") + "/" + file.getFileName());
 //                        FileUtil.shareFile(mMainActivity, mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + file.getFileName());
 //                        List<String> filePaths = new ArrayList<>();
 //                        filePaths.add(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + file.getFileName());
@@ -307,7 +311,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                 .setMessage("确定要删除" + fileList.size() + "个文件吗？").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String prefix = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/";
+                        String prefix = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + getStringFromSP("userName") + "/";
                         File file = null;
                         boolean flag = true;
                         for (String fileName : fileList) {
@@ -345,7 +349,7 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                 .setMessage("确定要删除该文件吗？").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        boolean flag = FileUtil.fileDelete(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + fileName);
+                        boolean flag = FileUtil.fileDelete(mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + getStringFromSP("userName")  + "/" + fileName);
                         mFiles.remove(position);
                         if(flag){
                             showToast("删除成功");
@@ -399,8 +403,8 @@ public class FileManageFragment extends BaseFragment implements View.OnClickList
                 EditText mEtFileName = dialogView.findViewById(R.id.et_fileName);
                 String oldName = mFiles.get(position).getFileName();
                 String newName = mEtFileName.getText().toString();
-                String oldFilePath = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + oldName;
-                String newFilePath = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + newName + ".xls";
+                String oldFilePath = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + getStringFromSP("userName") + "/" + oldName;
+                String newFilePath = mMainActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" +  getStringFromSP("userName") + "/" + newName + ".xls";
                 if (TextUtils.isEmpty(newName)) {
                     showToast("名字不能为空");
                     return;

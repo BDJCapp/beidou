@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,6 +31,7 @@ import com.beyond.beidou.my.FileManageFragment;
 import com.beyond.beidou.util.FileUtil;
 import com.beyond.beidou.views.MyDialog;
 import com.beyond.beidou.MainActivity;
+import com.beyond.beidou.views.MyDownloadDialog;
 import com.beyond.beidou.views.MySpinner;
 import com.beyond.beidou.R;
 import com.beyond.beidou.api.Api;
@@ -74,7 +74,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private Spinner mDeviceSp;
     private MySpinner mTimeSp;
     private LineChartView mNChart, mEChart, mHChart,  mDeltaDChart, mDeltaHChart, mHeartChart;
-    private TextView mNChartNameTv, mEChartNameTv, mHChartNameTv, mDeltaDChartNameTv, mDeltaHChartNameTv, mHeartChartNameTv;
     private TextView mNChartCooTv, mEChartCooTv, mHChartCooTv, mDeltaDChartCooTv, mDeltaHChartCooTv, mHeartChartCooTv;
     private TextView mNChartTimeTv, mEChartTimeTv, mHChartTimeTv,  mDeltaDChartTimeTv, mDeltaHChartTimeTv, mHeartChartTimeTv;
     private TextView mTitleTv;
@@ -110,6 +109,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     private boolean hasData = true;
     private Map<String, Integer> mTitleIndex = new HashMap<>();
     private MyDialog mTimePickerDlg;
+    private MyDownloadDialog mDownloadDlg;
     private int mLastSelectedTimePosition;
     private static final int LOADING = 1;
     private static final int GET_DATA_SUCCESS = 200;
@@ -196,11 +196,36 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         switch (item.getItemId()) {
             case R.id.mu_download:
                 if (LoginUtil.isNetworkUsable(getActivity())) {
-                    MainActivity activity = (MainActivity) getActivity();
-                    if (activity != null) {
-                        activity.displayToast("正在导出...");
-                    }
-                    downLoadExcel();
+                    mDownloadDlg.show();
+                    mDownloadDlg.setStartTime(mStartTime);
+                    mDownloadDlg.setEndTime(mEndTime);
+                    final MainActivity activity = (MainActivity) getActivity();
+                    mDownloadDlg.setOnClickBottomListener(new MyDownloadDialog.OnClickBottomListener() {
+                        @Override
+                        public void onPositiveClick() {
+                            if (activity != null) {
+                                activity.displayToast("正在导出...");
+                            }
+                            downLoadExcel(mDownloadDlg.getStartTime(),mDownloadDlg.getEndTime(),mDownloadDlg.getCheckedButton());
+                            mDownloadDlg.dismiss();
+                        }
+
+                        @Override
+                        public void onNegativeClick() {
+                            mDownloadDlg.dismiss();
+                        }
+                    });
+                    mDownloadDlg.setOnClickTextViewListener(new MyDownloadDialog.OnClickTextViewListener() {
+                        @Override
+                        public void onStartTimeClick(View v) {
+                            timePicker((TextView) v);
+                        }
+
+                        @Override
+                        public void onEndTimeClick(View v) {
+                            timePicker((TextView) v);
+                        }
+                    });
                 }
                 return true;
             case R.id.mu_manageFile:
@@ -225,6 +250,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mTimeSp = view.findViewById(R.id.sp_chart_time);
         mDownLoadExcelTv = view.findViewById(R.id.tv_load_excel);
         mTimePickerDlg = new MyDialog(getActivity());
+        mDownloadDlg = new MyDownloadDialog(getActivity());
         if (getArguments() != null) {
             mTitleTv.setText(getArguments().getString("projectName"));
             ArrayAdapter<String> deviceAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, getArguments().getStringArrayList("stationNameList"));
@@ -247,27 +273,21 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mDeltaHChart = view.findViewById(R.id.chart_DeltaH);
         mHeartChart = view.findViewById(R.id.chart_Heart);
 
-        mNChartNameTv = view.findViewById(R.id.tv_chartNameX);
         mNChartCooTv = view.findViewById(R.id.tv_coordinateSystemX);
         mNChartTimeTv = view.findViewById(R.id.tv_chartTimeX);
 
-        mEChartNameTv = view.findViewById(R.id.tv_chartNameY);
         mEChartCooTv = view.findViewById(R.id.tv_coordinateSystemY);
         mEChartTimeTv = view.findViewById(R.id.tv_chartTimeY);
 
-        mHChartNameTv = view.findViewById(R.id.tv_chartNameH);
         mHChartCooTv = view.findViewById(R.id.tv_coordinateSystemH);
         mHChartTimeTv = view.findViewById(R.id.tv_chartTimeH);
 
-        mDeltaDChartNameTv = view.findViewById(R.id.tv_DeltaDChartName);
         mDeltaDChartCooTv = view.findViewById(R.id.tv_coordinateSystemDeltaD);
         mDeltaDChartTimeTv = view.findViewById(R.id.tv_chartTimeDeltaD);
 
-        mDeltaHChartNameTv = view.findViewById(R.id.tv_chartNameDeltaH);
         mDeltaHChartCooTv = view.findViewById(R.id.tv_coordinateSystemDeltaH);
         mDeltaHChartTimeTv = view.findViewById(R.id.tv_chartTimeDeltaH);
 
-        mHeartChartNameTv = view.findViewById(R.id.tv_chartNameHeart);
         mHeartChartCooTv = view.findViewById(R.id.tv_coordinateSystemHeart);
         mHeartChartTimeTv = view.findViewById(R.id.tv_chartTimeHeart);
 
@@ -343,8 +363,10 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
                             @Override
                             public void onNegativeClick() {
+                                LogUtil.e("取消按钮","1111111");
                                 mTimePickerDlg.dismiss();
                                 if (mLastSelectedTimePosition != 7) {
+                                    LogUtil.e("位置7","++++++++");
                                     mTimeSp.setSelection(mLastSelectedTimePosition);
                                 }
                             }
@@ -393,15 +415,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      */
     public void drawXYHChart(String selectedTime) {
         String time = mStartTime + "~" + mEndTime;
-        mNChartNameTv.setText("N");
         mNChartTimeTv.setText(time);
         mNChartCooTv.setText(R.string.CoordinateSystem);
 
-        mEChartNameTv.setText("E");
         mEChartTimeTv.setText(time);
         mEChartCooTv.setText(R.string.CoordinateSystem);
 
-        mHChartNameTv.setText("H");
         mHChartTimeTv.setText(time);
         mHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
@@ -428,10 +447,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      */
     public void drawDeltaChart(String selectedTime) {
         String time = mStartTime + "~" + mEndTime;
-        mDeltaDChartNameTv.setText("水平位移图");
         mDeltaDChartTimeTv.setText(time);
         mDeltaDChartCooTv.setText(R.string.CoordinateSystem);
-        mDeltaHChartNameTv.setText("垂直位移图");
         mDeltaHChartTimeTv.setText(time);
         mDeltaHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
@@ -448,7 +465,6 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
     public void drawHeartChart() {
         String time = mStartTime + "~" + mEndTime;
         ArrayList edgeList = new ArrayList();
-        mHeartChartNameTv.setText("心型图");
         mHeartChartTimeTv.setText(time);
         mHeartChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> nAxisValues = new ArrayList<>();
@@ -1160,19 +1176,22 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         doLoadingDialog();
     }
 
-    public void downLoadExcel() {
+    public void downLoadExcel(String startTime,String endTime,String downloadType) {
         MainActivity mainActivity = (MainActivity) getActivity();
         String projectUUID= FileUtil.getProjectUUIDByName(mainActivity, mainActivity.getPresentProject());
         JSONObject jsonData = new JSONObject();
         JSONArray stationUUIDArray = new JSONArray();
+        LogUtil.e("+++++++++downloadType",downloadType);
         try {
-            stationUUIDArray.put(0,mStationUUIDList.get(mDeviceSp.getSelectedItemPosition()));
             jsonData.put("AccessToken", ApiConfig.getAccessToken());
             jsonData.put("SessionUUID", ApiConfig.getSessionUUID());
-            jsonData.put("StationUUID", stationUUIDArray);
             jsonData.put("ProjectUUID", projectUUID);
-            jsonData.put("StartTime", mStartTime);
-            jsonData.put("EndTime", mEndTime);
+            jsonData.put("StartTime", startTime);
+            jsonData.put("EndTime", endTime);
+            if ("currentPoint".equals(downloadType)){
+                stationUUIDArray.put(0,mStationUUIDList.get(mDeviceSp.getSelectedItemPosition()));
+                jsonData.put("StationUUID", stationUUIDArray);
+            }
         }catch (JSONException e) {
             e.printStackTrace();
         }
@@ -1188,7 +1207,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
                     if (url != null){
                         MainActivity mainActivity = (MainActivity) getActivity();
                         if (mainActivity != null) {
-                            mainActivity.getDownloadBinder().startDownload(url);
+                            mainActivity.getDownloadBinder().startDownload(url,getStringFromSP("userName"));
                         } else {
                             showToastSync("导出失败," + responseMsg);
                         }

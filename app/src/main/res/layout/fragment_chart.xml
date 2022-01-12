@@ -134,7 +134,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_chartNameX"
-                android:text="N"
+                android:text="@string/nChartName"
                 android:textSize="18dp"
                 android:textColor="@color/text_black"
                 android:layout_toRightOf="@id/img_icChartX"
@@ -161,6 +161,50 @@
                 android:textColor="@color/text_gray"
                 android:layout_below="@+id/tv_chartNameX"
                 android:layout_alignParentRight="true"
+                />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            >
+            <View
+                android:id="@+id/lineFilN"
+                android:layout_width="20dp"
+                android:layout_height="8px"
+                android:background="@color/filter_line"
+                android:layout_marginEnd="5dp"
+                android:layout_centerVertical="true"
+                />
+            <TextView
+                android:id="@+id/tv_LegendN"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filterLineName_N"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/lineFilN"
+                />
+
+            <View
+                android:id="@+id/lineEstN"
+                android:layout_width="20dp"
+                android:layout_height="8px"
+                android:background="@color/estimate_line"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="5dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/tv_LegendN"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/estimateLineName_N"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/lineEstN"
                 />
         </RelativeLayout>
 
@@ -196,7 +240,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_chartNameY"
-                android:text="E"
+                android:text="@string/eChartName"
                 android:textSize="18dp"
                 android:textColor="@color/text_black"
                 android:layout_toRightOf="@id/img_icChartY"
@@ -224,6 +268,49 @@
                 android:textColor="@color/text_gray"
                 android:layout_toLeftOf="@+id/tv_chartTimeY"
                 android:layout_below="@+id/tv_chartNameY"
+                />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            >
+            <View
+                android:id="@+id/lineFilE"
+                android:layout_width="20dp"
+                android:layout_height="8px"
+                android:background="@color/filter_line"
+                android:layout_marginEnd="5dp"
+                android:layout_centerVertical="true"
+                />
+            <TextView
+                android:id="@+id/tv_LegendE"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filterLineName_E"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/lineFilE"
+                />
+
+            <View
+                android:id="@+id/lineEstE"
+                android:layout_width="20dp"
+                android:layout_height="8px"
+                android:background="@color/estimate_line"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="5dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/tv_LegendE"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/estimateLineName_E"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/lineEstE"
                 />
         </RelativeLayout>
         <com.beyond.beidou.views.MyChartView
@@ -259,7 +346,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_chartNameH"
-                android:text="H"
+                android:text="@string/hChartName"
                 android:textSize="18dp"
                 android:textColor="@color/text_black"
                 android:layout_toRightOf="@id/img_icChartH"
@@ -286,6 +373,49 @@
                 android:textColor="@color/text_gray"
                 android:layout_toLeftOf="@+id/tv_chartTimeH"
                 android:layout_below="@+id/tv_chartNameH"
+                />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            >
+            <View
+                android:id="@+id/lineFilH"
+                android:layout_width="20dp"
+                android:layout_height="8px"
+                android:background="@color/filter_line"
+                android:layout_marginEnd="5dp"
+                android:layout_centerVertical="true"
+                />
+            <TextView
+                android:id="@+id/tv_LegendH"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filterLineName_H"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/lineFilH"
+                />
+
+            <View
+                android:id="@+id/lineEstH"
+                android:layout_width="20dp"
+                android:layout_height="8px"
+                android:background="@color/estimate_line"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="5dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/tv_LegendH"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/estimateLineName_H"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/lineEstH"
                 />
         </RelativeLayout>
         <com.beyond.beidou.views.MyChartView
@@ -319,7 +449,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_DeltaDChartName"
-                android:text="水平位移图"
+                android:text="@string/deltaDChartName"
                 android:textSize="18dp"
                 android:textColor="@color/text_black"
                 android:layout_toRightOf="@id/img_icDeltaD"
@@ -348,7 +478,30 @@
                 android:layout_alignParentRight="true"
                 />
         </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            >
+            <View
+                android:id="@+id/lineEstDeltaD"
+                android:layout_width="20dp"
+                android:layout_height="8px"
+                android:background="@color/estimate_line"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="5dp"
+                android:layout_centerVertical="true"
+                />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/estimateLineName_DeltaD"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/lineEstDeltaD"
+                />
+        </RelativeLayout>
         <com.beyond.beidou.views.MyChartView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -380,7 +533,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_chartNameDeltaH"
-                android:text="垂直位移图"
+                android:text="@string/deltaHChartName"
                 android:textSize="18dp"
                 android:textColor="@color/text_black"
                 android:layout_toRightOf="@id/img_icChartDeltaH"
@@ -409,7 +562,30 @@
                 android:layout_alignParentRight="true"
                 />
         </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            >
+            <View
+                android:id="@+id/lineEstDeltaH"
+                android:layout_width="20dp"
+                android:layout_height="8px"
+                android:background="@color/estimate_line"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="5dp"
+                android:layout_centerVertical="true"
+                />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/estimateLineName_DeltaH"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/lineEstDeltaH"
+                />
+        </RelativeLayout>
         <com.beyond.beidou.views.MyChartView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -441,7 +617,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_chartNameHeart"
-                android:text="心型图"
+                android:text="@string/heartChartName"
                 android:textSize="18dp"
                 android:textColor="@color/text_black"
                 android:layout_toRightOf="@id/img_icChartHeart"
@@ -470,7 +646,30 @@
                 android:layout_alignParentRight="true"
                 />
         </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            >
+            <View
+                android:id="@+id/lineEstHeart"
+                android:layout_width="20dp"
+                android:layout_height="8px"
+                android:background="@color/estimate_line"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="5dp"
+                android:layout_centerVertical="true"
+                />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/estimateLineName_Heart"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/text_black"
+                android:layout_toRightOf="@id/lineEstHeart"
+                />
+        </RelativeLayout>
         <com.beyond.beidou.views.MyChartView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -1,23 +1,17 @@
 package com.beyond.beidou.util;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
 import com.beyond.beidou.BaseActivity;
 import com.beyond.beidou.BuildConfig;
-import com.beyond.beidou.R;
 import com.beyond.beidou.entites.ProjectResponse;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 
 import java.io.*;
@@ -34,18 +28,35 @@ public class FileUtil {
     /**
      * 判断指定目录的文件夹是否存在，如果不存在则需要创建新的文件夹
      *
-     * @param fileName 指定目录
+     * @param filePath 指定文件路径
      * @return 返回创建结果 TRUE or FALSE
      */
-    public static boolean fileIsExist(String fileName) {
+    public static boolean filePathIsExist(String filePath) {
         //传入指定的路径，然后判断路径是否存在
-        File file = new File(fileName);
+        File file = new File(filePath);
         if (file.exists())
             return true;
         else {
-            //file.mkdirs() 创建文件夹
             return file.mkdirs();
         }
+    }
+
+    /**
+     * 对下载文件进行重命名，防止重名。
+     * 如果存在重名，则在原名后加（num）
+     * @param directory download路径
+     * @param originalName 原始文件名
+     * @return 最终路径
+     */
+    public static String getDownloadFilePath(String directory,String originalName,String fileType){
+        String fileName = originalName;
+        int num = 1;
+        File file = new File(directory + originalName + fileType);
+        while (file.exists()){
+            fileName = originalName + "(" + num++ + ")";
+            file = new File(directory + fileName + fileType);
+        }
+        return directory + fileName + fileType;
     }
 
     public static void saveBitmap(String name, Bitmap bm, Context mContext) {
@@ -54,7 +65,7 @@ public class FileUtil {
         String TargetPath = mContext.getFilesDir() + "/images/";
         LogUtil.e("Save Bitmap", "Save Path=" + TargetPath);
         //判断指定文件夹的路径是否存在
-        if (!FileUtil.fileIsExist(TargetPath)) {
+        if (!FileUtil.filePathIsExist(TargetPath)) {
             LogUtil.e("Save Bitmap", "TargetPath isn't exist");
         } else {
             //如果指定文件夹创建成功，那么我们则需要进行图片存储操作
@@ -91,7 +102,7 @@ public class FileUtil {
                     uri = Uri.fromFile(file);
                 }
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                LogUtil.e("该文件是否存在", fileIsExist(fileUrl) + " ");
+                LogUtil.e("该文件是否存在", filePathIsExist(fileUrl) + " ");
                 intent.setDataAndType(uri, "application/vnd.ms-excel");  //.xls
                 context.startActivity(intent);
             } catch (Exception e) {

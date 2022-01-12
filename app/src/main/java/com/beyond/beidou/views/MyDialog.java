@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.beyond.beidou.R;
+import com.beyond.beidou.util.LogUtil;
 
 public class MyDialog extends Dialog {
 

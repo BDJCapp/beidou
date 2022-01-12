@@ -4,10 +4,25 @@
     <string name="deviceType">监测点类型:</string>
     <string name="lastActivityTime">最近活跃时间:</string>
     <string name="lookData">查看数据</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="loadExcel"> 导出报表 </string>
     <string name="deviceNum">监测点数:</string>
     <string name="update">更新于:</string>
     <string name="CoordinateSystem">WGS84坐标系|</string>
+
+    <string name="nChartName">GNSSInfoN</string>
+    <string name="eChartName">GNSSInfoE</string>
+    <string name="hChartName">GNSSInfoH</string>
+    <string name="deltaDChartName">GNSSInfoDeltaD</string>
+    <string name="deltaHChartName">GNSSInfoDeltaH</string>
+    <string name="heartChartName">心型图</string>
+
+    <string name="filterLineName_N">GNSSPJKFIRInfoN</string>
+    <string name="estimateLineName_N">GNSSPJKESTInfoN</string>
+    <string name="filterLineName_E">GNSSPJKFIRInfoE</string>
+    <string name="estimateLineName_E">GNSSPJKESTInfoE</string>
+    <string name="filterLineName_H">GNSSPJKFIRInfoH</string>
+    <string name="estimateLineName_H">GNSSPJKESTInfoH</string>
+    <string name="estimateLineName_DeltaD">GNSSPJKESTInfoDeltaD</string>
+    <string name="estimateLineName_DeltaH">GNSSPJKESTInfoDeltaH</string>
+    <string name="estimateLineName_Heart">GNSSPJKESTInfoN,GNSSPJKESTInfoE</string>
 </resources>
