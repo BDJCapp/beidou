@@ -595,6 +595,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             existException = true;
         }
 
+
         BigDecimal bResponseNMin = new BigDecimal(df.format(bResponseNMinTmp));
         BigDecimal bResponseNMax = new BigDecimal(df.format(bResponseNMaxTmp));
 
