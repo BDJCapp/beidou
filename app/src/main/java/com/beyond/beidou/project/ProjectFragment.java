@@ -539,6 +539,7 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         showToastSync(projectResponse.getResponseMsg());
     }
 
+
     private void initStationList() {
         mBaiduMap.clear();
         mPointList.clear();
