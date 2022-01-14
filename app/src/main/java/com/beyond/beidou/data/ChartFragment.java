@@ -425,21 +425,24 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
         List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoN")).toString(), mFILNConvertData,N_CHART);
+        List<AxisValue> ryLabel = setAxisRYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoN")).toString(), mFILNConvertData, N_CHART);
         convertLines(mFILNConvertData, mFilChartLines);
         convertLines(mESTNConvertData, mEstChartLines);
-        setLineChart(mNChart, xAxisValues, yLabel, mFILNConvertAvg);
+        setLineChart(mNChart, xAxisValues, yLabel, ryLabel,mFILNConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
         yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoE")).toString(), mFILEConvertData,E_CHART);
+        ryLabel = setAxisRYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoE")).toString(), mFILEConvertData,E_CHART);
         convertLines(mFILEConvertData, mFilChartLines);
         convertLines(mESTEConvertData, mEstChartLines);
-        setLineChart(mEChart, xAxisValues, yLabel, mFILEConvertAvg);
+        setLineChart(mEChart, xAxisValues, yLabel, ryLabel,mFILEConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
         yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoH")).toString(), mFILHConvertData,H_CHART);
+        ryLabel = setAxisRYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoH")).toString(), mFILHConvertData,H_CHART);
         convertLines(mFILHConvertData, mFilChartLines);
         convertLines(mESTHConvertData, mEstChartLines);
-        setLineChart(mHChart, xAxisValues, yLabel, mFILHConvertAvg);
+        setLineChart(mHChart, xAxisValues, yLabel, ryLabel,mFILHConvertAvg);
     }
 
     /**
@@ -453,13 +456,15 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mDeltaHChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> xAxisValues = setXAxisValues(selectedTime);
         List<AxisValue> yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaD")).toString(), mESTDeltaDConvertData, DELTAD_CHART);
+        List<AxisValue> ryLabel = setAxisRYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaD")).toString(), mESTDeltaDConvertData, DELTAD_CHART);
         convertLines(mESTDeltaDConvertData, mEstChartLines);
-        setLineChart(mDeltaDChart, xAxisValues, yLabel, mDeltaDConvertAvg);
+        setLineChart(mDeltaDChart, xAxisValues, yLabel, ryLabel,mDeltaDConvertAvg);
 
         xAxisValues = setXAxisValues(selectedTime);
         yLabel = setAxisYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaH")).toString(), mESTDeltaHConvertData, DELTAH_CHART);
+        ryLabel = setAxisRYLabel(mMinResponse.get(mTitleIndex.get("GNSSPJKFIRInfoDeltaH")).toString(), mESTDeltaHConvertData, DELTAH_CHART);
         convertLines(mESTDeltaHConvertData, mEstChartLines);
-        setLineChart(mDeltaHChart, xAxisValues, yLabel, mDeltaHConvertAvg);
+        setLineChart(mDeltaHChart, xAxisValues, yLabel, ryLabel,mDeltaHConvertAvg);
     }
 
     public void drawHeartChart() {
@@ -697,9 +702,95 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             s_yMin = s_yMin.add(b_space);
             tempString = String.valueOf(s_yMin);
             chartValue = Float.parseFloat(String.valueOf(b_ymin));
+//            for (int i = 2; i < 10; i += 2) {
+////                BigDecimal mmSpace = new BigDecimal("0.00" + 5);
+//                BigDecimal mmSpace = new BigDecimal("0.00" + i);
+//                LogUtil.e("++++++mm刻度",mmSpace.toString());
+//                float mmChartValue = Float.parseFloat(String.valueOf(b_ymin.add(mmSpace)));
+//                AxisValue mmAxisValue = new AxisValue(mmChartValue);
+////                mmAxisValue.setLabel(String.valueOf(s_yMin.add(mmSpace)));
+//                mmAxisValue.setLabel("");
+//                axisValues.add(mmAxisValue);
+//            }
             AxisValue axisValue = new AxisValue(chartValue);
             axisValue.setLabel(tempString);
             axisValues.add(axisValue);
+        }
+        return axisValues;
+    }
+
+    public List<AxisValue> setAxisRYLabel(String yMin, List<PointValue> values, int chartType) {
+        float chartValue;
+        String tempString;
+        String minSubNum;     //最小值的减数
+        List<AxisValue> axisValues = new ArrayList<>();
+        float valueYMax = values.get(0).getY();
+        float valueYMin = values.get(0).getY();
+        for (PointValue pointValue : values) {
+            //确定最大最小值
+            if (pointValue.getY() >= valueYMax) {
+                valueYMax = pointValue.getY();
+            }
+            if (pointValue.getY() <= valueYMin) {
+                valueYMin = pointValue.getY();
+            }
+        }
+
+        //结果出现是0.005时，在浮点运算时会四舍五入为0.01，影响运算结果
+        if (Math.abs(valueYMin - 0.005) < 0.0001) {
+            valueYMin = 0;
+        }
+
+        //防止数据波动过大导致卡死
+        if (valueYMax - valueYMin > 100) {
+            mConvertYMax = valueYMin + 0.2f;
+            mConvertYMin = valueYMin - 0.01f;
+            if (chartType == DELTAD_CHART) {
+                mDeltaDConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            } else if (chartType == DELTAH_CHART) {
+                mDeltaHConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            }else if (chartType == N_CHART) {
+                mFILNConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            }else if (chartType == E_CHART) {
+                mFILEConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            }else if (chartType == H_CHART) {
+                mFILHConvertAvg = (mConvertYMax + mConvertYMin) / 2;
+            }
+            minSubNum = "0.01";
+        } else {
+            mConvertYMax = valueYMax + 0.1f;
+            mConvertYMin = valueYMin - 0.1f;
+            minSubNum = "0.1";
+        }
+
+        String space = "0.01";     //每格大小为0.01m
+
+        //保证convertYmin和yMin是真实值。这样即使转成只有两位小数，也是对应的。
+        DecimalFormat df = new DecimalFormat("#.00");//只保留小数点后两位，厘米级精度
+        BigDecimal b_ymin = new BigDecimal(df.format(mConvertYMin));
+        BigDecimal tempYmin = new BigDecimal(df.format(Double.parseDouble(yMin)));
+        BigDecimal b_space = new BigDecimal(space);
+        chartValue = mConvertYMin;
+        tempYmin = tempYmin.subtract(new BigDecimal(minSubNum));
+        BigDecimal s_yMin = new BigDecimal(df.format(tempYmin));  //传入格式化后的最小值
+
+        while (chartValue <= mConvertYMax) {
+            b_ymin = b_ymin.add(b_space);
+            s_yMin = s_yMin.add(b_space);
+            tempString = String.valueOf(s_yMin);
+            chartValue = Float.parseFloat(String.valueOf(b_ymin));
+            for (int i = 2; i < 10; i += 2) {
+//                BigDecimal mmSpace = new BigDecimal("0.00" + 5);
+                BigDecimal mmSpace = new BigDecimal("0.00" + i);
+                float mmChartValue = Float.parseFloat(String.valueOf(b_ymin.add(mmSpace)));
+                AxisValue mmAxisValue = new AxisValue(mmChartValue);
+//                mmAxisValue.setLabel(String.valueOf(s_yMin.add(mmSpace)));
+                mmAxisValue.setLabel("");
+                axisValues.add(mmAxisValue);
+            }
+//            AxisValue axisValue = new AxisValue(chartValue);
+//            axisValue.setLabel(tempString);
+//            axisValues.add(axisValue);
         }
         return axisValues;
     }
@@ -746,9 +837,9 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
      *
      * @param chartView   当前图表
      * @param xAxisValues X轴标签（时间）
-     * @param yAxisValues Y轴标签
+     * @param lyAxisValues Y轴标签
      */
-    public void setLineChart(LineChartView chartView, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, float convertAverage) {
+    public void setLineChart(LineChartView chartView, List<AxisValue> xAxisValues, List<AxisValue> lyAxisValues, List<AxisValue> ryAxisValues, float convertAverage) {
         String selectedTime = mTimeSp.getSelectedItem().toString();
         List<Line> lines = new ArrayList<>();
         if (chartView != mDeltaDChart && chartView != mDeltaHChart){
@@ -767,10 +858,8 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         Axis axisX = new Axis().setHasLines(true).setLineColor(Color.BLACK).setTextColor(Color.BLACK);
         axisX.setValues(xAxisValues);
         axisX.setHasTiltedLabels(true);      //设置旋转45°
-        //setHasLines(true),设定是否有网格线
         Axis axisY = new Axis().setHasLines(true).setLineColor(Color.BLACK).setTextColor(Color.BLACK);
-        //axisY.setInside(true);
-        axisY.setValues(yAxisValues);
+        axisY.setValues(lyAxisValues);
         axisY.setMaxLabelChars(7);
         if ("一周".equals(selectedTime) || "自定义时间".equals(selectedTime)) {
             axisX.setMaxLabelChars(8);
@@ -791,11 +880,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         chartView.setMaxZoom(10f);
         chartView.setContainerScrollEnabled(true, ContainerScrollType.HORIZONTAL);
         chartView.setVisibility(View.VISIBLE);
+        //添加毫米级刻度，且setLineChart中不能放在设置LineChartData之前
+        Axis axisRY = new Axis().setHasLines(true).setLineColor(Color.RED).setValues(ryAxisValues).setHasSeparationLine(false);
+        chartView.getLineChartData().setAxisYRight(axisRY);
 
         Viewport maxWindow = new Viewport(chartView.getMaximumViewport());
         maxWindow.bottom = mConvertYMin;
         maxWindow.top = mConvertYMax;
-
         //设置当前窗口，将每格长度大约设置成物理上的1cm
         Viewport currentWindow = new Viewport(chartView.getMaximumViewport());
         //经过计算：1dp = 0.015875cm；600dp = 9.525cm，所以设置当前窗口显示9个刻度即可保证一格为1cm
