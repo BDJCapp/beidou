@@ -30,6 +30,7 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.CoordinateConverter;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
+import com.beyond.beidou.data.ChartFragment;
 import com.beyond.beidou.util.*;
 import com.beyond.beidou.views.MyRecycleView;
 import com.beyond.beidou.R;
@@ -37,7 +38,6 @@ import com.beyond.beidou.adapter.MonitoringPointsAdapter;
 import com.beyond.beidou.api.Api;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
-import com.beyond.beidou.data.ChartFragment;
 import com.beyond.beidou.entites.MonitoringPoint;
 import com.beyond.beidou.entites.ProjectResponse;
 import com.google.gson.Gson;
@@ -538,7 +538,6 @@ public class ProjectFragment extends BaseFragment implements View.OnClickListene
         sIsReLogin = true;
         showToastSync(projectResponse.getResponseMsg());
     }
-
 
     private void initStationList() {
         mBaiduMap.clear();

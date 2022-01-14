@@ -474,12 +474,21 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         mHeartChartCooTv.setText(R.string.CoordinateSystem);
         List<AxisValue> nAxisValues = new ArrayList<>();
         List<AxisValue> eAxisValues = new ArrayList<>();
+        List<AxisValue> nAxisRValues = new ArrayList<>();
+        List<AxisValue> eAxisTValues = new ArrayList<>();
         List<PointValue> mEstPointValues = new ArrayList<>();
-        convertHeartChartData( mESTContentResponse, nAxisValues, eAxisValues,  mEstPointValues, edgeList);
-        setHeartChart(mHeartChart, mEstPointValues, nAxisValues, eAxisValues, edgeList);
+        convertHeartChartData(mESTContentResponse, eAxisValues, nAxisValues, eAxisTValues, nAxisRValues, mEstPointValues, edgeList);
+        setHeartChart(mHeartChart, mEstPointValues,  eAxisValues, nAxisValues, eAxisTValues, nAxisRValues, edgeList);
     }
 
-    public void setHeartChart(LineChartView chartView,  List<PointValue> estValues, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues, ArrayList<Double> edgeList) {
+    public void setHeartChart(LineChartView chartView,
+                              List<PointValue> estValues,
+                              List<AxisValue> xAxisValues,
+                              List<AxisValue> yAxisValues,
+
+                              List<AxisValue> xAxisTValues,
+                              List<AxisValue> yAxisRValues,
+                              ArrayList<Double> edgeList) {
         Line estLine = new Line(estValues).setColor(Color.parseColor("#0000ff")).setCubic(false).setPointRadius(0).setStrokeWidth(2);
 
         List<Line> lines = new ArrayList<>();
@@ -492,11 +501,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         axisX.setValues(xAxisValues);
         axisX.setHasTiltedLabels(true);
         axisX.setMaxLabelChars(10);
-        axisX.setName("单位(米)");
+        axisX.setName("E");
+
         Axis axisY = new Axis().setHasLines(true).setLineColor(Color.BLACK).setTextColor(Color.BLACK);
         axisY.setValues(yAxisValues);
         axisY.setMaxLabelChars(10);
-        axisY.setName("单位(米)");
+        axisY.setName("N");
 
         data.setAxisXBottom(axisX);
         data.setAxisYLeft(axisY);
@@ -507,6 +517,12 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         chartView.setContainerScrollEnabled(true, ContainerScrollType.HORIZONTAL);
         chartView.setZoomType(ZoomType.HORIZONTAL_AND_VERTICAL);
         mHeartChart.setVisibility(View.VISIBLE);
+
+        //添加mm刻度
+        Axis axisXTop = new Axis(xAxisTValues).setHasLines(true).setLineColor(Color.BLACK).setTextColor(Color.BLACK).setHasSeparationLine(false);
+        Axis axisYRight = new Axis(yAxisRValues).setHasLines(true).setLineColor(Color.BLACK).setTextColor(Color.BLACK).setHasSeparationLine(false);
+        chartView.getLineChartData().setAxisXTop(axisXTop);
+        chartView.getLineChartData().setAxisYRight(axisYRight);
 
         Viewport viewport = chartView.getMaximumViewport();
         if(existException){
@@ -526,7 +542,13 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
 
     }
 
-    public void convertHeartChartData(List<List<Object>> estContentList, List<AxisValue> xAxisValues, List<AxisValue> yAxisValues,  List<PointValue> estPointValues, ArrayList<Double> edgeList) {
+    public void convertHeartChartData(List<List<Object>> estContentList,
+                                      List<AxisValue> xAxisValues,
+                                      List<AxisValue> yAxisValues,
+                                      List<AxisValue> xAxisTValues,
+                                      List<AxisValue> yAxisRValues,
+                                      List<PointValue> estPointValues,
+                                      ArrayList<Double> edgeList) {
         int nIndex, eIndex;
         nIndex = mTitleIndex.get("GNSSPJKFIRInfoN");
         eIndex = mTitleIndex.get("GNSSPJKFIRInfoE");
@@ -561,6 +583,7 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
         String space = "0.01";
         BigDecimal bSpace = new BigDecimal(space);
 
+        //下侧x轴设置
         double bResponseEminTmp = mEMin;
         double bResponseEmaxTmp = mEMax;
 
@@ -586,12 +609,47 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertEMin)));
             axisValue.setLabel(tempString);
             xAxisValues.add(axisValue);
+
+
+            for (int i = 2; i < 10; i += 2) {
+                float mValueTmp = (float) (Float.parseFloat(df.format(tempDouble - convertEMin)) + i * 0.001);
+                xAxisTValues.add(new AxisValue(mValueTmp).setLabel(""));
+            }
+
+
             bResponseEmin = bResponseEmin.add(bSpace);
             strEMin = strEMin.add(bSpace);
             tempString = String.valueOf(strEMin);
             tempDouble = Double.parseDouble(String.valueOf(bResponseEmin));
         }
 
+//        //上侧x轴数据设置
+//        bSpace = new BigDecimal("0.002");
+//        bResponseEmin = new BigDecimal(df.format(bResponseEminTmp));
+//        bResponseEMax = new BigDecimal(df.format(bResponseEmaxTmp));
+//
+//        bResponseEmin = bResponseEmin.subtract(new BigDecimal("0.02"));
+//        bResponseEMax = bResponseEMax.add(new BigDecimal("0.02"));
+//
+//        convertEMin = Double.parseDouble(String.valueOf(bResponseEmin));
+//        convertEMax = Double.parseDouble(String.valueOf(bResponseEMax));
+//        tempDouble = Double.parseDouble(String.valueOf(bResponseEmin));
+//        tempString = String.valueOf(convertEMin);
+//        strEMin = new BigDecimal(df.format(bResponseEminTmp));
+//        strEMin = strEMin.subtract(new BigDecimal("0.02"));
+//
+//        while (tempDouble <= convertEMax) {
+//            AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertEMin)));
+//            axisValue.setLabel("ggg");
+//            xAxisTValues.add(axisValue);
+//            bResponseEmin = bResponseEmin.add(bSpace);
+//            strEMin = strEMin.add(bSpace);
+//            tempString = String.valueOf(strEMin);
+//            tempDouble = Double.parseDouble(String.valueOf(bResponseEmin));
+//        }
+
+        //左侧y轴数据设置
+        bSpace = new BigDecimal("0.01");
         double bResponseNMinTmp = mNMin;
         double bResponseNMaxTmp = mNMax;
 
@@ -617,12 +675,43 @@ public class ChartFragment extends BaseFragment implements View.OnClickListener 
             AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertNMin)));
             axisValue.setLabel(tempString);
             yAxisValues.add(axisValue);
+
+            for (int i = 2; i < 10; i += 2) {
+                float mValueTmp = (float) (Float.parseFloat(df.format(tempDouble - convertNMin)) + i * 0.001);
+                yAxisRValues.add(new AxisValue(mValueTmp).setLabel(""));
+            }
+
             bResponseNMin = bResponseNMin.add(bSpace);
             strNMin = strNMin.add(bSpace);
             tempString = String.valueOf(strNMin);
             tempDouble = Double.parseDouble(String.valueOf(bResponseNMin));
         }
 
+        //右侧y轴设置
+//        bSpace = new BigDecimal("0.002");
+//        bResponseNMin = new BigDecimal(df.format(bResponseNMinTmp));
+//        bResponseNMax = new BigDecimal(df.format(bResponseNMaxTmp));
+//
+//        bResponseNMin = bResponseNMin.subtract(new BigDecimal("0.02"));
+//        bResponseNMax = bResponseNMax.add(new BigDecimal("0.02"));
+//
+//        convertNMin = Double.parseDouble(String.valueOf(bResponseNMin));
+//        convertNMax = Double.parseDouble(String.valueOf(bResponseNMax));
+//        tempDouble = Double.parseDouble(String.valueOf(bResponseNMin));
+//        tempString = String.valueOf(convertNMin);
+//        strNMin = new BigDecimal(df.format(bResponseNMinTmp));
+//        strNMin = strNMin.subtract(new BigDecimal("0.02"));
+//        while (tempDouble <= convertNMax) {
+//            AxisValue axisValue = new AxisValue(Float.parseFloat(df.format(tempDouble - convertNMin)));
+//            axisValue.setLabel("wdnmd");
+//            yAxisRValues.add(axisValue);
+//            bResponseNMin = bResponseNMin.add(bSpace);
+//            strNMin = strNMin.add(bSpace);
+//            tempString = String.valueOf(strNMin);
+//            tempDouble = Double.parseDouble(String.valueOf(bResponseNMin));
+//        }
+
+        //图点数据设置
         double tempE, tempN;
         BigDecimal minuendN1 = new BigDecimal(df.format(mNMin));
         minuendN1 = minuendN1.subtract(new BigDecimal("0.02"));
