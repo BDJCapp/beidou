@@ -47,6 +47,7 @@ public class MyChartView extends LineChartView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
+
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 mLastX = event.getX();
