@@ -51,5 +51,12 @@ public class ExampleUnitTest {
         }
     }
 
+    @Test
+    public void test(){
+        ArrayList<Double> edgeList = new ArrayList<>();
+        edgeList.add(-0.02);
+        System.out.println(edgeList.get(0).floatValue());
+    }
+
 
 }

@@ -99,10 +99,10 @@
     </LinearLayout>
 
     <com.beyond.beidou.views.MyScrollView
+        android:id="@+id/sv_charts"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/layout_spinner"
-        android:id="@+id/sv_charts"
         >
 
 <LinearLayout
@@ -167,7 +167,7 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="right"
             >
             <View
                 android:id="@+id/lineFilN"
@@ -182,8 +182,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/filterLineName_N"
+                android:textColor="@color/text_gray"
+                android:textSize="11sp"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/text_black"
                 android:layout_toRightOf="@id/lineFilN"
                 />
 
@@ -203,7 +204,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/estimateLineName_N"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/text_black"
+                android:textColor="@color/text_gray"
+                android:textSize="11sp"
                 android:layout_toRightOf="@id/lineEstN"
                 />
         </RelativeLayout>
@@ -212,7 +214,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_X"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             />
     </LinearLayout>
 
@@ -273,7 +275,7 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="right"
             >
             <View
                 android:id="@+id/lineFilE"
@@ -288,8 +290,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/filterLineName_E"
+                android:textSize="11dp"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/text_black"
+                android:textColor="@color/text_gray"
                 android:layout_toRightOf="@id/lineFilE"
                 />
 
@@ -308,8 +311,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/estimateLineName_E"
+                android:textSize="11dp"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/text_black"
+                android:textColor="@color/text_gray"
                 android:layout_toRightOf="@id/lineEstE"
                 />
         </RelativeLayout>
@@ -317,7 +321,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_Y"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             />
     </LinearLayout>
 
@@ -378,7 +382,7 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="right"
             >
             <View
                 android:id="@+id/lineFilH"
@@ -393,8 +397,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/filterLineName_H"
+                android:textSize="11dp"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/text_black"
+                android:textColor="@color/text_gray"
                 android:layout_toRightOf="@id/lineFilH"
                 />
 
@@ -413,8 +418,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/estimateLineName_H"
+                android:textSize="11dp"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/text_black"
+                android:textColor="@color/text_gray"
                 android:layout_toRightOf="@id/lineEstH"
                 />
         </RelativeLayout>
@@ -422,7 +428,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_H"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             />
     </LinearLayout>
 
@@ -497,8 +503,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/estimateLineName_DeltaD"
+                android:textSize="11dp"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/text_black"
+                android:textColor="@color/text_gray"
                 android:layout_toRightOf="@id/lineEstDeltaD"
                 />
         </RelativeLayout>
@@ -506,7 +513,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_DeltaD"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             />
     </LinearLayout>
 
@@ -581,8 +588,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/estimateLineName_DeltaH"
+                android:textSize="11dp"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/text_black"
+                android:textColor="@color/text_gray"
                 android:layout_toRightOf="@id/lineEstDeltaH"
                 />
         </RelativeLayout>
@@ -590,7 +598,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_DeltaH"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             />
     </LinearLayout>
 
@@ -665,8 +673,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/estimateLineName_Heart"
+                android:textSize="11dp"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/text_black"
+                android:textColor="@color/text_gray"
                 android:layout_toRightOf="@id/lineEstHeart"
                 />
         </RelativeLayout>
@@ -674,7 +683,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/chart_Heart"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             />
     </LinearLayout>
 </LinearLayout>

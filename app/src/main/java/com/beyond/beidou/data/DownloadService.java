@@ -95,6 +95,7 @@ public class DownloadService extends Service {
                     cancelDownload();
                     return;
                 }
+                LogUtil.e("///////////downloadUrl:",downloadUrl);
                 String fileName = downloadUrl.substring(downloadUrl.lastIndexOf("/"),downloadUrl.lastIndexOf(".xls"));
 //                filePath = directory + fileName;
                 filePath = FileUtil.getDownloadFilePath(directory,fileName,".xls");

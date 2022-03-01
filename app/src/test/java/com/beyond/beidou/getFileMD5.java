@@ -34,8 +34,8 @@ public class getFileMD5 {
 
     @Test
     public void test() {
-//        String fileMD5 = getFileMD5(new File("D:\\AndroidProject\\bdjcAPP\\app\\release\\bdjc.apk"));
-        String fileMD5 = getFileMD5(new File("D:\\AndroidProject\\bdjc_testAPP\\app\\release\\bdjc-test.apk"));
+        String fileMD5 = getFileMD5(new File("D:\\AndroidProject\\bdjcAPP\\app\\release\\bdjc.apk"));
+//        String fileMD5 = getFileMD5(new File("D:\\AndroidProject\\bdjc_testAPP\\app\\release\\bdjc-test.apk"));
         System.out.println(fileMD5);
     }
 }

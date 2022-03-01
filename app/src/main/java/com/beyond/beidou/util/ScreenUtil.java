@@ -75,4 +75,12 @@ public class ScreenUtil {
         final float scale = context.getResources().getDisplayMetrics().densityDpi;
         return (float) (cmValue * 25.4 / scale);
     }
+
+    /**
+     * sp转换成px
+     */
+    public static int sp2px(Context context,float spValue){
+        float fontScale=context.getResources().getDisplayMetrics().scaledDensity;
+        return (int) (spValue*fontScale+0.5f);
+    }
 }
