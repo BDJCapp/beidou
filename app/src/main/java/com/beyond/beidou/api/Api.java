@@ -177,7 +177,10 @@ public class Api {
                 String responseText = response.body().string();
                 String responseCode = parseSimpleJson(responseText,"ResponseCode");
                 //如果返回的结果不正确，不调用Success。维持原状，提示用户重新操作
-                if (!responseCodeHandling(context,responseCode))
+                if (context instanceof StartActivity){
+                    callback.onSuccess(responseText);
+                }
+                else if (!responseCodeHandling(context,responseCode))
                 {
                     LoginUtil.updateSessionExpireTimestamp(context);
                     callback.onSuccess(responseText);
@@ -229,7 +232,7 @@ public class Api {
                     Thread getTokenThread = new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            while (!LoginUtil.getAccessToken(context)){}
+                           while (!LoginUtil.getAccessToken(context)){}
                         }
                     });
                     getTokenThread.start();

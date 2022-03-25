@@ -14,6 +14,7 @@ import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
 import com.beyond.beidou.api.ApiCallback;
 import com.beyond.beidou.api.ApiConfig;
+import com.beyond.beidou.util.AutoUpdater;
 import com.beyond.beidou.util.LogUtil;
 import com.beyond.beidou.util.LoginUtil;
 
@@ -59,6 +60,10 @@ public class StartActivity extends BaseActivity {
 
     @Override
     public void initEvent() {
+        checkForceUpdate();
+    }
+
+    public void autoLogin(){
         //如果不是首次登录且session到期时间未过则直接进入首页
         if (!"".equals(getStringFromSP("SessionExpireTimestamp"))){
             long sessionExpireTimestamp = Long.parseLong(getStringFromSP("SessionExpireTimestamp"));
@@ -113,6 +118,51 @@ public class StartActivity extends BaseActivity {
         }
         setContentView(R.layout.activity_start);
         init();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         initEvent();
+    }
+
+    public void checkForceUpdate(){
+
+        if (!"".equals(getStringFromSP("checkUpdateExpireTimestamp"))){
+            long checkUpdateExpireTimestamp = Long.parseLong(getStringFromSP("checkUpdateExpireTimestamp"));
+            if (checkUpdateExpireTimestamp > Calendar.getInstance().getTimeInMillis()){
+                autoLogin();
+                return;
+            }
+        }
+
+        Thread getTokenThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                LogUtil.e("--------getAccessToken()",ApiConfig.getAccessToken());
+                while (!LoginUtil.getAccessToken(StartActivity.this)) {
+                }
+            }
+        });
+        getTokenThread.start();
+        try {
+            getTokenThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        final AutoUpdater autoUpdater = new AutoUpdater(StartActivity.this);
+        autoUpdater.checkUpdate("v"+AutoUpdater.getLocalVersionName(getApplication()), new ApiCallback() {
+            @Override
+            public void onSuccess(String res) {
+                autoLogin();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+
+            }
+        });
     }
 }

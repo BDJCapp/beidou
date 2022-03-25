@@ -1,12 +1,10 @@
 package com.beyond.beidou.my;
 
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,22 +16,18 @@ import androidx.fragment.app.FragmentTransaction;
 import com.beyond.beidou.BaseFragment;
 import com.beyond.beidou.MainActivity;
 import com.beyond.beidou.R;
-import com.beyond.beidou.entites.FileItem;
-import com.beyond.beidou.util.ListUtil;
-import com.beyond.beidou.util.LogUtil;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.util.ArrayList;
-import java.util.List;
+import com.beyond.beidou.api.ApiCallback;
+import com.beyond.beidou.util.AutoUpdater;
 
 
 public class MyFragment extends BaseFragment implements View.OnClickListener {
     private TextView mTvUserName;
+    private TextView mTvVersion;
     private ImageView mIvUserInfo;
     public static String userName = "";
     private CardView mCardViewSettings;
     private CardView mCardViewFile;
+    private CardView mCardViewUpdateApp;
     private boolean isGetName = false;
 
     @Nullable
@@ -53,12 +47,17 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
 
     public void initView(View view) {
         mTvUserName = view.findViewById(R.id.tv_user_name);
+        mTvVersion = view.findViewById(R.id.tv_version);
         mIvUserInfo = view.findViewById(R.id.img_user);
         mCardViewSettings = view.findViewById(R.id.cv_settings);
         mCardViewFile = view.findViewById(R.id.cv_file);
+        mCardViewUpdateApp = view.findViewById(R.id.cv_updateApp);
         mIvUserInfo.setOnClickListener(this);
         mCardViewSettings.setOnClickListener(this);
         mCardViewFile.setOnClickListener(this);
+        mCardViewUpdateApp.setOnClickListener(this);
+
+        mTvVersion.setText("Ver "+AutoUpdater.getLocalVersionName(getActivity()));
     }
 
     @Override
@@ -91,6 +90,20 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
                 ft.add(R.id.layout_home, fileManageFragment).hide(this);
 //                ft.addToBackStack(null);   //加入到返回栈中
                 ft.commit();
+                break;
+            case R.id.cv_updateApp:
+                AutoUpdater autoUpdater = new AutoUpdater(getContext());
+                autoUpdater.checkUpdate("", new ApiCallback() {
+                    @Override
+                    public void onSuccess(String res) {
+
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+
+                    }
+                });
                 break;
             case R.id.img_user:
                 if(!isGetName){

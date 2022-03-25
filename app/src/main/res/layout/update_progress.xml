@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/titleBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="正在下载"
+            android:textColor="@color/text_black"
+            android:textSize="18sp"
+            android:textStyle="normal"
+            android:layout_margin="10dp"/>
+
+        <ProgressBar
+            android:id="@+id/pg_update"
+            android:minHeight="8dp"
+            android:maxHeight="8dp"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:progressDrawable="@drawable/progress_download_apk"
+             />
+
+        <TextView
+            android:id="@+id/txtStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="状态"
+            android:textColor="@color/main_blue"
+            android:textSize="15sp"
+            android:textStyle="normal" />
+    </LinearLayout>
+</LinearLayout>
